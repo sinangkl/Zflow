@@ -6,7 +6,29 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		303515232F4D8F4200419F58 /* ZFlowWatch Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 303515192F4D8F4100419F58 /* ZFlowWatch Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		3035153D2F4D8FCE00419F58 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3035153C2F4D8FCE00419F58 /* WidgetKit.framework */; };
+		3035153F2F4D8FCE00419F58 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3035153E2F4D8FCE00419F58 /* SwiftUI.framework */; };
+		3035154E2F4D8FCF00419F58 /* ZFlowWidgetExtensionExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 3035153A2F4D8FCE00419F58 /* ZFlowWidgetExtensionExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		307F427C2F4D9E3B000D3E8B /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 307F427B2F4D9E3B000D3E8B /* Supabase */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
+		303515212F4D8F4200419F58 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 30916A7D2F48969F001E2B8C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 303515182F4D8F4100419F58;
+			remoteInfo = "ZFlowWatch Watch App";
+		};
+		3035154C2F4D8FCF00419F58 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 30916A7D2F48969F001E2B8C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 303515392F4D8FCE00419F58;
+			remoteInfo = ZFlowWidgetExtensionExtension;
+		};
 		30916A932F48969F001E2B8C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 30916A7D2F48969F001E2B8C /* Project object */;
@@ -23,15 +45,87 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		303515272F4D8F4200419F58 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				303515232F4D8F4200419F58 /* ZFlowWatch Watch App.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		303515532F4D8FCF00419F58 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				3035154E2F4D8FCF00419F58 /* ZFlowWidgetExtensionExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		303515192F4D8F4100419F58 /* ZFlowWatch Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ZFlowWatch Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		3035153A2F4D8FCE00419F58 /* ZFlowWidgetExtensionExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ZFlowWidgetExtensionExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		3035153C2F4D8FCE00419F58 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		3035153E2F4D8FCE00419F58 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		30916A852F48969F001E2B8C /* Zflow.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Zflow.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		30916A922F48969F001E2B8C /* ZflowTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ZflowTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		30916A9C2F48969F001E2B8C /* ZflowUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ZflowUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		3035154F2F4D8FCF00419F58 /* Exceptions for "ZFlowWidgetExtension" folder in "ZFlowWidgetExtensionExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 303515392F4D8FCE00419F58 /* ZFlowWidgetExtensionExtension */;
+		};
+		303515602F4D913B00419F58 /* Exceptions for "Zflow" folder in "ZFlowWatch Watch App" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Ecosystem/Shared/AppGroupModels.swift,
+				Ecosystem/Shared/BudgetAlertEngine.swift,
+				Ecosystem/Shared/WatchConnector.swift,
+			);
+			target = 303515182F4D8F4100419F58 /* ZFlowWatch Watch App */;
+		};
+		303515612F4D913B00419F58 /* Exceptions for "Zflow" folder in "ZFlowWidgetExtensionExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Ecosystem/Shared/AppGroupModels.swift,
+			);
+			target = 303515392F4D8FCE00419F58 /* ZFlowWidgetExtensionExtension */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		3035151A2F4D8F4100419F58 /* ZFlowWatch Watch App */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "ZFlowWatch Watch App";
+			sourceTree = "<group>";
+		};
+		303515402F4D8FCE00419F58 /* ZFlowWidgetExtension */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				3035154F2F4D8FCF00419F58 /* Exceptions for "ZFlowWidgetExtension" folder in "ZFlowWidgetExtensionExtension" target */,
+			);
+			path = ZFlowWidgetExtension;
+			sourceTree = "<group>";
+		};
 		30916A872F48969F001E2B8C /* Zflow */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				303515602F4D913B00419F58 /* Exceptions for "Zflow" folder in "ZFlowWatch Watch App" target */,
+				303515612F4D913B00419F58 /* Exceptions for "Zflow" folder in "ZFlowWidgetExtensionExtension" target */,
+			);
 			path = Zflow;
 			sourceTree = "<group>";
 		};
@@ -48,10 +142,27 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		303515162F4D8F4100419F58 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		303515372F4D8FCE00419F58 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3035153F2F4D8FCE00419F58 /* SwiftUI.framework in Frameworks */,
+				3035153D2F4D8FCE00419F58 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		30916A822F48969F001E2B8C /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				307F427C2F4D9E3B000D3E8B /* Supabase in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -72,12 +183,24 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		3035153B2F4D8FCE00419F58 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				3035153C2F4D8FCE00419F58 /* WidgetKit.framework */,
+				3035153E2F4D8FCE00419F58 /* SwiftUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		30916A7C2F48969F001E2B8C = {
 			isa = PBXGroup;
 			children = (
 				30916A872F48969F001E2B8C /* Zflow */,
 				30916A952F48969F001E2B8C /* ZflowTests */,
 				30916A9F2F48969F001E2B8C /* ZflowUITests */,
+				3035151A2F4D8F4100419F58 /* ZFlowWatch Watch App */,
+				303515402F4D8FCE00419F58 /* ZFlowWidgetExtension */,
+				3035153B2F4D8FCE00419F58 /* Frameworks */,
 				30916A862F48969F001E2B8C /* Products */,
 			);
 			sourceTree = "<group>";
@@ -88,6 +211,8 @@
 				30916A852F48969F001E2B8C /* Zflow.app */,
 				30916A922F48969F001E2B8C /* ZflowTests.xctest */,
 				30916A9C2F48969F001E2B8C /* ZflowUITests.xctest */,
+				303515192F4D8F4100419F58 /* ZFlowWatch Watch App.app */,
+				3035153A2F4D8FCE00419F58 /* ZFlowWidgetExtensionExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -95,6 +220,50 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		303515182F4D8F4100419F58 /* ZFlowWatch Watch App */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 303515242F4D8F4200419F58 /* Build configuration list for PBXNativeTarget "ZFlowWatch Watch App" */;
+			buildPhases = (
+				303515152F4D8F4100419F58 /* Sources */,
+				303515162F4D8F4100419F58 /* Frameworks */,
+				303515172F4D8F4100419F58 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				3035151A2F4D8F4100419F58 /* ZFlowWatch Watch App */,
+			);
+			name = "ZFlowWatch Watch App";
+			packageProductDependencies = (
+			);
+			productName = "ZFlowWatch Watch App";
+			productReference = 303515192F4D8F4100419F58 /* ZFlowWatch Watch App.app */;
+			productType = "com.apple.product-type.application";
+		};
+		303515392F4D8FCE00419F58 /* ZFlowWidgetExtensionExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 303515502F4D8FCF00419F58 /* Build configuration list for PBXNativeTarget "ZFlowWidgetExtensionExtension" */;
+			buildPhases = (
+				303515362F4D8FCE00419F58 /* Sources */,
+				303515372F4D8FCE00419F58 /* Frameworks */,
+				303515382F4D8FCE00419F58 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				303515402F4D8FCE00419F58 /* ZFlowWidgetExtension */,
+			);
+			name = ZFlowWidgetExtensionExtension;
+			packageProductDependencies = (
+			);
+			productName = ZFlowWidgetExtensionExtension;
+			productReference = 3035153A2F4D8FCE00419F58 /* ZFlowWidgetExtensionExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		30916A842F48969F001E2B8C /* Zflow */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 30916AA62F48969F001E2B8C /* Build configuration list for PBXNativeTarget "Zflow" */;
@@ -102,16 +271,21 @@
 				30916A812F48969F001E2B8C /* Sources */,
 				30916A822F48969F001E2B8C /* Frameworks */,
 				30916A832F48969F001E2B8C /* Resources */,
+				303515272F4D8F4200419F58 /* Embed Watch Content */,
+				303515532F4D8FCF00419F58 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				303515222F4D8F4200419F58 /* PBXTargetDependency */,
+				3035154D2F4D8FCF00419F58 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				30916A872F48969F001E2B8C /* Zflow */,
 			);
 			name = Zflow;
 			packageProductDependencies = (
+				307F427B2F4D9E3B000D3E8B /* Supabase */,
 			);
 			productName = Zflow;
 			productReference = 30916A852F48969F001E2B8C /* Zflow.app */;
@@ -173,6 +347,12 @@
 				LastSwiftUpdateCheck = 2620;
 				LastUpgradeCheck = 2620;
 				TargetAttributes = {
+					303515182F4D8F4100419F58 = {
+						CreatedOnToolsVersion = 26.2;
+					};
+					303515392F4D8FCE00419F58 = {
+						CreatedOnToolsVersion = 26.2;
+					};
 					30916A842F48969F001E2B8C = {
 						CreatedOnToolsVersion = 26.2;
 					};
@@ -192,9 +372,14 @@
 			knownRegions = (
 				en,
 				Base,
+				de,
+				tr,
 			);
 			mainGroup = 30916A7C2F48969F001E2B8C;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				307F427A2F4D9E3B000D3E8B /* XCRemoteSwiftPackageReference "supabase-swift" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 30916A862F48969F001E2B8C /* Products */;
 			projectDirPath = "";
@@ -203,11 +388,27 @@
 				30916A842F48969F001E2B8C /* Zflow */,
 				30916A912F48969F001E2B8C /* ZflowTests */,
 				30916A9B2F48969F001E2B8C /* ZflowUITests */,
+				303515182F4D8F4100419F58 /* ZFlowWatch Watch App */,
+				303515392F4D8FCE00419F58 /* ZFlowWidgetExtensionExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		303515172F4D8F4100419F58 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		303515382F4D8FCE00419F58 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		30916A832F48969F001E2B8C /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -232,6 +433,20 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		303515152F4D8F4100419F58 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		303515362F4D8FCE00419F58 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		30916A812F48969F001E2B8C /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -256,6 +471,16 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		303515222F4D8F4200419F58 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 303515182F4D8F4100419F58 /* ZFlowWatch Watch App */;
+			targetProxy = 303515212F4D8F4200419F58 /* PBXContainerItemProxy */;
+		};
+		3035154D2F4D8FCF00419F58 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 303515392F4D8FCE00419F58 /* ZFlowWidgetExtensionExtension */;
+			targetProxy = 3035154C2F4D8FCF00419F58 /* PBXContainerItemProxy */;
+		};
 		30916A942F48969F001E2B8C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 30916A842F48969F001E2B8C /* Zflow */;
@@ -269,6 +494,134 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		303515252F4D8F4200419F58 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = H6FNM9B2WV;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = ZFlowWatch;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.sinangokcul.zflowapp;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sinangokcul.zflowapp.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 26.2;
+			};
+			name = Debug;
+		};
+		303515262F4D8F4200419F58 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = H6FNM9B2WV;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = ZFlowWatch;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.sinangokcul.zflowapp;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sinangokcul.zflowapp.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 26.2;
+			};
+			name = Release;
+		};
+		303515512F4D8FCF00419F58 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ZFlowWidgetExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = ZFlowWidgetExtension;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sinangokcul.zflowapp.ZFlowWidgetExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		303515522F4D8FCF00419F58 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ZFlowWidgetExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = ZFlowWidgetExtension;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sinangokcul.zflowapp.ZFlowWidgetExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		30916AA42F48969F001E2B8C /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -410,7 +763,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sinangokcul.Zflow;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sinangokcul.zflowapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -442,7 +795,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sinangokcul.Zflow;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sinangokcul.zflowapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -541,6 +894,24 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		303515242F4D8F4200419F58 /* Build configuration list for PBXNativeTarget "ZFlowWatch Watch App" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				303515252F4D8F4200419F58 /* Debug */,
+				303515262F4D8F4200419F58 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		303515502F4D8FCF00419F58 /* Build configuration list for PBXNativeTarget "ZFlowWidgetExtensionExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				303515512F4D8FCF00419F58 /* Debug */,
+				303515522F4D8FCF00419F58 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		30916A802F48969F001E2B8C /* Build configuration list for PBXProject "Zflow" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -578,6 +949,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		307F427A2F4D9E3B000D3E8B /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/supabase/supabase-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.5.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		307F427B2F4D9E3B000D3E8B /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 307F427A2F4D9E3B000D3E8B /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 30916A7D2F48969F001E2B8C /* Project object */;
 }

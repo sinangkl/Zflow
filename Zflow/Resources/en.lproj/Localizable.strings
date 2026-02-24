@@ -1,0 +1,148 @@
+/* English Localizable.strings — ZFlow */
+
+// Onboarding
+"onboarding.tagline" = "Smart Finance Tracker";
+"onboarding.continue" = "Continue";
+"onboarding.getStarted" = "Get Started";
+"onboarding.skip" = "Skip";
+"onboarding.page1.title" = "Welcome to ZFlow";
+"onboarding.page1.subtitle" = "Track every income and expense with elegance — personal or business.";
+"onboarding.page2.title" = "Personal & Business";
+"onboarding.page2.subtitle" = "Separate flows for individuals and companies. KDV / VAT tax preview built in.";
+"onboarding.page3.title" = "Smart Reports";
+"onboarding.page3.subtitle" = "Visual insights, budget alerts, spending trends, and AI-powered forecasts.";
+"onboarding.page4.title" = "Calendar Sync";
+"onboarding.page4.subtitle" = "Sync with Apple Calendar. Add financial events and reminders effortlessly.";
+"onboarding.page5.title" = "Secure & Portable";
+"onboarding.page5.subtitle" = "Encrypted sync via Supabase. Export as CSV or PDF — anytime, anywhere.";
+
+// Auth
+"auth.signIn" = "Sign In";
+"auth.signUp" = "Sign Up";
+"auth.email" = "Email";
+"auth.password" = "Password";
+"auth.fullName" = "Full Name";
+"auth.businessName" = "Company / Brand Name";
+"auth.rememberMe" = "Stay Signed In";
+"auth.noAccount" = "Don't have an account?";
+"auth.haveAccount" = "Already have an account?";
+"auth.accountType" = "Account Type";
+"auth.personal" = "Personal";
+"auth.business" = "Business";
+"auth.createAccount" = "Create Account";
+"auth.welcomeBack" = "Welcome Back";
+
+// Tabs
+"tab.home" = "Home";
+"tab.transactions" = "Transactions";
+"tab.calendar" = "Calendar";
+"tab.settings" = "Settings";
+
+// Dashboard
+"dashboard.netBalance" = "Net Balance";
+"dashboard.income" = "Income";
+"dashboard.expense" = "Expense";
+"dashboard.insights" = "Insights";
+"dashboard.budgets" = "Budgets";
+"dashboard.recent" = "Recent";
+"dashboard.showMore" = "Show More";
+"dashboard.showLess" = "Show Less";
+"dashboard.seeAll" = "See All";
+"dashboard.noTransactions" = "No Transactions Yet";
+"dashboard.addFirst" = "Tap the + button to add your first transaction.";
+"dashboard.addTransaction" = "Add Transaction";
+"dashboard.monthlyChange" = "Monthly Change";
+"dashboard.transactions" = "transactions";
+
+// Transactions
+"transaction.new" = "New Transaction";
+"transaction.edit" = "Edit Transaction";
+"transaction.save" = "Save Transaction";
+"transaction.update" = "Update Transaction";
+"transaction.amount" = "Amount";
+"transaction.currency" = "Currency";
+"transaction.category" = "Category";
+"transaction.note" = "Note (optional)";
+"transaction.date" = "Date";
+"sort.newest" = "Newest";
+"sort.oldest" = "Oldest";
+"sort.highest" = "Highest";
+"sort.lowest" = "Lowest";
+
+// Common
+"common.cancel" = "Cancel";
+"common.done" = "Done";
+"common.delete" = "Delete";
+"common.edit" = "Edit";
+"common.save" = "Save";
+"common.search" = "Search";
+"time.today" = "Today";
+"time.yesterday" = "Yesterday";
+
+// Reports
+"reports.title" = "Reports";
+"reports.totalIncome" = "Total Income";
+"reports.totalExpense" = "Total Expense";
+"reports.trend" = "Trend";
+"reports.breakdown" = "Breakdown";
+"reports.topCategories" = "Top Categories";
+"reports.comparison" = "Month Comparison";
+"reports.thisMonth" = "This Month";
+"reports.lastMonth" = "Last Month";
+"reports.7d" = "7D";
+"reports.30d" = "30D";
+"reports.90d" = "90D";
+"reports.1y" = "1Y";
+
+// Calendar
+"calendar.title" = "Calendar";
+"calendar.addEvent" = "Add Event";
+"calendar.noEventsToday" = "No events for this day";
+"calendar.apple" = "Apple Calendar";
+"calendar.permTitle" = "Calendar Access";
+"calendar.permDesc" = "ZFlow needs permission to add financial events to Apple Calendar.";
+"calendar.allowAccess" = "Allow Access";
+
+// Settings
+"settings.title" = "Settings";
+"settings.editProfile" = "Edit Profile";
+"settings.addPhoto" = "Add Photo";
+"settings.removePhoto" = "Remove Photo";
+"settings.saveChanges" = "Save Changes";
+"settings.appearance" = "Appearance";
+"settings.preferences" = "Preferences";
+"settings.theme" = "Theme";
+"settings.themeSystem" = "System";
+"settings.themeLight" = "Light";
+"settings.themeDark" = "Dark";
+"settings.defaultCurrency" = "Default Currency";
+"settings.staySignedIn" = "Stay Signed In";
+"settings.manageBudgets" = "Manage Budgets";
+"settings.manageCategories" = "Manage Categories";
+"settings.exportData" = "Export Data";
+"settings.signOut" = "Sign Out";
+"settings.signOutConfirm" = "Are you sure you want to sign out?";
+"settings.version" = "Version";
+
+// Export
+"export.title" = "Export";
+"export.subtitle" = "Export all your transactions";
+"export.format" = "Format";
+"export.generate" = "Generate";
+"export.share" = "Share";
+
+// VAT / Tax
+"vat.title" = "VAT Calculator";
+"vat.preview" = "VAT Preview";
+"vat.rate" = "VAT Rate";
+"vat.base" = "Base Amount";
+"vat.amount" = "VAT Amount";
+"vat.total" = "Total (incl. VAT)";
+"vat.comingSoon" = "Coming Soon";
+"vat.aiIntegration" = "AI-Powered VAT Integration — Coming Soon";
+
+// Categories
+"category.other" = "Other";
+"time.goodMorning" = "Good Morning";
+"time.goodAfternoon" = "Good Afternoon";
+"time.goodEvening" = "Good Evening";

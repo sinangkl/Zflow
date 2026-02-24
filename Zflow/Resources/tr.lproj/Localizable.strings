@@ -1,0 +1,192 @@
+/* Turkish Localizable.strings — ZFlow */
+
+// Onboarding
+"onboarding.tagline" = "Akıllı Finans Takipçisi";
+"onboarding.continue" = "Devam Et";
+"onboarding.getStarted" = "Başlayalım";
+"onboarding.skip" = "Geç";
+"onboarding.page1.title" = "ZFlow'a Hoş Geldiniz";
+"onboarding.page1.subtitle" = "Her gelir ve gideri şıklıkla takip edin — kişisel veya işletme.";
+"onboarding.page2.title" = "Kişisel & İşletme";
+"onboarding.page2.subtitle" = "Bireyler ve şirketler için ayrı akışlar. KDV / VAT vergi önizlemesi dahil.";
+"onboarding.page3.title" = "Akıllı Raporlar";
+"onboarding.page3.subtitle" = "Görsel öngörüler, bütçe uyarıları, harcama trendleri ve yapay zeka destekli tahminler.";
+"onboarding.page4.title" = "Takvim Senkronizasyonu";
+"onboarding.page4.subtitle" = "Apple Takvim ile senkronize edin. Finansal etkinlikleri ve hatırlatıcıları kolayca ekleyin.";
+"onboarding.page5.title" = "Güvenli & Taşınabilir";
+"onboarding.page5.subtitle" = "Supabase ile şifreli senkronizasyon. CSV veya PDF olarak dışa aktarın — istediğiniz zaman.";
+
+// Auth
+"auth.signIn" = "Giriş Yap";
+"auth.signUp" = "Kayıt Ol";
+"auth.email" = "E-posta";
+"auth.password" = "Şifre";
+"auth.fullName" = "Ad Soyad";
+"auth.businessName" = "Şirket / Marka Adı";
+"auth.rememberMe" = "Beni Hatırla";
+"auth.noAccount" = "Hesabın yok mu?";
+"auth.haveAccount" = "Zaten hesabın var mı?";
+"auth.accountType" = "Hesap Türü";
+"auth.personal" = "Kişisel";
+"auth.business" = "İşletme";
+"auth.createAccount" = "Hesap Oluştur";
+"auth.welcomeBack" = "Tekrar Hoş Geldiniz";
+
+// Tabs
+"tab.home" = "Ana Sayfa";
+"tab.transactions" = "İşlemler";
+"tab.calendar" = "Takvim";
+"tab.settings" = "Ayarlar";
+
+// Dashboard
+"dashboard.netBalance" = "Net Bakiye";
+"dashboard.income" = "Gelir";
+"dashboard.expense" = "Gider";
+"dashboard.insights" = "İpuçları";
+"dashboard.budgets" = "Bütçeler";
+"dashboard.recent" = "Son İşlemler";
+"dashboard.showMore" = "Daha Fazla";
+"dashboard.showLess" = "Daha Az";
+"dashboard.seeAll" = "Tümünü Gör";
+"dashboard.noTransactions" = "Henüz İşlem Yok";
+"dashboard.addFirst" = "İlk işleminizi eklemek için + butonuna dokunun.";
+"dashboard.addTransaction" = "İşlem Ekle";
+"dashboard.monthlyChange" = "Aylık Değişim";
+"dashboard.transactions" = "işlem";
+
+// Transactions
+"transaction.new" = "Yeni İşlem";
+"transaction.edit" = "İşlemi Düzenle";
+"transaction.save" = "Kaydet";
+"transaction.update" = "Güncelle";
+"transaction.amount" = "Tutar";
+"transaction.currency" = "Para Birimi";
+"transaction.category" = "Kategori";
+"transaction.note" = "Not";
+"transaction.date" = "Tarih";
+"sort.newest" = "En Yeni";
+"sort.oldest" = "En Eski";
+"sort.highest" = "En Yüksek";
+"sort.lowest" = "En Düşük";
+
+// Common
+"common.cancel" = "İptal";
+"common.done" = "Tamam";
+"common.delete" = "Sil";
+"common.edit" = "Düzenle";
+"common.save" = "Kaydet";
+"common.search" = "Ara";
+"time.today" = "Bugün";
+"time.yesterday" = "Dün";
+
+// Reports
+"reports.title" = "Raporlar";
+"reports.totalIncome" = "Toplam Gelir";
+"reports.totalExpense" = "Toplam Gider";
+"reports.trend" = "Trend";
+"reports.breakdown" = "Dağılım";
+"reports.topCategories" = "Başlıca Kategoriler";
+"reports.comparison" = "Ay Karşılaştırması";
+"reports.thisMonth" = "Bu Ay";
+"reports.lastMonth" = "Geçen Ay";
+"reports.7d" = "7G";
+"reports.30d" = "30G";
+"reports.90d" = "90G";
+"reports.1y" = "1Y";
+
+// Calendar
+"calendar.title" = "Takvim";
+"calendar.addEvent" = "Etkinlik Ekle";
+"calendar.noEventsToday" = "Bu gün için etkinlik yok";
+"calendar.apple" = "Apple Takvim";
+"calendar.permTitle" = "Takvim Erişimi";
+"calendar.permDesc" = "ZFlow, finansal etkinliklerinizi Apple Takvim'e ekleyebilmek için izin istiyor.";
+"calendar.allowAccess" = "Erişime İzin Ver";
+
+// Settings
+"settings.title" = "Ayarlar";
+"settings.editProfile" = "Profili Düzenle";
+"settings.addPhoto" = "Fotoğraf Ekle";
+"settings.removePhoto" = "Fotoğrafı Kaldır";
+"settings.saveChanges" = "Değişiklikleri Kaydet";
+"settings.appearance" = "Görünüm";
+"settings.preferences" = "Tercihler";
+"settings.theme" = "Tema";
+"settings.themeSystem" = "Sistem";
+"settings.themeLight" = "Açık";
+"settings.themeDark" = "Koyu";
+"settings.defaultCurrency" = "Varsayılan Para Birimi";
+"settings.staySignedIn" = "Oturumu Açık Tut";
+"settings.manageBudgets" = "Bütçeleri Yönet";
+"settings.manageCategories" = "Kategorileri Yönet";
+"settings.exportData" = "Verileri Dışa Aktar";
+"settings.signOut" = "Çıkış Yap";
+"settings.signOutConfirm" = "Çıkış yapmak istediğinize emin misiniz?";
+"settings.version" = "Sürüm";
+
+// Export
+"export.title" = "Dışa Aktar";
+"export.subtitle" = "Tüm işlemlerinizi dışa aktarın";
+"export.format" = "Format";
+"export.generate" = "Oluştur";
+"export.share" = "Paylaş";
+
+// VAT / Tax
+"vat.title" = "KDV Hesaplama";
+"vat.preview" = "KDV Önizleme";
+"vat.rate" = "KDV Oranı";
+"vat.base" = "Matrah";
+"vat.amount" = "KDV Tutarı";
+"vat.total" = "Toplam (KDV dahil)";
+"vat.comingSoon" = "Yakında";
+"vat.aiIntegration" = "Yapay Zeka ile KDV Entegrasyonu — Yakında";
+
+// Categories
+"category.other" = "Diğer";
+
+// Additional sort/transaction keys
+"sort.newest" = "En Yeni";
+"sort.oldest" = "En Eski";
+"sort.highest" = "En Yüksek";
+"sort.lowest" = "En Düşük";
+"dashboard.budgets" = "Bütçeler";
+"dashboard.insights" = "İpuçları";
+"dashboard.recent" = "Son İşlemler";
+"dashboard.showMore" = "Daha Fazla";
+"dashboard.showLess" = "Daha Az";
+"dashboard.seeAll" = "Tümünü Gör";
+"dashboard.monthlyChange" = "Aylık Değişim";
+"transaction.new" = "Yeni İşlem";
+"transaction.edit" = "İşlemi Düzenle";
+"transaction.save" = "İşlemi Kaydet";
+"transaction.update" = "Güncelle";
+"transaction.amount" = "Tutar";
+"transaction.currency" = "Para Birimi";
+"transaction.category" = "Kategori";
+"transaction.note" = "Not (isteğe bağlı)";
+"transaction.date" = "Tarih";
+"reports.7d" = "7G";
+"reports.30d" = "30G";
+"reports.90d" = "90G";
+"reports.1y" = "1Y";
+"export.title" = "Dışa Aktar";
+"export.subtitle" = "Tüm işlemlerinizi dışa aktarın";
+"export.format" = "Format";
+"export.generate" = "Oluştur";
+"export.share" = "Paylaş";
+"settings.appearance" = "Görünüm";
+"settings.preferences" = "Tercihler";
+"settings.theme" = "Tema";
+"settings.themeSystem" = "Sistem";
+"settings.themeLight" = "Açık";
+"settings.themeDark" = "Koyu";
+"settings.defaultCurrency" = "Varsayılan Para Birimi";
+"settings.staySignedIn" = "Oturumu Açık Tut";
+"settings.manageBudgets" = "Bütçeleri Yönet";
+"settings.manageCategories" = "Kategorileri Yönet";
+"settings.exportData" = "Verileri Dışa Aktar";
+"settings.version" = "Sürüm";
+"calendar.apple" = "Apple Takvim";
+"time.goodMorning" = "Günaydın";
+"time.goodAfternoon" = "İyi Günler";
+"time.goodEvening" = "İyi Akşamlar";

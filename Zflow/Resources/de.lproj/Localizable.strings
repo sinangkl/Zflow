@@ -120,3 +120,46 @@
 "time.goodMorning" = "Guten Morgen";
 "time.goodAfternoon" = "Guten Tag";
 "time.goodEvening" = "Guten Abend";
+
+// Language
+"settings.language" = "Sprache";
+
+// Bank Connection
+"bank.title" = "Bankkonten";
+"bank.heroTitle" = "Verbinden Sie Ihre Bank";
+"bank.heroSubtitle" = "Importieren Sie Transaktionen automatisch über Open Banking.";
+"bank.noAccounts" = "Noch keine Bankkonten verbunden.\nVerbinden Sie Ihre Konten sicher über Open Banking.";
+"bank.connectAccount" = "Bankkonto verbinden";
+"bank.connectedAccounts" = "Verbundene Konten";
+"bank.addAnother" = "Weiteres Konto hinzufügen";
+"bank.supportedBanks" = "Unterstützte Banken";
+"bank.comingSoon" = "Demnächst";
+"bank.statusActive" = "Aktiv";
+"bank.statusPending" = "Ausstehend";
+"bank.securityTitle" = "Ihre Daten sind sicher";
+"bank.securitySubtitle" = "Bankverbindungen verwenden PSD2-konforme Open-Banking-APIs. Ihre Passwörter werden niemals gespeichert.";
+"bank.sectionTitle" = "Bankverbindungen";
+"calendar.syncTitle" = "Mit Apple Kalender synchronisieren";
+"calendar.syncSubtitle" = "Finanzielle Ereignisse zu deinem Kalender hinzufügen";
+"calendar.enable" = "Aktivieren";
+"calendar.noAppleEvents" = "Keine Apple Kalender Ereignisse";
+"calendar.enableAccess" = "Kalenderzugriff aktivieren";
+"calendar.notNow" = "Nicht Jetzt";
+"calendar.event" = "Ereignis";
+"calendar.eventTitle" = "Titel";
+"calendar.dateTime" = "Datum & Uhrzeit";
+"calendar.optionalNote" = "Optionale Notiz...";
+"calendar.newEvent" = "Neues Kalenderereignis";
+"calendar.add" = "Hinzufügen";
+"calendar.syncTitle" = "Mit Apple Kalender synchronisieren";
+"calendar.syncSubtitle" = "Finanzielle Ereignisse zu deinem Kalender hinzufügen";
+"calendar.enable" = "Aktivieren";
+"calendar.noAppleEvents" = "Keine Apple Kalender Ereignisse";
+"calendar.enableAccess" = "Kalenderzugriff aktivieren";
+"calendar.notNow" = "Nicht Jetzt";
+"calendar.event" = "Ereignis";
+"calendar.eventTitle" = "Titel";
+"calendar.dateTime" = "Datum & Uhrzeit";
+"calendar.optionalNote" = "Optionale Notiz...";
+"calendar.newEvent" = "Neues Kalenderereignis";
+"calendar.add" = "Hinzufügen";

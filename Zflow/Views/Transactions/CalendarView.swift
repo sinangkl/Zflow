@@ -48,6 +48,7 @@ final class CalendarManager: ObservableObject {
 
 struct CalendarView: View {
     @EnvironmentObject var transactionVM: TransactionViewModel
+    @EnvironmentObject var authVM: AuthViewModel
     @StateObject private var calMgr = CalendarManager()
     @Environment(\.colorScheme) var scheme
 
@@ -55,6 +56,8 @@ struct CalendarView: View {
     @State private var displayedMonth = Date()
     @State private var showAddEvent   = false
     @State private var showPermSheet  = false
+    @State private var transactionToDelete: Transaction? = nil
+    @State private var transactionToEdit: Transaction? = nil
 
     private var cal: Calendar { Calendar.current }
 
@@ -119,19 +122,52 @@ struct CalendarView: View {
                         else { showPermSheet = true }
                     } label: {
                         Image(systemName: "calendar.badge.plus")
+                            .font(.system(size: 16, weight: .semibold))
                             .foregroundColor(ZColor.indigo)
+                            .frame(width: 34, height: 34)
+                            .background(Circle().fill(ZColor.indigo.opacity(0.10)))
                     }
+                    .padding(.trailing, 4)
                 }
             }
             .sheet(isPresented: $showAddEvent) {
                 AddCalendarEventView(defaultDate: selectedDate, calMgr: calMgr)
                     .environmentObject(transactionVM)
+                    .environmentObject(authVM)
             }
             .sheet(isPresented: $showPermSheet) {
                 CalendarPermissionView {
                     Task { await calMgr.requestAccess() }
                     showPermSheet = false
                 }
+            }
+            .sheet(item: $transactionToEdit) { txn in
+                EditTransactionView(transaction: txn)
+                    .environmentObject(transactionVM)
+                    .environmentObject(authVM)
+            }
+            .confirmationDialog(
+                NSLocalizedString("common.delete", comment: "Delete"),
+                isPresented: Binding(
+                    get: { transactionToDelete != nil },
+                    set: { if !$0 { transactionToDelete = nil } }
+                ),
+                titleVisibility: .visible
+            ) {
+                Button(NSLocalizedString("common.delete", comment: "Delete"), role: .destructive) {
+                    if let txn = transactionToDelete, let uid = authVM.currentUserId {
+                        Task {
+                            await transactionVM.deleteTransaction(id: txn.id, userId: uid)
+                            Haptic.success()
+                        }
+                        transactionToDelete = nil
+                    }
+                }
+                Button(NSLocalizedString("common.cancel", comment: "Cancel"), role: .cancel) {
+                    transactionToDelete = nil
+                }
+            } message: {
+                Text(NSLocalizedString("common.deleteWarning", comment: "This action cannot be undone."))
             }
             .task { await calMgr.requestAccess() }
         }
@@ -179,9 +215,9 @@ struct CalendarView: View {
                 }
 
                 HStack(spacing: 0) {
-                    summaryChip(label: "Income", amount: monthIncome, tint: Color(hex: "#86EFAC"))
+                    summaryChip(label: NSLocalizedString("dashboard.income", comment: ""), amount: monthIncome, tint: Color(hex: "#86EFAC"))
                     Rectangle().fill(Color.white.opacity(0.2)).frame(width: 0.5, height: 36)
-                    summaryChip(label: "Expense", amount: monthExpense, tint: Color(hex: "#FCA5A5"))
+                    summaryChip(label: NSLocalizedString("dashboard.expense", comment: ""), amount: monthExpense, tint: Color(hex: "#FCA5A5"))
                 }
                 .padding(.horizontal, 10).padding(.vertical, 10)
                 .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.white.opacity(0.12)))
@@ -203,9 +239,13 @@ struct CalendarView: View {
 
     private var calendarGrid: some View {
         VStack(spacing: 8) {
-            // Weekday headers
+            // Weekday headers (locale-aware, Mon-start)
             HStack(spacing: 0) {
-                ForEach(["Mo","Tu","We","Th","Fr","Sa","Su"], id: \.self) { day in
+                let symbols = {
+                    let s = cal.shortWeekdaySymbols  // [Sun, Mon, Tue, ...]
+                    return Array(s.dropFirst()) + [s[0]]  // [Mon, Tue, ..., Sun]
+                }()
+                ForEach(symbols, id: \.self) { day in
                     Text(day).font(.system(size: 11, weight: .semibold))
                         .foregroundColor(ZColor.labelTert)
                         .frame(maxWidth: .infinity)
@@ -266,7 +306,7 @@ struct CalendarView: View {
                     )
 
                 // Dot indicators
-                HStack(spacing: 2) {
+                HStack(spacing: 4) {
                     if hasIncome  { Circle().fill(ZColor.income).frame(width: 5, height: 5) }
                     if hasExpense { Circle().fill(ZColor.expense).frame(width: 5, height: 5) }
                     if appleCount > 0 { Circle().fill(ZColor.info).frame(width: 5, height: 5) }
@@ -300,6 +340,37 @@ struct CalendarView: View {
                         TransactionRow(
                             transaction: txn,
                             category: transactionVM.category(for: txn.categoryId))
+                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                            Button(role: .destructive) {
+                                transactionToDelete = txn
+                                Haptic.medium()
+                            } label: {
+                                Label(NSLocalizedString("common.delete", comment: "Delete"),
+                                      systemImage: "trash.fill")
+                            }
+                            
+                            Button {
+                                transactionToEdit = txn
+                                Haptic.light()
+                            } label: {
+                                Label(NSLocalizedString("common.edit", comment: "Edit"),
+                                      systemImage: "pencil")
+                            }
+                            .tint(ZColor.indigo)
+                        }
+                        .contextMenu {
+                            Button {
+                                transactionToEdit = txn
+                            } label: {
+                                Label(NSLocalizedString("common.edit", comment: "Edit"), systemImage: "pencil")
+                            }
+                            Button(role: .destructive) {
+                                transactionToDelete = txn
+                            } label: {
+                                Label(NSLocalizedString("common.delete", comment: "Delete"), systemImage: "trash")
+                            }
+                        }
+                        
                         if idx < txnForDate.count - 1 { Divider().padding(.leading, 70) }
                     }
                 }
@@ -320,13 +391,13 @@ struct CalendarView: View {
                 HStack(spacing: 12) {
                     Image(systemName: "calendar").font(.system(size: 20)).foregroundColor(ZColor.indigo)
                     VStack(alignment: .leading, spacing: 3) {
-                        Text("Sync with Apple Calendar")
+                        Text(NSLocalizedString("calendar.syncTitle", comment: ""))
                             .font(.system(size: 14, weight: .semibold))
-                        Text("Add financial events to your calendar")
+                        Text(NSLocalizedString("calendar.syncSubtitle", comment: ""))
                             .font(.system(size: 12)).foregroundColor(ZColor.labelSec)
                     }
                     Spacer()
-                    Button("Enable") {
+                    Button(NSLocalizedString("calendar.enable", comment: "")) {
                         Task { await calMgr.requestAccess() }
                     }
                     .font(.system(size: 13, weight: .semibold))
@@ -338,7 +409,7 @@ struct CalendarView: View {
                     cal.isDate($0.startDate, inSameDayAs: selectedDate)
                 }
                 if dayEvents.isEmpty {
-                    Text("No Apple Calendar events")
+                    Text(NSLocalizedString("calendar.noAppleEvents", comment: ""))
                         .font(.system(size: 13)).foregroundColor(ZColor.labelSec)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(14).zFlowCard()
@@ -381,19 +452,19 @@ struct CalendarPermissionView: View {
             Image(systemName: "calendar.badge.plus")
                 .font(.system(size: 64, weight: .medium))
                 .foregroundStyle(AppTheme.accentGradient)
-            Text("Calendar Access")
+            Text(NSLocalizedString("calendar.permTitle", comment: ""))
                 .font(.system(size: 24, weight: .bold))
-            Text(L.calendarPermission.localized)
+            Text(L.calPermDesc.localized)
                 .font(.system(size: 15)).foregroundColor(ZColor.labelSec)
                 .multilineTextAlignment(.center).padding(.horizontal, 32)
             Button { onEnable() } label: {
-                Text("Enable Calendar Access")
+                Text(NSLocalizedString("calendar.enableAccess", comment: ""))
                     .font(.system(size: 17, weight: .bold)).foregroundColor(.white)
                     .frame(maxWidth: .infinity).frame(height: 54)
                     .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(AppTheme.accentGradient))
             }
             .padding(.horizontal, 28)
-            Button("Not Now") { dismiss() }
+            Button(NSLocalizedString("calendar.notNow", comment: "")) { dismiss() }
                 .font(.system(size: 14)).foregroundColor(ZColor.labelSec)
             Spacer()
         }
@@ -410,7 +481,7 @@ struct AddCalendarEventView: View {
     let defaultDate: Date
     @State private var title    = ""
     @State private var amount   = ""
-    @State private var currency: Currency = .TRY
+    @State private var currency: Currency = .try_
     @State private var eventDate: Date
     @State private var note     = ""
     @State private var isSaving = false
@@ -424,28 +495,28 @@ struct AddCalendarEventView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Event") {
-                    TextField("Title", text: $title)
+                Section(NSLocalizedString("calendar.event", comment: "")) {
+                    TextField(NSLocalizedString("calendar.eventTitle", comment: ""), text: $title)
                     HStack {
-                        TextField("Amount", text: $amount).keyboardType(.decimalPad)
+                        TextField(NSLocalizedString("transaction.amount", comment: ""), text: $amount).keyboardType(.decimalPad)
                         Picker("", selection: $currency) {
                             ForEach(Currency.allCases) { c in Text("\(c.flag) \(c.rawValue)").tag(c) }
                         }.labelsHidden()
                     }
-                    DatePicker("Date & Time", selection: $eventDate)
+                    DatePicker(NSLocalizedString("calendar.dateTime", comment: ""), selection: $eventDate)
                 }
-                Section("Note") {
-                    TextField("Optional note...", text: $note, axis: .vertical).lineLimit(2...4)
+                Section(NSLocalizedString("transaction.note", comment: "")) {
+                    TextField(NSLocalizedString("calendar.optionalNote", comment: ""), text: $note, axis: .vertical).lineLimit(2...4)
                 }
             }
-            .navigationTitle("New Calendar Event")
+            .navigationTitle(NSLocalizedString("calendar.newEvent", comment: ""))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button(L.cancel.localized) { dismiss() }.foregroundColor(ZColor.indigo)
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Add") {
+                    Button(NSLocalizedString("calendar.add", comment: "")) {
                         isSaving = true
                         let amt = Double(amount.replacingOccurrences(of: ",", with: ".")) ?? 0
                         let _ = calMgr.addEvent(title: title, amount: amt, currency: currency.rawValue,

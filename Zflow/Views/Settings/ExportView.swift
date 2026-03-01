@@ -31,97 +31,11 @@ struct ZFlowExportView: View {
         NavigationStack {
             ZStack {
                 Color(.systemGroupedBackground).ignoresSafeArea()
-
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 24) {
-
-                        // Header
-                        VStack(spacing: 10) {
-                            Image(systemName: "square.and.arrow.up.fill")
-                                .font(.system(size: 48, weight: .medium))
-                                .foregroundStyle(AppTheme.accentGradient)
-                            Text(L.exportTitle.localized)
-                                .font(.system(size: 24, weight: .bold))
-                            Text("\(transactionVM.transactions.count) transactions available")
-                                .font(.system(size: 14))
-                                .foregroundColor(ZColor.labelSec)
-                        }
-                        .padding(.top, 32)
-
-                        // Format picker
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("Export Format")
-                                .font(.system(size: 13, weight: .semibold))
-                                .foregroundColor(ZColor.labelSec)
-                                .textCase(.uppercase)
-                                .tracking(0.4)
-                                .padding(.horizontal, 4)
-
-                            ForEach(ExportFormat.allCases, id: \.rawValue) { fmt in
-                                Button {
-                                    withAnimation(.spring(response: 0.25)) { selectedFormat = fmt }
-                                    Haptic.selection()
-                                } label: {
-                                    HStack(spacing: 14) {
-                                        ZStack {
-                                            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                                .fill(fmt.color.opacity(0.12))
-                                                .frame(width: 44, height: 44)
-                                            Image(systemName: fmt.icon)
-                                                .font(.system(size: 18, weight: .medium))
-                                                .foregroundColor(fmt.color)
-                                        }
-                                        VStack(alignment: .leading, spacing: 3) {
-                                            Text(fmt.rawValue)
-                                                .font(.system(size: 16, weight: .semibold))
-                                                .foregroundColor(ZColor.label)
-                                            Text(fmt.desc)
-                                                .font(.system(size: 13))
-                                                .foregroundColor(ZColor.labelSec)
-                                        }
-                                        Spacer()
-                                        Image(systemName: selectedFormat == fmt ? "checkmark.circle.fill" : "circle")
-                                            .foregroundColor(selectedFormat == fmt ? ZColor.indigo : ZColor.labelTert)
-                                            .font(.system(size: 20))
-                                    }
-                                    .padding(14)
-                                    .background(Color(.secondarySystemGroupedBackground))
-                                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                            .strokeBorder(
-                                                selectedFormat == fmt ? ZColor.indigo.opacity(0.5) : Color.clear,
-                                                lineWidth: 1.5)
-                                    )
-                                }
-                                .buttonStyle(.plain)
-                            }
-                        }
-
-                        // Export button
-                        Button {
-                            generate()
-                        } label: {
-                            Group {
-                                if isGenerating {
-                                    ProgressView().tint(.white)
-                                } else {
-                                    HStack(spacing: 8) {
-                                        Image(systemName: selectedFormat.icon)
-                                            .font(.system(size: 16, weight: .semibold))
-                                        Text(selectedFormat == .csv ? L.exportCSV.localized : L.exportPDF.localized)
-                                            .font(.system(size: 17, weight: .bold))
-                                    }
-                                }
-                            }
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity).frame(height: 54)
-                            .background(RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                .fill(AppTheme.accentGradient))
-                        }
-                        .disabled(isGenerating || transactionVM.transactions.isEmpty)
-                        .opacity(transactionVM.transactions.isEmpty ? 0.5 : 1)
-                        .padding(.top, 4)
+                        headerSection
+                        formatPickerSection
+                        exportButton
                     }
                     .padding(.horizontal, 20)
                     .padding(.bottom, 40)
@@ -140,6 +54,108 @@ struct ZFlowExportView: View {
             }
         }
     }
+
+    // MARK: - Header
+
+    private var headerSection: some View {
+        VStack(spacing: 10) {
+            Image(systemName: "square.and.arrow.up.fill")
+                .font(.system(size: 48, weight: .medium))
+                .foregroundStyle(AppTheme.accentGradient)
+            Text(L.exportTitle.localized)
+                .font(.system(size: 24, weight: .bold))
+            Text("\(transactionVM.transactions.count) transactions available")
+                .font(.system(size: 14))
+                .foregroundColor(ZColor.labelSec)
+        }
+        .padding(.top, 32)
+    }
+
+    // MARK: - Format Picker
+
+    private var formatPickerSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Export Format")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundColor(ZColor.labelSec)
+                .textCase(.uppercase)
+                .tracking(0.4)
+                .padding(.horizontal, 4)
+
+            ForEach(ExportFormat.allCases, id: \.rawValue) { fmt in
+                formatRow(fmt)
+            }
+        }
+    }
+
+    private func formatRow(_ fmt: ExportFormat) -> some View {
+        let isSelected = selectedFormat == fmt
+        return Button {
+            withAnimation(.spring(response: 0.25)) { selectedFormat = fmt }
+            Haptic.selection()
+        } label: {
+            HStack(spacing: 14) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .fill(fmt.color.opacity(0.12))
+                        .frame(width: 44, height: 44)
+                    Image(systemName: fmt.icon)
+                        .font(.system(size: 18, weight: .medium))
+                        .foregroundColor(fmt.color)
+                }
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(fmt.rawValue)
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(ZColor.label)
+                    Text(fmt.desc)
+                        .font(.system(size: 13))
+                        .foregroundColor(ZColor.labelSec)
+                }
+                Spacer()
+                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                    .foregroundColor(isSelected ? ZColor.indigo : ZColor.labelTert)
+                    .font(.system(size: 20))
+            }
+            .padding(14)
+            .background(Color(.secondarySystemGroupedBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .strokeBorder(isSelected ? ZColor.indigo.opacity(0.5) : Color.clear, lineWidth: 1.5)
+            )
+        }
+        .buttonStyle(.plain)
+    }
+
+    // MARK: - Export Button
+
+    private var exportButton: some View {
+        let label = selectedFormat == .csv ? "Export CSV" : "Export PDF"
+        return Button { generate() } label: {
+            Group {
+                if isGenerating {
+                    ProgressView().tint(.white)
+                } else {
+                    HStack(spacing: 8) {
+                        Image(systemName: selectedFormat.icon)
+                            .font(.system(size: 16, weight: .semibold))
+                        Text(label)
+                            .font(.system(size: 17, weight: .bold))
+                    }
+                }
+            }
+            .foregroundColor(.white)
+            .frame(maxWidth: .infinity).frame(height: 54)
+            .background(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(AppTheme.accentGradient)
+            )
+        }
+        .disabled(isGenerating || transactionVM.transactions.isEmpty)
+        .opacity(transactionVM.transactions.isEmpty ? 0.5 : 1)
+        .padding(.top, 4)
+    }
+
 
     private func generate() {
         isGenerating = true
@@ -184,7 +200,6 @@ struct ZFlowExportView: View {
     }
 
     private func drawPDF(in ctx: CGContext) {
-        let accentUIColor = UIColor(ZColor.indigo)
         let sorted = transactionVM.transactions.sorted {
             ($0.date ?? .distantPast) > ($1.date ?? .distantPast)
         }

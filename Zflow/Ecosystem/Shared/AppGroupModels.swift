@@ -154,12 +154,17 @@ struct BudgetAlertPayload: Codable, Identifiable {
 }
 
 // MARK: - Number Formatting
+// Shared across main app, Widget, and Watch targets.
 
 extension Double {
-    func formattedShort() -> String {
-        if abs(self) >= 1_000_000 { return String(format: "%.1fM", self / 1_000_000) }
-        if abs(self) >= 1_000     { return String(format: "%.1fK", self / 1_000) }
-        return String(format: "%.0f", self)
+    /// Short numeric format, optional currency code appended.
+    /// e.g. 12500.formattedShort() → "12.5K"
+    ///      12500.formattedShort(code: "TRY") → "12.5K TRY"
+    func formattedShort(code: String = "") -> String {
+        let suffix = code.isEmpty ? "" : " \(code)"
+        if abs(self) >= 1_000_000 { return String(format: "%.1fM\(suffix)", self / 1_000_000) }
+        if abs(self) >= 1_000     { return String(format: "%.1fK\(suffix)", self / 1_000) }
+        return String(format: "%.0f\(suffix)", self)
     }
 
     func formattedCurrencySimple(code: String) -> String {
@@ -171,3 +176,5 @@ extension Double {
         return f.string(from: NSNumber(value: self)) ?? "\(code) \(self)"
     }
 }
+
+

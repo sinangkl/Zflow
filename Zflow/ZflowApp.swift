@@ -11,6 +11,7 @@ struct ZFlowApp: App {
     @StateObject private var watchConnector = WatchConnector.shared
 
     @AppStorage("appColorScheme") private var appColorScheme: String = "system"
+    @ObservedObject private var languageManager = LanguageManager.shared
 
     init() {
         // Bildirim kategorilerini kayıt et
@@ -28,6 +29,7 @@ struct ZFlowApp: App {
                 .environmentObject(transactionVM)
                 .environmentObject(budgetManager)
                 .preferredColorScheme(colorSchemeValue)
+                .id(languageManager.currentLanguage) // Force full rebuild on language change
                 .tint(ZColor.indigo)
                 // Watch'tan gelen Quick-Add işlemini dinle
                 .onReceive(

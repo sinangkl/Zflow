@@ -1,44 +1,36 @@
-/* English Localizable.strings — ZFlow */
-
-// Onboarding
+/* Hindi Localizable.strings */
 "onboarding.tagline" = "Smart Finance Tracker";
 "onboarding.continue" = "Continue";
-"onboarding.getStarted" = "Get Started";
+"onboarding.getStarted" = "Start";
 "onboarding.skip" = "Skip";
-"onboarding.page1.title" = "Welcome to ZFlow";
-"onboarding.page1.subtitle" = "Track every income and expense with elegance — personal or business.";
+"onboarding.page1.title" = "ZFlow Welcome";
+"onboarding.page1.subtitle" = "Track every income and expense.";
 "onboarding.page2.title" = "Personal & Business";
-"onboarding.page2.subtitle" = "Separate flows for individuals and companies. KDV / VAT tax preview built in.";
+"onboarding.page2.subtitle" = "Separate flows for individuals and companies.";
 "onboarding.page3.title" = "Smart Reports";
-"onboarding.page3.subtitle" = "Visual insights, budget alerts, spending trends, and AI-powered forecasts.";
+"onboarding.page3.subtitle" = "Visual insights and AI forecasts.";
 "onboarding.page4.title" = "Calendar Sync";
-"onboarding.page4.subtitle" = "Sync with Apple Calendar. Add financial events and reminders effortlessly.";
+"onboarding.page4.subtitle" = "Sync with Apple Calendar.";
 "onboarding.page5.title" = "Secure & Portable";
-"onboarding.page5.subtitle" = "Encrypted sync via Supabase. Export as CSV or PDF — anytime, anywhere.";
-
-// Auth
+"onboarding.page5.subtitle" = "Encrypted sync via Supabase.";
 "auth.signIn" = "Sign In";
 "auth.signUp" = "Sign Up";
 "auth.email" = "Email";
 "auth.password" = "Password";
 "auth.fullName" = "Full Name";
-"auth.businessName" = "Company / Brand Name";
+"auth.businessName" = "Company Name";
 "auth.rememberMe" = "Stay Signed In";
-"auth.noAccount" = "Don't have an account?";
+"auth.noAccount" = "No account?";
 "auth.haveAccount" = "Already have an account?";
 "auth.accountType" = "Account Type";
 "auth.personal" = "Personal";
 "auth.business" = "Business";
 "auth.createAccount" = "Create Account";
 "auth.welcomeBack" = "Welcome Back";
-
-// Tabs
 "tab.home" = "Home";
 "tab.transactions" = "Transactions";
 "tab.calendar" = "Calendar";
 "tab.settings" = "Settings";
-
-// Dashboard
 "dashboard.netBalance" = "Net Balance";
 "dashboard.income" = "Income";
 "dashboard.expense" = "Expense";
@@ -48,17 +40,15 @@
 "dashboard.showMore" = "Show More";
 "dashboard.showLess" = "Show Less";
 "dashboard.seeAll" = "See All";
-"dashboard.noTransactions" = "No Transactions Yet";
-"dashboard.addFirst" = "Tap the + button to add your first transaction.";
+"dashboard.noTransactions" = "No Transactions";
+"dashboard.addFirst" = "Tap + to add your first transaction.";
 "dashboard.addTransaction" = "Add Transaction";
 "dashboard.monthlyChange" = "Monthly Change";
 "dashboard.transactions" = "transactions";
-
-// Transactions
 "transaction.new" = "New Transaction";
 "transaction.edit" = "Edit Transaction";
-"transaction.save" = "Save Transaction";
-"transaction.update" = "Update Transaction";
+"transaction.save" = "Save";
+"transaction.update" = "Update";
 "transaction.amount" = "Amount";
 "transaction.currency" = "Currency";
 "transaction.category" = "Category";
@@ -68,8 +58,6 @@
 "sort.oldest" = "Oldest";
 "sort.highest" = "Highest";
 "sort.lowest" = "Lowest";
-
-// Common
 "common.cancel" = "Cancel";
 "common.done" = "Done";
 "common.delete" = "Delete";
@@ -78,8 +66,9 @@
 "common.search" = "Search";
 "time.today" = "Today";
 "time.yesterday" = "Yesterday";
-
-// Reports
+"time.goodMorning" = "Good Morning";
+"time.goodAfternoon" = "Good Afternoon";
+"time.goodEvening" = "Good Evening";
 "reports.title" = "Reports";
 "reports.totalIncome" = "Total Income";
 "reports.totalExpense" = "Total Expense";
@@ -93,29 +82,13 @@
 "reports.30d" = "30D";
 "reports.90d" = "90D";
 "reports.1y" = "1Y";
-
-// Calendar
 "calendar.title" = "Calendar";
 "calendar.addEvent" = "Add Event";
-"calendar.noEventsToday" = "No events for this day";
+"calendar.noEventsToday" = "No events today";
 "calendar.apple" = "Apple Calendar";
 "calendar.permTitle" = "Calendar Access";
-"calendar.permDesc" = "ZFlow needs permission to add financial events to Apple Calendar.";
+"calendar.permDesc" = "ZFlow needs access to Apple Calendar.";
 "calendar.allowAccess" = "Allow Access";
-"calendar.syncTitle" = "Sync with Apple Calendar";
-"calendar.syncSubtitle" = "Add financial events to your calendar";
-"calendar.enable" = "Enable";
-"calendar.noAppleEvents" = "No Apple Calendar events";
-"calendar.enableAccess" = "Enable Calendar Access";
-"calendar.notNow" = "Not Now";
-"calendar.event" = "Event";
-"calendar.eventTitle" = "Title";
-"calendar.dateTime" = "Date & Time";
-"calendar.optionalNote" = "Optional note...";
-"calendar.newEvent" = "New Calendar Event";
-"calendar.add" = "Add";
-
-// Settings
 "settings.title" = "Settings";
 "settings.editProfile" = "Edit Profile";
 "settings.addPhoto" = "Add Photo";
@@ -136,35 +109,24 @@
 "settings.signOut" = "Sign Out";
 "settings.signOutConfirm" = "Are you sure you want to sign out?";
 "settings.version" = "Version";
-
-// Export
 "export.title" = "Export";
-"export.subtitle" = "Export all your transactions";
+"export.subtitle" = "Export all transactions";
 "export.format" = "Format";
 "export.generate" = "Generate";
 "export.share" = "Share";
-
-// VAT / Tax
-"vat.title" = "VAT Calculator";
-"vat.preview" = "VAT Preview";
-"vat.rate" = "VAT Rate";
+"vat.title" = "GST Calculator";
+"vat.preview" = "GST Preview";
+"vat.rate" = "GST Rate";
 "vat.base" = "Base Amount";
-"vat.amount" = "VAT Amount";
-"vat.total" = "Total (incl. VAT)";
+"vat.amount" = "GST Amount";
+"vat.total" = "Total (incl. GST)";
 "vat.comingSoon" = "Coming Soon";
-"vat.aiIntegration" = "AI-Powered VAT Integration — Coming Soon";
-
-// Categories
+"vat.aiIntegration" = "AI GST Integration - Coming Soon";
 "category.other" = "Other";
-"time.goodMorning" = "Good Morning";
-"time.goodAfternoon" = "Good Afternoon";
-"time.goodEvening" = "Good Evening";
-
-// Bank Connection
 "bank.title" = "Bank Accounts";
 "bank.heroTitle" = "Connect Your Bank";
-"bank.heroSubtitle" = "Import transactions automatically from your bank via Open Banking.";
-"bank.noAccounts" = "No bank accounts connected yet.\nLink your accounts securely via Open Banking.";
+"bank.heroSubtitle" = "Import transactions automatically via Open Banking.";
+"bank.noAccounts" = "No bank accounts connected.";
 "bank.connectAccount" = "Connect Bank Account";
 "bank.connectedAccounts" = "Connected Accounts";
 "bank.addAnother" = "Add Another Account";
@@ -173,5 +135,29 @@
 "bank.statusActive" = "Active";
 "bank.statusPending" = "Pending";
 "bank.securityTitle" = "Your Data is Secure";
-"bank.securitySubtitle" = "Bank connections use PSD2-compliant Open Banking APIs. Your passwords and card details are never stored.";
+"bank.securitySubtitle" = "Bank connections use PSD2-compliant Open Banking APIs.";
 "bank.sectionTitle" = "Bank Connections";
+"calendar.syncTitle" = "Sync with Apple Calendar";
+"calendar.syncSubtitle" = "Add financial events to your calendar";
+"calendar.enable" = "Enable";
+"calendar.noAppleEvents" = "No Apple Calendar events";
+"calendar.enableAccess" = "Enable Calendar Access";
+"calendar.notNow" = "Not Now";
+"calendar.event" = "Event";
+"calendar.eventTitle" = "Title";
+"calendar.dateTime" = "Date & Time";
+"calendar.optionalNote" = "Optional note...";
+"calendar.newEvent" = "New Calendar Event";
+"calendar.add" = "Add";
+"calendar.syncTitle" = "Sync with Apple Calendar";
+"calendar.syncSubtitle" = "Add financial events to your calendar";
+"calendar.enable" = "Enable";
+"calendar.noAppleEvents" = "No Apple Calendar events";
+"calendar.enableAccess" = "Enable Calendar Access";
+"calendar.notNow" = "Not Now";
+"calendar.event" = "Event";
+"calendar.eventTitle" = "Title";
+"calendar.dateTime" = "Date & Time";
+"calendar.optionalNote" = "Optional note...";
+"calendar.newEvent" = "New Calendar Event";
+"calendar.add" = "Add";

@@ -101,6 +101,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Ecosystem/Shared/AppGroupModels.swift,
+				Ecosystem/Shared/ZFlowLiveActivityManager.swift,
 			);
 			target = 303515392F4D8FCE00419F58 /* ZFlowWidgetExtensionExtension */;
 		};
@@ -374,6 +375,22 @@
 				Base,
 				de,
 				tr,
+				fr,
+				es,
+				it,
+				pt,
+				nl,
+				ru,
+				ja,
+				ko,
+				"zh-Hans",
+				ar,
+				fi,
+				nb,
+				pl,
+				da,
+				sv,
+				hi,
 			);
 			mainGroup = 30916A7C2F48969F001E2B8C;
 			minimizedProjectReferenceProxies = 1;
@@ -565,9 +582,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = H6FNM9B2WV;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ZFlowWidgetExtension/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = ZFlowWidgetExtension;
@@ -596,9 +614,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = H6FNM9B2WV;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ZFlowWidgetExtension/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = ZFlowWidgetExtension;
@@ -753,6 +772,7 @@
 				DEVELOPMENT_TEAM = H6FNM9B2WV;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "ZFlow needs access to your calendar to add and view financial events.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -785,6 +805,7 @@
 				DEVELOPMENT_TEAM = H6FNM9B2WV;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "ZFlow needs access to your calendar to add and view financial events.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

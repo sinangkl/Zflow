@@ -1,0 +1,189 @@
+/* Spanish Localizable.strings — ZFlow */
+
+// Onboarding
+"onboarding.tagline" = "Seguimiento Financiero Inteligente";
+"onboarding.continue" = "Continuar";
+"onboarding.getStarted" = "Empezar";
+"onboarding.skip" = "Omitir";
+"onboarding.page1.title" = "Bienvenido a ZFlow";
+"onboarding.page1.subtitle" = "Registra cada ingreso y gasto con elegancia — personal o empresarial.";
+"onboarding.page2.title" = "Personal & Empresarial";
+"onboarding.page2.subtitle" = "Flujos separados para personas y empresas. Vista previa de IVA incluida.";
+"onboarding.page3.title" = "Informes Inteligentes";
+"onboarding.page3.subtitle" = "Análisis visuales, alertas de presupuesto, tendencias de gastos y pronósticos con IA.";
+"onboarding.page4.title" = "Sincronización de Calendario";
+"onboarding.page4.subtitle" = "Sincroniza con Apple Calendar. Agrega eventos financieros fácilmente.";
+"onboarding.page5.title" = "Seguro & Portable";
+"onboarding.page5.subtitle" = "Sincronización cifrada vía Supabase. Exporta como CSV o PDF — cuando quieras.";
+
+// Auth
+"auth.signIn" = "Iniciar Sesión";
+"auth.signUp" = "Registrarse";
+"auth.email" = "Correo electrónico";
+"auth.password" = "Contraseña";
+"auth.fullName" = "Nombre Completo";
+"auth.businessName" = "Nombre de la Empresa";
+"auth.rememberMe" = "Mantener Sesión";
+"auth.noAccount" = "¿No tienes cuenta?";
+"auth.haveAccount" = "¿Ya tienes cuenta?";
+"auth.accountType" = "Tipo de Cuenta";
+"auth.personal" = "Personal";
+"auth.business" = "Empresarial";
+"auth.createAccount" = "Crear Cuenta";
+"auth.welcomeBack" = "Bienvenido de Nuevo";
+
+// Tabs
+"tab.home" = "Inicio";
+"tab.transactions" = "Transacciones";
+"tab.calendar" = "Calendario";
+"tab.settings" = "Ajustes";
+
+// Dashboard
+"dashboard.netBalance" = "Saldo Neto";
+"dashboard.income" = "Ingresos";
+"dashboard.expense" = "Gastos";
+"dashboard.insights" = "Análisis";
+"dashboard.budgets" = "Presupuestos";
+"dashboard.recent" = "Reciente";
+"dashboard.showMore" = "Ver Más";
+"dashboard.showLess" = "Ver Menos";
+"dashboard.seeAll" = "Ver Todo";
+"dashboard.noTransactions" = "Sin Transacciones";
+"dashboard.addFirst" = "Pulsa + para agregar tu primera transacción.";
+"dashboard.addTransaction" = "Agregar Transacción";
+"dashboard.monthlyChange" = "Cambio Mensual";
+"dashboard.transactions" = "transacciones";
+
+// Transactions
+"transaction.new" = "Nueva Transacción";
+"transaction.edit" = "Editar Transacción";
+"transaction.save" = "Guardar";
+"transaction.update" = "Actualizar";
+"transaction.amount" = "Monto";
+"transaction.currency" = "Moneda";
+"transaction.category" = "Categoría";
+"transaction.note" = "Nota (opcional)";
+"transaction.date" = "Fecha";
+"sort.newest" = "Más Reciente";
+"sort.oldest" = "Más Antiguo";
+"sort.highest" = "Más Alto";
+"sort.lowest" = "Más Bajo";
+
+// Common
+"common.cancel" = "Cancelar";
+"common.done" = "Listo";
+"common.delete" = "Eliminar";
+"common.edit" = "Editar";
+"common.save" = "Guardar";
+"common.search" = "Buscar";
+"time.today" = "Hoy";
+"time.yesterday" = "Ayer";
+
+// Reports
+"reports.title" = "Informes";
+"reports.totalIncome" = "Ingreso Total";
+"reports.totalExpense" = "Gasto Total";
+"reports.trend" = "Tendencia";
+"reports.breakdown" = "Desglose";
+"reports.topCategories" = "Principales Categorías";
+"reports.comparison" = "Comparación Mensual";
+"reports.thisMonth" = "Este Mes";
+"reports.lastMonth" = "Mes Pasado";
+"reports.7d" = "7D";
+"reports.30d" = "30D";
+"reports.90d" = "90D";
+"reports.1y" = "1A";
+
+// Calendar
+"calendar.title" = "Calendario";
+"calendar.addEvent" = "Agregar Evento";
+"calendar.noEventsToday" = "Sin eventos para este día";
+"calendar.apple" = "Apple Calendar";
+"calendar.permTitle" = "Acceso al Calendario";
+"calendar.permDesc" = "ZFlow necesita permiso para agregar eventos financieros a Apple Calendar.";
+"calendar.allowAccess" = "Permitir Acceso";
+
+// Settings
+"settings.title" = "Ajustes";
+"settings.editProfile" = "Editar Perfil";
+"settings.addPhoto" = "Agregar Foto";
+"settings.removePhoto" = "Eliminar Foto";
+"settings.saveChanges" = "Guardar Cambios";
+"settings.appearance" = "Apariencia";
+"settings.preferences" = "Preferencias";
+"settings.theme" = "Tema";
+"settings.themeSystem" = "Sistema";
+"settings.themeLight" = "Claro";
+"settings.themeDark" = "Oscuro";
+"settings.defaultCurrency" = "Moneda Predeterminada";
+"settings.staySignedIn" = "Mantener Sesión";
+"settings.language" = "Idioma";
+"settings.manageBudgets" = "Gestionar Presupuestos";
+"settings.manageCategories" = "Gestionar Categorías";
+"settings.exportData" = "Exportar Datos";
+"settings.signOut" = "Cerrar Sesión";
+"settings.signOutConfirm" = "¿Estás seguro de que quieres cerrar sesión?";
+"settings.version" = "Versión";
+
+// Export
+"export.title" = "Exportar";
+"export.subtitle" = "Exporta todas tus transacciones";
+"export.format" = "Formato";
+"export.generate" = "Generar";
+"export.share" = "Compartir";
+
+// VAT
+"vat.title" = "Calculadora IVA";
+"vat.preview" = "Vista Previa IVA";
+"vat.rate" = "Tasa IVA";
+"vat.base" = "Monto Base";
+"vat.amount" = "Monto IVA";
+"vat.total" = "Total (IVA incluido)";
+"vat.comingSoon" = "Próximamente";
+"vat.aiIntegration" = "Integración IVA con IA — Próximamente";
+
+// Categories
+"category.other" = "Otro";
+"time.goodMorning" = "Buenos Días";
+"time.goodAfternoon" = "Buenas Tardes";
+"time.goodEvening" = "Buenas Noches";
+
+// Bank
+"bank.title" = "Cuentas Bancarias";
+"bank.heroTitle" = "Conecta Tu Banco";
+"bank.heroSubtitle" = "Importa transacciones automáticamente mediante Banca Abierta.";
+"bank.noAccounts" = "Sin cuentas bancarias conectadas.\nVincula tus cuentas de forma segura.";
+"bank.connectAccount" = "Conectar Cuenta Bancaria";
+"bank.connectedAccounts" = "Cuentas Conectadas";
+"bank.addAnother" = "Agregar Otra Cuenta";
+"bank.supportedBanks" = "Bancos Compatibles";
+"bank.comingSoon" = "Próximamente";
+"bank.statusActive" = "Activo";
+"bank.statusPending" = "Pendiente";
+"bank.securityTitle" = "Tus Datos Están Seguros";
+"bank.securitySubtitle" = "Las conexiones bancarias usan APIs de Banca Abierta conformes con PSD2.";
+"bank.sectionTitle" = "Conexiones Bancarias";
+"calendar.syncTitle" = "Sincronizar con Apple Calendar";
+"calendar.syncSubtitle" = "Agrega eventos financieros a tu calendario";
+"calendar.enable" = "Activar";
+"calendar.noAppleEvents" = "Sin eventos de Apple Calendar";
+"calendar.enableAccess" = "Activar Acceso al Calendario";
+"calendar.notNow" = "Ahora No";
+"calendar.event" = "Evento";
+"calendar.eventTitle" = "Título";
+"calendar.dateTime" = "Fecha y Hora";
+"calendar.optionalNote" = "Nota opcional...";
+"calendar.newEvent" = "Nuevo Evento";
+"calendar.add" = "Agregar";
+"calendar.syncTitle" = "Sincronizar con Apple Calendar";
+"calendar.syncSubtitle" = "Agrega eventos financieros a tu calendario";
+"calendar.enable" = "Activar";
+"calendar.noAppleEvents" = "Sin eventos de Apple Calendar";
+"calendar.enableAccess" = "Activar Acceso al Calendario";
+"calendar.notNow" = "Ahora No";
+"calendar.event" = "Evento";
+"calendar.eventTitle" = "Título";
+"calendar.dateTime" = "Fecha y Hora";
+"calendar.optionalNote" = "Nota opcional...";
+"calendar.newEvent" = "Nuevo Evento";
+"calendar.add" = "Agregar";

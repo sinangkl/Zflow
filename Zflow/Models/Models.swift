@@ -9,18 +9,18 @@ enum TransactionType: String, Codable, CaseIterable {
 }
 
 enum Currency: String, Codable, CaseIterable, Identifiable {
-    case TRY, USD, EUR, GBP, CHF, JPY, AED, SAR, RUB, CNY
+    case try_ = "TRY", USD, EUR, GBP, CHF, JPY, AED, SAR, RUB, CNY
     var id: String { rawValue }
     var symbol: String {
         switch self {
-        case .TRY: "₺"; case .USD: "$"; case .EUR: "€"; case .GBP: "£"
+        case .try_: "₺"; case .USD: "$"; case .EUR: "€"; case .GBP: "£"
         case .CHF: "Fr"; case .JPY: "¥"; case .AED: "د.إ"; case .SAR: "﷼"
         case .RUB: "₽"; case .CNY: "¥"
         }
     }
     var name: String {
         switch self {
-        case .TRY: "Turkish Lira"; case .USD: "US Dollar"; case .EUR: "Euro"
+        case .try_: "Turkish Lira"; case .USD: "US Dollar"; case .EUR: "Euro"
         case .GBP: "British Pound"; case .CHF: "Swiss Franc"; case .JPY: "Japanese Yen"
         case .AED: "UAE Dirham"; case .SAR: "Saudi Riyal"; case .RUB: "Russian Ruble"
         case .CNY: "Chinese Yuan"
@@ -28,7 +28,7 @@ enum Currency: String, Codable, CaseIterable, Identifiable {
     }
     var flag: String {
         switch self {
-        case .TRY: "🇹🇷"; case .USD: "🇺🇸"; case .EUR: "🇪🇺"; case .GBP: "🇬🇧"
+        case .try_: "🇹🇷"; case .USD: "🇺🇸"; case .EUR: "🇪🇺"; case .GBP: "🇬🇧"
         case .CHF: "🇨🇭"; case .JPY: "🇯🇵"; case .AED: "🇦🇪"; case .SAR: "🇸🇦"
         case .RUB: "🇷🇺"; case .CNY: "🇨🇳"
         }
@@ -273,3 +273,61 @@ enum TurkishVATRate: Double, CaseIterable {
 extension Profile {
     var avatarStoragePath: String { "avatars/\(id.uuidString).jpg" }
 }
+// MARK: - Scheduled Payment Models
+
+enum ScheduledPaymentStatus: String, Codable {
+    case pending     // Henüz tarih gelmedi, bekliyor
+    case ready       // Tarih geldi, onay bekliyor
+    case completed   // Kullanıcı onayladı, transaction oluşturuldu
+    case cancelled   // İptal edildi
+}
+struct ScheduledPayment: Codable, Identifiable, Equatable {
+    let id: UUID
+    let userId: UUID?
+    var title: String
+    var amount: Double
+    var currency: String
+    var type: String?           // "income" | "expense"
+    var categoryId: UUID?
+    var note: String?
+    var scheduledDate: Date     // Ödeme planı tarihi
+    var status: String          // pending, ready, completed, cancelled
+    var calendarEventId: String? // Apple Calendar event ID (opsiyonel)
+    let createdAt: Date?
+    var completedAt: Date?      // Onaylandığı tarih
+    var transactionId: UUID?    // Oluşturulan transaction ID
+
+    enum CodingKeys: String, CodingKey {
+        case id, title, amount, currency, type, note, status
+        case userId = "user_id"
+        case categoryId = "category_id"
+        case scheduledDate = "scheduled_date"
+        case calendarEventId = "calendar_event_id"
+        case createdAt = "created_at"
+        case completedAt = "completed_at"
+        case transactionId = "transaction_id"
+    }
+}
+
+struct ScheduledPaymentInsert: Codable {
+    let userId: UUID
+    let title: String
+    let amount: Double
+    let currency: String
+    let type: String
+    let categoryId: UUID?
+    let note: String?
+    let scheduledDate: Date
+    let status: String
+    let calendarEventId: String?
+
+    enum CodingKeys: String, CodingKey {
+        case title, amount, currency, type, note, status
+        case userId = "user_id"
+        case categoryId = "category_id"
+        case scheduledDate = "scheduled_date"
+        case calendarEventId = "calendar_event_id"
+    }
+}
+
+

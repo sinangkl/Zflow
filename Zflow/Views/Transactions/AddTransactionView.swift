@@ -9,7 +9,7 @@ struct AddTransactionView: View {
     var preselectedCategory: Category? = nil
 
     @State private var amount           = ""
-    @State private var selectedCurrency: Currency = .TRY
+    @State private var selectedCurrency: Currency = .try_
     @State private var selectedType: TransactionType = .expense
     @State private var selectedCategory: Category?
     @State private var note             = ""
@@ -18,7 +18,7 @@ struct AddTransactionView: View {
     @State private var showCurrencyPicker = false
     @FocusState private var amountFocused: Bool
 
-    private let quickCurrencies: [Currency] = [.TRY, .USD, .EUR, .GBP]
+    private let quickCurrencies: [Currency] = [.try_, .USD, .EUR, .GBP]
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 10), count: 4)
 
     private var filteredCategories: [Category] {
@@ -50,10 +50,6 @@ struct AddTransactionView: View {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Cancel") { dismiss() }
                         .foregroundColor(ZColor.indigo)
-                }
-                ToolbarItemGroup(placement: .keyboard) {
-                    Spacer()
-                    Button("Done") { amountFocused = false }
                 }
             }
             .onAppear {
@@ -118,17 +114,18 @@ struct AddTransactionView: View {
                     .foregroundColor(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
 
-                HStack(alignment: .bottom, spacing: 8) {
+                HStack(alignment: .center, spacing: 8) {
                     Text(selectedCurrency.symbol)
-                        .font(.system(size: 28, weight: .bold))
+                        .font(.system(size: 26, weight: .bold))
                         .foregroundColor(ZColor.indigo)
 
                     TextField("0.00", text: $amount)
-                        .font(.system(size: 42, weight: .black, design: .rounded))
+                        .font(.system(size: 36, weight: .black, design: .rounded))
                         .keyboardType(.decimalPad)
                         .focused($amountFocused)
                         .foregroundColor(.primary)
                         .minimumScaleFactor(0.5)
+                        .frame(height: 48)
                 }
 
                 if let parsed = Double(amount.replacingOccurrences(of: ",", with: ".")),
@@ -224,11 +221,20 @@ struct AddTransactionView: View {
                 }
 
                 if filteredCategories.isEmpty {
-                    Text("No categories found.")
-                        .font(.system(size: 13))
-                        .foregroundColor(.secondary)
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .padding(.vertical, 10)
+                    VStack(spacing: 12) {
+                        Image(systemName: "tag.slash")
+                            .font(.system(size: 32))
+                            .foregroundColor(ZColor.labelTert)
+                        Text("No categories yet")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(ZColor.labelSec)
+                        Text("Go to Settings → Categories to add one.")
+                            .font(.system(size: 12))
+                            .foregroundColor(ZColor.labelTert)
+                            .multilineTextAlignment(.center)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
                 } else {
                     LazyVGrid(columns: columns, spacing: 10) {
                         ForEach(filteredCategories) { cat in
@@ -458,7 +464,7 @@ struct EditTransactionView: View {
     let transaction: Transaction
 
     @State private var amount           = ""
-    @State private var selectedCurrency: Currency = .TRY
+    @State private var selectedCurrency: Currency = .try_
     @State private var selectedType: TransactionType = .expense
     @State private var selectedCategory: Category?
     @State private var note             = ""
@@ -517,7 +523,7 @@ struct EditTransactionView: View {
 
                         // Currency quick row
                         HStack(spacing: 8) {
-                            ForEach([Currency.TRY, .USD, .EUR, .GBP], id: \.self) { cur in
+                            ForEach([Currency.try_, .USD, .EUR, .GBP], id: \.self) { cur in
                                 let sel = selectedCurrency == cur
                                 Button { selectedCurrency = cur; Haptic.selection() } label: {
                                     Text("\(cur.flag) \(cur.rawValue)")
@@ -603,7 +609,7 @@ struct EditTransactionView: View {
             }
             .onAppear {
                 amount           = String(format: "%.2f", transaction.amount)
-                selectedCurrency = Currency(rawValue: transaction.currency) ?? .TRY
+                selectedCurrency = Currency(rawValue: transaction.currency) ?? .try_
                 selectedType     = TransactionType(rawValue: transaction.type ?? "expense") ?? .expense
                 selectedCategory = transactionVM.category(for: transaction.categoryId)
                 note             = transaction.note ?? ""

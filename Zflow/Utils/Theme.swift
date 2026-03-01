@@ -129,13 +129,8 @@ extension Double {
         f.minimumFractionDigits = ["JPY","KRW"].contains(code) ? 0 : 2
         return f.string(from: NSNumber(value: self)) ?? "\(self)"
     }
-    func formattedShort(code: String = "") -> String {
-        let s = code.isEmpty ? "" : " \(code)"
-        if abs(self) >= 1_000_000 { return String(format: "%.1fM\(s)", self/1_000_000) }
-        if abs(self) >= 1_000     { return String(format: "%.1fK\(s)", self/1_000) }
-        return String(format: "%.0f\(s)", self)
-    }
 }
+
 
 // MARK: - ZFlowCard Modifier
 

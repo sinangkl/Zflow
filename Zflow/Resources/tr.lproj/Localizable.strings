@@ -102,6 +102,18 @@
 "calendar.permTitle" = "Takvim Erişimi";
 "calendar.permDesc" = "ZFlow, finansal etkinliklerinizi Apple Takvim'e ekleyebilmek için izin istiyor.";
 "calendar.allowAccess" = "Erişime İzin Ver";
+"calendar.syncTitle" = "Apple Takvim ile Senkronize Et";
+"calendar.syncSubtitle" = "Finansal etkinlikleri takviminize ekleyin";
+"calendar.enable" = "Etkinleştir";
+"calendar.noAppleEvents" = "Apple Takvim etkinliği yok";
+"calendar.enableAccess" = "Takvim Erişimini Etkinleştir";
+"calendar.notNow" = "Şimdi Değil";
+"calendar.event" = "Etkinlik";
+"calendar.eventTitle" = "Başlık";
+"calendar.dateTime" = "Tarih ve Saat";
+"calendar.optionalNote" = "İsteğe bağlı not...";
+"calendar.newEvent" = "Yeni Takvim Etkinliği";
+"calendar.add" = "Ekle";
 
 // Settings
 "settings.title" = "Ayarlar";
@@ -117,6 +129,7 @@
 "settings.themeDark" = "Koyu";
 "settings.defaultCurrency" = "Varsayılan Para Birimi";
 "settings.staySignedIn" = "Oturumu Açık Tut";
+"settings.language" = "Dil";
 "settings.manageBudgets" = "Bütçeleri Yönet";
 "settings.manageCategories" = "Kategorileri Yönet";
 "settings.exportData" = "Verileri Dışa Aktar";
@@ -182,6 +195,7 @@
 "settings.themeDark" = "Koyu";
 "settings.defaultCurrency" = "Varsayılan Para Birimi";
 "settings.staySignedIn" = "Oturumu Açık Tut";
+"settings.language" = "Dil";
 "settings.manageBudgets" = "Bütçeleri Yönet";
 "settings.manageCategories" = "Kategorileri Yönet";
 "settings.exportData" = "Verileri Dışa Aktar";
@@ -190,3 +204,19 @@
 "time.goodMorning" = "Günaydın";
 "time.goodAfternoon" = "İyi Günler";
 "time.goodEvening" = "İyi Akşamlar";
+
+// Bank Connection
+"bank.title" = "Banka Hesapları";
+"bank.heroTitle" = "Banka Hesabınızı Bağlayın";
+"bank.heroSubtitle" = "Açık bankacılık ile harcamalarınız otomatik olarak ZFlow'a aktarılır.";
+"bank.noAccounts" = "Henüz bağlı banka hesabınız yok.\nAçık bankacılık ile hesabınızı güvenle bağlayabilirsiniz.";
+"bank.connectAccount" = "Banka Hesabı Bağla";
+"bank.connectedAccounts" = "Bağlı Hesaplar";
+"bank.addAnother" = "Başka Hesap Ekle";
+"bank.supportedBanks" = "Desteklenen Bankalar";
+"bank.comingSoon" = "Yakında";
+"bank.statusActive" = "Aktif";
+"bank.statusPending" = "Bekliyor";
+"bank.securityTitle" = "Verileriniz Güvende";
+"bank.securitySubtitle" = "Banka bağlantıları PSD2 düzenlemesine uygun açık bankacılık API'ları ile sağlanır. Şifre veya kart bilginiz asla saklanmaz.";
+"bank.sectionTitle" = "Banka Bağlantıları";

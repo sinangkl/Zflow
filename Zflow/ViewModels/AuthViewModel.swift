@@ -108,7 +108,7 @@ final class AuthViewModel: ObservableObject {
     }
 
     // MARK: - Avatar
-    
+
     func uploadAvatar(data: Data) async {
         guard let uid = currentUserId else { return }
         let path = "avatars/\(uid.uuidString).jpg"
@@ -116,23 +116,22 @@ final class AuthViewModel: ObservableObject {
             try await supabase.storage
                 .from("avatars")
                 .upload(path, data: data, options: FileOptions(upsert: true))
-            
+
             // Update profile avatar_url
             let url = try await supabase.storage.from("avatars").createSignedURL(path: path, expiresIn: 60 * 60 * 24 * 7)
-            
+
             try await supabase.from("profiles")
                 .update(["avatar_url": url.absoluteString])
                 .eq("id", value: uid.uuidString)
                 .execute()
-            
+
             await MainActor.run { self.userAvatarData = data }
             await fetchProfile()
         } catch { print("Avatar upload error: \(error)") }
     }
-    
+
     func loadAvatar() async {
-        guard let uid = currentUserId, // uid kontrolü
-              let avatarURL = userProfile?.avatarURL,
+        guard let avatarURL = userProfile?.avatarURL,
               let url = URL(string: avatarURL) else { return }
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
@@ -156,7 +155,12 @@ final class AuthViewModel: ObservableObject {
             let p: Profile = try await supabase.from("profiles")
                 .select().eq("id", value: uid.uuidString).single().execute().value
             userProfile = p
-        } catch { print("Profile fetch error: \(error)") }
+            print("✅ [Profile] Fetched: fullName=\(p.fullName ?? "nil"), userType=\(p.userType ?? "nil"), businessName=\(p.businessName ?? "nil")")
+            await loadAvatar()
+        } catch {
+            print("❌ [Profile] FETCH ERROR: \(error)")
+            // Fallback: bir hata olsa bile mevcut profili koruyalım
+        }
     }
 
     func updateProfile(fullName: String, businessName: String?) async -> Bool {
@@ -164,10 +168,10 @@ final class AuthViewModel: ObservableObject {
         do {
             var updates: [String: String] = ["full_name": fullName]
             if let bn = businessName { updates["business_name"] = bn }
-            
+
             try await supabase.from("profiles")
                 .update(updates).eq("id", value: uid.uuidString).execute()
-            
+
             await fetchProfile()
             Haptic.success()
             return true
@@ -181,34 +185,15 @@ final class AuthViewModel: ObservableObject {
     // MARK: - Private
 
     private func seedCategories(userId: UUID, userType: String) async {
-        let inserts = categories(for: userType).map {
+        let inserts = filteredDefaultCategories(for: userType).map {
             CategoryInsert(userId: userId, name: $0.name, color: $0.color, icon: $0.icon, type: $0.type)
         }
+        print("🔐 [Auth] Seeding \(inserts.count) categories for userType: \(userType), userId: \(userId.uuidString)")
         do {
             try await supabase.from("categories").insert(inserts).execute()
+            print("🔐 [Auth] Seed categories SUCCESS")
         } catch {
-            print("Seed error: \(error)")
-        }
-    }
-
-    // HATA VEREN VE EKSİK OLAN KATEGORİ FONKSİYONU EKLENDİ
-    private func categories(for userType: String) -> [(name: String, color: String, icon: String, type: String)] {
-        if userType == UserType.business.rawValue {
-            return [
-                ("Sales", "#4ADE80", "chart.line.uptrend.xyaxis", "income"),
-                ("Services", "#60A5FA", "briefcase.fill", "income"),
-                ("Salaries", "#F87171", "person.2.fill", "expense"),
-                ("Rent", "#FBBF24", "building.2.fill", "expense"),
-                ("Marketing", "#A78BFA", "megaphone.fill", "expense")
-            ]
-        } else {
-            return [
-                ("Salary", "#4ADE80", "banknote.fill", "income"),
-                ("Freelance", "#60A5FA", "laptopcomputer", "income"),
-                ("Groceries", "#F87171", "cart.fill", "expense"),
-                ("Transport", "#FBBF24", "car.fill", "expense"),
-                ("Entertainment", "#A78BFA", "gamecontroller.fill", "expense")
-            ]
+            print("❌ [Auth] SEED CATEGORIES ERROR: \(error)")
         }
     }
 
@@ -224,58 +209,5 @@ final class AuthViewModel: ObservableObject {
             return "Network error. Please check your connection."
         }
         return error.localizedDescription
-    }
-}
-
-// MARK: - Gerekli Modeller
-// NOT: Eğer bu modeller projende başka bir dosyada zaten varsa buradakileri silebilirsin!
-
-enum UserType: String, Codable {
-    case personal = "personal"
-    case business = "business"
-}
-
-struct Profile: Codable, Identifiable {
-    let id: UUID
-    var fullName: String
-    var userType: String
-    var businessName: String?
-    var avatarURL: String? // Eksik olan özellik eklendi
-
-    enum CodingKeys: String, CodingKey {
-        case id
-        case fullName = "full_name"
-        case userType = "user_type"
-        case businessName = "business_name"
-        case avatarURL = "avatar_url"
-    }
-}
-
-struct ProfileInsert: Codable {
-    let id: UUID
-    var fullName: String
-    var userType: String
-    var businessName: String?
-    var avatarURL: String?
-
-    enum CodingKeys: String, CodingKey {
-        case id
-        case fullName = "full_name"
-        case userType = "user_type"
-        case businessName = "business_name"
-        case avatarURL = "avatar_url"
-    }
-}
-
-struct CategoryInsert: Codable {
-    let userId: UUID
-    let name: String
-    let color: String
-    let icon: String
-    let type: String
-    
-    enum CodingKeys: String, CodingKey {
-        case userId = "user_id"
-        case name, color, icon, type
     }
 }

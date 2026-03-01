@@ -111,18 +111,24 @@ final class TransactionViewModel: ObservableObject {
 
     func fetchCategories(userId: UUID, userType: String) async {
         do {
+            print("📂 [Categories] Fetching for user: \(userId.uuidString)")
             let fetched: [Category] = try await supabase.from("categories")
                 .select()
                 .eq("user_id", value: userId.uuidString)
                 .order("name")
                 .execute().value
 
+            print("📂 [Categories] Fetched \(fetched.count) categories")
             if fetched.isEmpty {
+                print("📂 [Categories] Empty — seeding defaults for userType: \(userType)")
                 await seedDefaultCategories(userId: userId, userType: userType)
             } else {
                 categories = fetched
             }
-        } catch { print("Category fetch error: \(error)") }
+        } catch {
+            print("❌ [Categories] FETCH ERROR: \(error)")
+            errorMessage = "Kategoriler yüklenirken hata oluştu: \(error.localizedDescription)"
+        }
     }
 
     // MARK: - CRUD: Transactions
@@ -185,12 +191,16 @@ final class TransactionViewModel: ObservableObject {
 
     func addCategory(userId: UUID, name: String, color: String, icon: String, type: String) async -> Bool {
         let insert = CategoryInsert(userId: userId, name: name, color: color, icon: icon, type: type)
+        print("➕ [Categories] Adding: name=\(name), color=\(color), icon=\(icon), type=\(type), userId=\(userId.uuidString)")
         do {
             try await supabase.from("categories").insert(insert).execute()
-            await fetchCategories(userId: userId, userType: "personal")
+            print("✅ [Categories] Added successfully")
+            let userType = authVM?.userProfile?.userType ?? "personal"
+            await fetchCategories(userId: userId, userType: userType)
             Haptic.success()
             return true
         } catch {
+            print("❌ [Categories] ADD ERROR: \(error)")
             errorMessage = error.localizedDescription
             Haptic.error()
             return false
@@ -221,7 +231,7 @@ final class TransactionViewModel: ObservableObject {
 
         let snap = SnapshotStore.shared.load()
         BudgetAlertEngine.shared.evaluate(budgets: snap.budgetStatuses)
-        LiZFlowLiveActivityManager.shared.update(snapshot: snap)
+        ZFlowLiveActivityManager.shared.update(snapshot: snap)
         WatchConnector.shared.sendSnapshotToWatch(snap)
     }
 
@@ -270,16 +280,22 @@ final class TransactionViewModel: ObservableObject {
     }
 
     private func seedDefaultCategories(userId: UUID, userType: String) async {
-        let inserts = categories(for: userType).map {
+        let inserts = filteredDefaultCategories(for: userType).map {
             CategoryInsert(userId: userId, name: $0.name, color: $0.color, icon: $0.icon, type: $0.type)
         }
+        print("🌱 [Categories] Seeding \(inserts.count) defaults for userType: \(userType)")
         do {
             try await supabase.from("categories").insert(inserts).execute()
-            await fetchCategories(userId: userId, userType: userType)
-        } catch { print("Seed error: \(error)") }
-    }
-
-    private func categories(for userType: String) -> [DefaultCategory] {
-        defaultCategories.filter { $0.userType == nil || $0.userType == userType }
+            print("🌱 [Categories] Seed INSERT success, now fetching...")
+            let fetched: [Category] = try await supabase.from("categories")
+                .select()
+                .eq("user_id", value: userId.uuidString)
+                .order("name")
+                .execute().value
+            print("🌱 [Categories] Post-seed fetched \(fetched.count) categories")
+            categories = fetched
+        } catch {
+            print("❌ [Categories] SEED ERROR: \(error)")
+        }
     }
 }

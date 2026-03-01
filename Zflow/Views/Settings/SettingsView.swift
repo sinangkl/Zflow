@@ -1,4 +1,6 @@
 import SwiftUI
+import Supabase
+import PostgREST
 
 struct SettingsView: View {
     @EnvironmentObject var authVM: AuthViewModel
@@ -8,12 +10,14 @@ struct SettingsView: View {
 
     @AppStorage("defaultCurrency") private var defaultCurrency: String = "TRY"
     @AppStorage("appColorScheme")  private var appColorScheme: String  = "system"
+    @ObservedObject private var languageManager = LanguageManager.shared
 
     @State private var showEditProfile    = false
     @State private var showBudgetManager  = false
     @State private var showCategoryMgr    = false
     @State private var showExport         = false
     @State private var showSignOutAlert   = false
+    @State private var showBankConnection = false
 
     var body: some View {
         NavigationStack {
@@ -25,6 +29,7 @@ struct SettingsView: View {
                         appearanceSection
                         preferencesSection
                         budgetSection
+                        bankConnectionSection
                         if authVM.userProfile?.isBusiness == true {
                             VATPreviewCard()
                                 .environmentObject(transactionVM)
@@ -38,7 +43,7 @@ struct SettingsView: View {
                     .padding(.bottom, 110)
                 }
             }
-            .navigationTitle("Settings")
+            .navigationTitle(NSLocalizedString("settings.title", comment: ""))
             .navigationBarTitleDisplayMode(.large)
             .sheet(isPresented: $showEditProfile)   { EditProfileView().environmentObject(authVM) }
             .sheet(isPresented: $showBudgetManager) {
@@ -54,13 +59,16 @@ struct SettingsView: View {
             .sheet(isPresented: $showExport) {
                 ExportView().environmentObject(transactionVM)
             }
-            .alert("Sign Out", isPresented: $showSignOutAlert) {
-                Button("Cancel", role: .cancel) {}
-                Button("Sign Out", role: .destructive) {
+            .sheet(isPresented: $showBankConnection) {
+                BankConnectionView().environmentObject(authVM)
+            }
+            .alert(NSLocalizedString("settings.signOut", comment: ""), isPresented: $showSignOutAlert) {
+                Button(NSLocalizedString("common.cancel", comment: ""), role: .cancel) {}
+                Button(NSLocalizedString("settings.signOut", comment: ""), role: .destructive) {
                     Task { await authVM.signOut() }
                 }
             } message: {
-                Text("Are you sure you want to sign out?")
+                Text(NSLocalizedString("settings.signOutConfirm", comment: ""))
             }
         }
     }
@@ -146,12 +154,12 @@ struct SettingsView: View {
     // MARK: - Sections
 
     private var appearanceSection: some View {
-        settingsSection("Appearance") {
-            settingsRow(icon: "moon.stars.fill", iconColor: ZColor.purple, title: "Theme") {
+        settingsSection(NSLocalizedString("settings.appearance", comment: "")) {
+            settingsRow(icon: "moon.stars.fill", iconColor: ZColor.purple, title: NSLocalizedString("settings.theme", comment: "")) {
                 Picker("", selection: $appColorScheme) {
-                    Text("System").tag("system")
-                    Text("Light").tag("light")
-                    Text("Dark").tag("dark")
+                    Text(NSLocalizedString("settings.themeSystem", comment: "")).tag("system")
+                    Text(NSLocalizedString("settings.themeLight", comment: "")).tag("light")
+                    Text(NSLocalizedString("settings.themeDark", comment: "")).tag("dark")
                 }
                 .pickerStyle(.segmented)
                 .frame(width: 190)
@@ -160,9 +168,9 @@ struct SettingsView: View {
     }
 
     private var preferencesSection: some View {
-        settingsSection("Preferences") {
+        settingsSection(NSLocalizedString("settings.preferences", comment: "")) {
             VStack(spacing: 0) {
-                settingsRow(icon: "dollarsign.circle.fill", iconColor: ZColor.income, title: "Default Currency") {
+                settingsRow(icon: "dollarsign.circle.fill", iconColor: ZColor.income, title: NSLocalizedString("settings.defaultCurrency", comment: "")) {
                     Picker("", selection: $defaultCurrency) {
                         ForEach(Currency.allCases) { cur in
                             Text("\(cur.flag) \(cur.rawValue)").tag(cur.rawValue)
@@ -171,24 +179,33 @@ struct SettingsView: View {
                     .tint(.primary)
                 }
                 divider
-                settingsRow(icon: "lock.fill", iconColor: ZColor.indigo, title: "Stay Signed In") {
+                settingsRow(icon: "lock.fill", iconColor: ZColor.indigo, title: NSLocalizedString("settings.staySignedIn", comment: "")) {
                     Toggle("", isOn: $authVM.rememberMe).labelsHidden()
+                }
+                divider
+                settingsRow(icon: "globe", iconColor: Color(hex: "#8B5CF6"), title: NSLocalizedString("settings.language", comment: "")) {
+                    Picker("", selection: $languageManager.currentLanguage) {
+                        ForEach(AppLanguage.allLanguages) { lang in
+                            Text("\(lang.flag) \(lang.displayName)").tag(lang.code)
+                        }
+                    }
+                    .tint(.primary)
                 }
             }
         }
     }
 
     private var budgetSection: some View {
-        settingsSection("Budget & Categories") {
+        settingsSection(NSLocalizedString("settings.manageBudgets", comment: "")) {
             VStack(spacing: 0) {
                 navRow(icon: "target", iconColor: Color(hex: "#F59E0B"),
-                       title: "Category Budgets",
+                       title: NSLocalizedString("settings.manageBudgets", comment: ""),
                        badge: budgetManager.budgets.isEmpty ? nil : "\(budgetManager.budgets.count) active") {
                     showBudgetManager = true; Haptic.light()
                 }
                 divider
                 navRow(icon: "tag.fill", iconColor: Color(hex: "#EC4899"),
-                       title: "Manage Categories",
+                       title: NSLocalizedString("settings.manageCategories", comment: ""),
                        badge: "\(transactionVM.categories.count)") {
                     showCategoryMgr = true; Haptic.light()
                 }
@@ -196,17 +213,27 @@ struct SettingsView: View {
         }
     }
 
+    private var bankConnectionSection: some View {
+        settingsSection(NSLocalizedString("bank.sectionTitle", comment: "")) {
+            navRow(icon: "building.columns.fill", iconColor: Color(hex: "#059669"),
+                   title: NSLocalizedString("bank.connectAccount", comment: ""),
+                   badge: nil) {
+                showBankConnection = true; Haptic.light()
+            }
+        }
+    }
+
     private var dataSection: some View {
-        settingsSection("Data") {
+        settingsSection(NSLocalizedString("settings.exportData", comment: "")) {
             navRow(icon: "square.and.arrow.up.fill", iconColor: Color(hex: "#06B6D4"),
-                   title: "Export Transactions", badge: nil) {
+                   title: NSLocalizedString("settings.exportData", comment: ""), badge: nil) {
                 showExport = true; Haptic.light()
             }
         }
     }
 
     private var dangerSection: some View {
-        settingsSection("Account") {
+        settingsSection(NSLocalizedString("settings.signOut", comment: "")) {
             Button {
                 showSignOutAlert = true; Haptic.warning()
             } label: {
@@ -216,7 +243,7 @@ struct SettingsView: View {
                         .foregroundColor(.red)
                         .frame(width: 28, height: 28)
                         .background(Circle().fill(Color.red.opacity(0.1)))
-                    Text("Sign Out")
+                    Text(NSLocalizedString("settings.signOut", comment: ""))
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundColor(.red)
                     Spacer()
@@ -508,58 +535,79 @@ struct BudgetManagerView: View {
     var body: some View {
         NavigationStack {
             List {
-                Section {
-                    ForEach(expenseCategories) { cat in
-                        let limit = budgetManager.budget(for: cat.id)
-                        let spent = transactionVM.categorySpending(categoryId: cat.id)
+                if expenseCategories.isEmpty {
+                    VStack(spacing: 16) {
+                        Spacer()
+                        Image(systemName: "target")
+                            .font(.system(size: 48))
+                            .foregroundColor(ZColor.labelTert)
+                        Text("No Categories Yet")
+                            .font(.system(size: 18, weight: .bold))
+                        Text("Add categories in Settings → Categories first, then come back to set budgets.")
+                            .font(.system(size: 14))
+                            .foregroundColor(ZColor.labelSec)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 32)
+                        Spacer()
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 60)
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                } else {
+                    Section {
+                        ForEach(expenseCategories) { cat in
+                            let limit = budgetManager.budget(for: cat.id)
+                            let spent = transactionVM.categorySpending(categoryId: cat.id)
 
-                        VStack(spacing: 10) {
-                            HStack(spacing: 12) {
-                                ZStack {
-                                    Circle().fill(Color(hex: cat.color).opacity(0.15)).frame(width: 38, height: 38)
-                                    Image(systemName: cat.icon ?? "circle").font(.system(size: 14)).foregroundColor(Color(hex: cat.color))
-                                }
-                                VStack(alignment: .leading, spacing: 3) {
-                                    Text(cat.name).font(.system(size: 14, weight: .semibold))
+                            VStack(spacing: 10) {
+                                HStack(spacing: 12) {
+                                    ZStack {
+                                        Circle().fill(Color(hex: cat.color).opacity(0.15)).frame(width: 38, height: 38)
+                                        Image(systemName: cat.icon ?? "circle").font(.system(size: 14)).foregroundColor(Color(hex: cat.color))
+                                    }
+                                    VStack(alignment: .leading, spacing: 3) {
+                                        Text(cat.name).font(.system(size: 14, weight: .semibold))
+                                        if let l = limit {
+                                            Text("\(spent.formattedCurrency(code: transactionVM.primaryCurrency)) / \(l.formattedCurrency(code: transactionVM.primaryCurrency))")
+                                                .font(.system(size: 12)).foregroundColor(.secondary)
+                                        } else {
+                                            Text("No budget set").font(.system(size: 12)).foregroundColor(.secondary)
+                                        }
+                                    }
+                                    Spacer()
                                     if let l = limit {
-                                        Text("\(spent.formattedCurrency(code: transactionVM.primaryCurrency)) / \(l.formattedCurrency(code: transactionVM.primaryCurrency))")
-                                            .font(.system(size: 12)).foregroundColor(.secondary)
-                                    } else {
-                                        Text("No budget set").font(.system(size: 12)).foregroundColor(.secondary)
+                                        let ratio = l > 0 ? spent / l : 0
+                                        Circle()
+                                            .fill(budgetManager.statusColor(ratio: ratio))
+                                            .frame(width: 10, height: 10)
                                     }
                                 }
-                                Spacer()
                                 if let l = limit {
-                                    let ratio = l > 0 ? spent / l : 0
-                                    Circle()
-                                        .fill(budgetManager.statusColor(ratio: ratio))
-                                        .frame(width: 10, height: 10)
+                                    BudgetProgressBar(spent: spent, limit: l,
+                                                      color: Color(hex: cat.color), height: 6)
                                 }
                             }
-                            if let l = limit {
-                                BudgetProgressBar(spent: spent, limit: l,
-                                                  color: Color(hex: cat.color), height: 6)
+                            .padding(.vertical, 4)
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                selectedCategory = cat
+                                budgetText = limit.map { String(format: "%.0f", $0) } ?? ""
+                                Haptic.selection()
+                            }
+                            .swipeActions(edge: .trailing) {
+                                if limit != nil {
+                                    Button(role: .destructive) {
+                                        budgetManager.removeBudget(for: cat.id); Haptic.medium()
+                                    } label: { Label("Remove", systemImage: "trash") }
+                                }
                             }
                         }
-                        .padding(.vertical, 4)
-                        .contentShape(Rectangle())
-                        .onTapGesture {
-                            selectedCategory = cat
-                            budgetText = limit.map { String(format: "%.0f", $0) } ?? ""
-                            Haptic.selection()
-                        }
-                        .swipeActions(edge: .trailing) {
-                            if limit != nil {
-                                Button(role: .destructive) {
-                                    budgetManager.removeBudget(for: cat.id); Haptic.medium()
-                                } label: { Label("Remove", systemImage: "trash") }
-                            }
-                        }
+                    } header: {
+                        Text("Tap a category to set its monthly budget")
+                            .font(.system(size: 12))
+                            .foregroundColor(.secondary)
                     }
-                } header: {
-                    Text("Tap a category to set its monthly budget")
-                        .font(.system(size: 12))
-                        .foregroundColor(.secondary)
                 }
             }
             .navigationTitle("Category Budgets")
@@ -596,43 +644,53 @@ struct CategoryManagerView: View {
     @EnvironmentObject var authVM: AuthViewModel
     @Environment(\.dismiss) var dismiss
 
-    @State private var showAdd    = false
-    @State private var newName    = ""
-    @State private var newColor   = "#6366F1"
-    @State private var newIcon    = "tag.fill"
-    @State private var newType    = "expense"
+    @State private var showAdd     = false
+    @State private var isRestoring = false
 
     var body: some View {
         NavigationStack {
-            List {
-                ForEach(transactionVM.categories) { cat in
-                    HStack(spacing: 12) {
-                        ZStack {
-                            Circle().fill(Color(hex: cat.color).opacity(0.15)).frame(width: 38, height: 38)
-                            Image(systemName: cat.icon ?? "tag.fill").font(.system(size: 15)).foregroundColor(Color(hex: cat.color))
-                        }
-                        VStack(alignment: .leading, spacing: 3) {
-                            Text(cat.name).font(.system(size: 14, weight: .semibold))
-                            Text((cat.type ?? "both").capitalized).font(.system(size: 12)).foregroundColor(.secondary)
-                        }
-                    }
-                    .swipeActions(edge: .trailing) {
-                        Button(role: .destructive) {
-                            if let uid = authVM.currentUserId {
-                                Task {
-                                    await transactionVM.deleteCategory(
-                                        id: cat.id, userId: uid,
-                                        userType: authVM.userProfile?.userType ?? "personal")
+            Group {
+                if transactionVM.categories.isEmpty {
+                    emptyState
+                } else {
+                    List {
+                        ForEach(transactionVM.categories) { cat in
+                            HStack(spacing: 12) {
+                                ZStack {
+                                    Circle().fill(Color(hex: cat.color).opacity(0.15))
+                                        .frame(width: 38, height: 38)
+                                    Image(systemName: cat.icon ?? "tag.fill")
+                                        .font(.system(size: 15))
+                                        .foregroundColor(Color(hex: cat.color))
+                                }
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(cat.name).font(.system(size: 14, weight: .semibold))
+                                    Text((cat.type ?? "both").capitalized)
+                                        .font(.system(size: 11, weight: .medium))
+                                        .foregroundColor(typeColor(cat.type))
+                                        .padding(.horizontal, 7).padding(.vertical, 2)
+                                        .background(Capsule().fill(typeColor(cat.type).opacity(0.12)))
                                 }
                             }
-                        } label: { Label("Delete", systemImage: "trash") }
+                            .swipeActions(edge: .trailing) {
+                                Button(role: .destructive) {
+                                    if let uid = authVM.currentUserId {
+                                        Task { await transactionVM.deleteCategory(
+                                            id: cat.id, userId: uid,
+                                            userType: authVM.userProfile?.userType ?? "personal") }
+                                    }
+                                } label: { Label("Delete", systemImage: "trash") }
+                            }
+                        }
                     }
                 }
             }
             .navigationTitle("Categories")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarLeading)  { Button("Done") { dismiss() }.foregroundColor(ZColor.indigo) }
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Done") { dismiss() }.foregroundColor(ZColor.indigo)
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button { showAdd = true; Haptic.light() } label: {
                         Image(systemName: "plus.circle.fill").foregroundColor(ZColor.indigo)
@@ -640,54 +698,252 @@ struct CategoryManagerView: View {
                 }
             }
             .sheet(isPresented: $showAdd) {
-                addCategorySheet
+                AddCategorySheet()
+                    .environmentObject(transactionVM)
+                    .environmentObject(authVM)
             }
         }
     }
 
-    private var addCategorySheet: some View {
-        NavigationStack {
-            Form {
-                Section("Name") {
-                    TextField("Category Name", text: $newName)
+    private var emptyState: some View {
+        VStack(spacing: 18) {
+            Spacer()
+            Image(systemName: "tag.slash").font(.system(size: 52)).foregroundColor(ZColor.labelTert)
+            Text("No Categories").font(.system(size: 20, weight: .bold))
+            Text("Tap + to add custom categories,\nor restore built-in defaults.")
+                .font(.system(size: 14)).foregroundColor(ZColor.labelSec)
+                .multilineTextAlignment(.center).padding(.horizontal, 40)
+            Button {
+                isRestoring = true
+                Task { await restoreDefaults(); isRestoring = false }
+            } label: {
+                HStack(spacing: 8) {
+                    if isRestoring { ProgressView().tint(.white) }
+                    else { Image(systemName: "arrow.counterclockwise"); Text("Restore Defaults") }
                 }
-                Section("Type") {
-                    Picker("Type", selection: $newType) {
-                        Text("Income").tag("income")
-                        Text("Expense").tag("expense")
-                        Text("Both").tag("both")
-                    }
-                    .pickerStyle(.segmented)
-                }
-                Section("Icon (SF Symbol name)") {
-                    TextField("e.g. cart, house, airplane", text: $newIcon)
-                }
+                .font(.system(size: 15, weight: .semibold)).foregroundColor(.white)
+                .padding(.horizontal, 28).padding(.vertical, 14)
+                .background(AppTheme.accentGradient).clipShape(Capsule())
             }
+            .disabled(isRestoring)
+            Spacer()
+        }
+    }
+
+    private func typeColor(_ type: String?) -> Color {
+        switch type {
+        case "income": return ZColor.income
+        case "expense": return ZColor.expense
+        default: return ZColor.indigo
+        }
+    }
+
+    private func restoreDefaults() async {
+        guard let uid = authVM.currentUserId else { return }
+        let userType = authVM.userProfile?.userType ?? "personal"
+        let inserts = filteredDefaultCategories(for: userType).map {
+            CategoryInsert(userId: uid, name: $0.name, color: $0.color, icon: $0.icon, type: $0.type)
+        }
+        do {
+            try await SupabaseManager.shared.client.from("categories").insert(inserts).execute()
+            await transactionVM.fetchCategories(userId: uid, userType: userType)
+        } catch { print("Restore error: \(error)") }
+    }
+}
+
+// MARK: - Add Category Sheet
+
+struct AddCategorySheet: View {
+    @EnvironmentObject var transactionVM: TransactionViewModel
+    @EnvironmentObject var authVM: AuthViewModel
+    @Environment(\.dismiss) var dismiss
+
+    @State private var name          = ""
+    @State private var selectedIcon  = "tag.fill"
+    @State private var selectedColor = "#6366F1"
+    @State private var selectedType  = "expense"
+    @State private var isSaving      = false
+
+    private let icons: [String] = [
+        "banknote.fill", "creditcard.fill", "dollarsign.circle.fill", "chart.line.uptrend.xyaxis",
+        "percent", "building.columns.fill", "key.fill", "arrow.triangle.2.circlepath",
+        "cart.fill", "bag.fill", "fork.knife", "cup.and.saucer.fill",
+        "gift.fill", "tray.full.fill", "shippingbox.fill", "truck.box.fill",
+        "car.fill", "airplane", "tram.fill", "bicycle",
+        "heart.fill", "cross.case.fill", "figure.run", "shield.fill",
+        "house.fill", "leaf.fill", "bolt.fill", "tv.fill",
+        "laptopcomputer", "book.fill", "graduationcap.fill", "briefcase.fill",
+        "gamecontroller.fill", "music.note", "film.fill", "headphones",
+        "person.2.fill", "building.2.fill", "megaphone.fill", "wrench.and.screwdriver.fill",
+        "tag.fill", "star.fill", "sparkles", "ellipsis.circle.fill", "pawprint.fill", "iphone"
+    ]
+
+    private let colors: [String] = [
+        "#34D399", "#10B981", "#60A5FA", "#3B82F6", "#8B5CF6",
+        "#6366F1", "#EC4899", "#F472B6", "#F59E0B", "#FB923C",
+        "#EF4444", "#FB7185", "#06B6D4", "#2DD4BF", "#84CC16"
+    ]
+
+    var body: some View {
+        NavigationStack {
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 20) {
+                    previewCard
+                    nameField
+                    typeRow
+                    colorSection
+                    iconGrid
+                }
+                .padding(16).padding(.bottom, 32)
+            }
+            .background(Color(.systemGroupedBackground).ignoresSafeArea())
             .navigationTitle("New Category")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarLeading)  {
-                    Button("Cancel") { showAdd = false }.foregroundColor(ZColor.indigo)
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Cancel") { dismiss() }.foregroundColor(ZColor.indigo)
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Add") {
-                        guard !newName.isEmpty, let uid = authVM.currentUserId else { return }
-                        Task {
-                            await transactionVM.addCategory(
-                                userId: uid, name: newName,
-                                color: newColor, icon: newIcon, type: newType)
-                            showAdd = false
-                            newName = ""; newIcon = "tag.fill"
-                        }
-                        Haptic.success()
+                    Button { save() } label: {
+                        if isSaving { ProgressView() }
+                        else { Text("Save").bold() }
                     }
-                    .foregroundColor(ZColor.indigo)
-                    .disabled(newName.isEmpty)
+                    .foregroundColor(name.trimmingCharacters(in: .whitespaces).isEmpty ? .secondary : ZColor.indigo)
+                    .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty || isSaving)
                 }
             }
         }
     }
+
+    // MARK: - Sub-views
+
+    private var previewCard: some View {
+        VStack(spacing: 10) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                    .fill(Color(hex: selectedColor).opacity(0.18))
+                    .frame(width: 80, height: 80)
+                Image(systemName: selectedIcon)
+                    .font(.system(size: 34, weight: .semibold))
+                    .foregroundColor(Color(hex: selectedColor))
+            }
+            Text(name.trimmingCharacters(in: .whitespaces).isEmpty ? "Preview" : name)
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundColor(name.isEmpty ? .secondary : .primary)
+                .animation(.default, value: name)
+        }
+        .frame(maxWidth: .infinity).padding(.vertical, 8)
+    }
+
+    private var nameField: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            label("Name")
+            TextField("e.g. Groceries, Salary, Travel…", text: $name)
+                .font(.system(size: 16)).padding(14)
+                .background(Color(.secondarySystemGroupedBackground))
+                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        }
+    }
+
+    private var typeRow: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            label("Type")
+            HStack(spacing: 8) {
+                typeChip("income",  "Income",  "arrow.down.circle.fill", ZColor.income)
+                typeChip("expense", "Expense", "arrow.up.circle.fill",   ZColor.expense)
+                typeChip("both",    "Both",    "arrow.up.arrow.down",    ZColor.indigo)
+            }
+        }
+    }
+
+    private func typeChip(_ val: String, _ lbl: String, _ icon: String, _ col: Color) -> some View {
+        let sel = selectedType == val
+        return Button { withAnimation(.spring(response: 0.25)) { selectedType = val }; Haptic.selection() } label: {
+            HStack(spacing: 5) {
+                Image(systemName: icon).font(.system(size: 12))
+                Text(lbl).font(.system(size: 13, weight: .semibold))
+            }
+            .frame(maxWidth: .infinity).padding(.vertical, 10)
+            .background(sel ? col.opacity(0.15) : Color(.secondarySystemGroupedBackground))
+            .foregroundColor(sel ? col : .secondary)
+            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .strokeBorder(sel ? col.opacity(0.45) : .clear, lineWidth: 1.5))
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var colorSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            label("Color")
+            let cols = Array(repeating: GridItem(.flexible(), spacing: 10), count: 5)
+            LazyVGrid(columns: cols, spacing: 10) {
+                ForEach(colors, id: \.self) { hex in
+                    let sel = selectedColor == hex
+                    Button { withAnimation(.spring(response: 0.2)) { selectedColor = hex }; Haptic.selection() } label: {
+                        ZStack {
+                            Circle().fill(Color(hex: hex))
+                            if sel {
+                                Circle().strokeBorder(.white, lineWidth: 2.5)
+                                Image(systemName: "checkmark")
+                                    .font(.system(size: 13, weight: .bold)).foregroundColor(.white)
+                            }
+                        }
+                        .frame(height: 44)
+                        .shadow(color: sel ? Color(hex: hex).opacity(0.5) : .clear, radius: 8, y: 2)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+    }
+
+    private var iconGrid: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            label("Icon")
+            let cols = Array(repeating: GridItem(.flexible(), spacing: 8), count: 6)
+            LazyVGrid(columns: cols, spacing: 8) {
+                ForEach(icons, id: \.self) { icon in
+                    let sel = selectedIcon == icon
+                    Button { withAnimation(.spring(response: 0.2)) { selectedIcon = icon }; Haptic.selection() } label: {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                .fill(sel ? Color(hex: selectedColor).opacity(0.18)
+                                          : Color(.secondarySystemGroupedBackground))
+                                .frame(height: 46)
+                                .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                    .strokeBorder(sel ? Color(hex: selectedColor).opacity(0.55) : .clear, lineWidth: 1.5))
+                            Image(systemName: icon)
+                                .font(.system(size: 20))
+                                .foregroundColor(sel ? Color(hex: selectedColor) : ZColor.labelSec)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+    }
+
+    private func label(_ text: String) -> some View {
+        Text(text.uppercased())
+            .font(.system(size: 11, weight: .semibold))
+            .foregroundColor(.secondary).tracking(0.5)
+    }
+
+    private func save() {
+        let trimmed = name.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.isEmpty, let uid = authVM.currentUserId else { return }
+        isSaving = true
+        Task {
+            _ = await transactionVM.addCategory(
+                userId: uid, name: trimmed,
+                color: selectedColor, icon: selectedIcon, type: selectedType)
+            isSaving = false
+            dismiss()
+        }
+    }
 }
+
 
 // MARK: - Export View
 

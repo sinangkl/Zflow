@@ -13,7 +13,7 @@ struct DefaultCategory {
 // MARK: - Default Categories (20+ per type)
 // Her kategori için özenle seçilmiş renk ve ikon
 
-let defaultCategories: [DefaultCategory] = [
+let allDefaultCategories: [DefaultCategory] = [
 
     // ─── PERSONAL INCOME (8) ───────────────────────────────────
     DefaultCategory(name: "Salary",        color: "#34D399", icon: "banknote.fill",                type: "income",  userType: "personal"),
@@ -84,9 +84,9 @@ let defaultCategories: [DefaultCategory] = [
     DefaultCategory(name: "Other",         color: "#94A3B8", icon: "ellipsis.circle.fill",         type: "both",    userType: nil),
 ]
 
-func defaultCategories(for userType: String) -> [DefaultCategory] {
-    defaultCategories.filter { $0.userType == nil || $0.userType == userType }
+func filteredDefaultCategories(for userType: String) -> [DefaultCategory] {
+    allDefaultCategories.filter { $0.userType == nil || $0.userType == userType }
 }
 
-let incomeCategoryNames: Set<String>  = Set(defaultCategories.filter { $0.type == "income"  || $0.type == "both" }.map { $0.name })
-let expenseCategoryNames: Set<String> = Set(defaultCategories.filter { $0.type == "expense" || $0.type == "both" }.map { $0.name })
+let incomeCategoryNames: Set<String>  = Set(allDefaultCategories.filter { $0.type == "income"  || $0.type == "both" }.map { $0.name })
+let expenseCategoryNames: Set<String> = Set(allDefaultCategories.filter { $0.type == "expense" || $0.type == "both" }.map { $0.name })

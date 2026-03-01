@@ -314,6 +314,7 @@ struct TransactionsReportsView: View {
                         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                             Button(role: .destructive) {
                                 transactionToDelete = txn
+                                Haptic.medium()
                             } label: {
                                 Label(NSLocalizedString("common.delete", comment: ""),
                                       systemImage: "trash.fill")

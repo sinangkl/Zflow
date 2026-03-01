@@ -113,6 +113,7 @@ struct SettingsView: View {
                             .offset(x: 26, y: 26)
                     }
                 }
+                .accessibilityLabel("Edit profile and avatar")
 
                 VStack(spacing: 5) {
                     Text(authVM.userProfile?.displayName ?? "User")
@@ -145,6 +146,7 @@ struct SettingsView: View {
                         .background(Capsule().fill(Color.white.opacity(0.18)))
                         .overlay(Capsule().strokeBorder(Color.white.opacity(0.38), lineWidth: 1))
                 }
+                .accessibilityLabel("Open edit profile dialog")
             }
             .padding(.vertical, 24)
             .frame(maxWidth: .infinity)
@@ -329,6 +331,7 @@ struct SettingsView: View {
             .padding(.vertical, 13)
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(title)
     }
 }
 
@@ -678,8 +681,9 @@ struct CategoryManagerView: View {
                                         Task { await transactionVM.deleteCategory(
                                             id: cat.id, userId: uid,
                                             userType: authVM.userProfile?.userType ?? "personal") }
+                                        Haptic.medium()
                                     }
-                                } label: { Label("Delete", systemImage: "trash") }
+                                } label: { Label("Delete", systemImage: "trash.fill") }
                             }
                         }
                     }
@@ -871,6 +875,7 @@ struct AddCategorySheet: View {
                 .strokeBorder(sel ? col.opacity(0.45) : .clear, lineWidth: 1.5))
         }
         .buttonStyle(.plain)
+        .accessibilityLabel("Select \(lbl) category type")
     }
 
     private var colorSection: some View {
@@ -901,26 +906,7 @@ struct AddCategorySheet: View {
     private var iconGrid: some View {
         VStack(alignment: .leading, spacing: 10) {
             label("Icon")
-            let cols = Array(repeating: GridItem(.flexible(), spacing: 8), count: 6)
-            LazyVGrid(columns: cols, spacing: 8) {
-                ForEach(icons, id: \.self) { icon in
-                    let sel = selectedIcon == icon
-                    Button { withAnimation(.spring(response: 0.2)) { selectedIcon = icon }; Haptic.selection() } label: {
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                .fill(sel ? Color(hex: selectedColor).opacity(0.18)
-                                          : Color(.secondarySystemGroupedBackground))
-                                .frame(height: 46)
-                                .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                    .strokeBorder(sel ? Color(hex: selectedColor).opacity(0.55) : .clear, lineWidth: 1.5))
-                            Image(systemName: icon)
-                                .font(.system(size: 20))
-                                .foregroundColor(sel ? Color(hex: selectedColor) : ZColor.labelSec)
-                        }
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
+            IconGridPicker(selectedIcon: $selectedIcon)
         }
     }
 

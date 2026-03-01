@@ -398,6 +398,7 @@ struct LoginView: View {
         .disabled(isFormInvalid || authVM.isLoading)
         .buttonStyle(FABButtonStyle())
         .animation(.easeInOut(duration: 0.18), value: isFormInvalid)
+        .accessibilityLabel(NSLocalizedString(isSignUp ? "auth.createAccount" : "auth.signIn", comment: ""))
     }
 
     // MARK: - Toggle
@@ -418,6 +419,7 @@ struct LoginView: View {
             }
             .font(.system(size: 14, weight: .bold))
             .foregroundColor(ZColor.indigo)
+            .accessibilityLabel(NSLocalizedString(isSignUp ? "auth.signIn" : "auth.signUp", comment: ""))
         }
     }
 

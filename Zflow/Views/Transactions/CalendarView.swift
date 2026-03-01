@@ -49,6 +49,7 @@ final class CalendarManager: ObservableObject {
 struct CalendarView: View {
     @EnvironmentObject var transactionVM: TransactionViewModel
     @EnvironmentObject var authVM: AuthViewModel
+    @EnvironmentObject var scheduledPaymentVM: ScheduledPaymentViewModel
     @StateObject private var calMgr = CalendarManager()
     @Environment(\.colorScheme) var scheme
 
@@ -65,6 +66,12 @@ struct CalendarView: View {
         transactionVM.transactions.filter {
             guard let d = $0.date else { return false }
             return cal.isDate(d, inSameDayAs: selectedDate)
+        }
+    }
+
+    private var readyPaymentsForDate: [ScheduledPayment] {
+        scheduledPaymentVM.readyPayments.filter {
+            cal.isDate($0.scheduledDate, inSameDayAs: selectedDate)
         }
     }
 
@@ -134,6 +141,7 @@ struct CalendarView: View {
                 AddCalendarEventView(defaultDate: selectedDate, calMgr: calMgr)
                     .environmentObject(transactionVM)
                     .environmentObject(authVM)
+                    .environmentObject(scheduledPaymentVM)
             }
             .sheet(isPresented: $showPermSheet) {
                 CalendarPermissionView {
@@ -189,6 +197,7 @@ struct CalendarView: View {
                             .foregroundColor(.white.opacity(0.8)).frame(width: 36, height: 36)
                             .background(Circle().fill(Color.white.opacity(0.15)))
                     }
+                    .accessibilityLabel("Previous month")
 
                     Spacer()
 
@@ -212,6 +221,7 @@ struct CalendarView: View {
                             .foregroundColor(.white.opacity(0.8)).frame(width: 36, height: 36)
                             .background(Circle().fill(Color.white.opacity(0.15)))
                     }
+                    .accessibilityLabel("Next month")
                 }
 
                 HStack(spacing: 0) {
@@ -324,7 +334,41 @@ struct CalendarView: View {
         VStack(spacing: 10) {
             SectionHeader(title: selectedDate.formatted(.dateTime.weekday(.wide).day().month(.wide)))
 
-            if txnForDate.isEmpty {
+            // Ready Payments Section (Requires Approval)
+            if !readyPaymentsForDate.isEmpty {
+                VStack(spacing: 8) {
+                    ForEach(readyPaymentsForDate, id: \.id) { payment in
+                        ReadyPaymentCard(
+                            payment: payment,
+                            onApprove: {
+                                Task {
+                                    guard let userId = authVM.currentUserId else { return }
+                                    let confirmed = await scheduledPaymentVM.confirmPayment(
+                                        payment: payment,
+                                        transactionVM: transactionVM,
+                                        userId: userId
+                                    )
+                                    if confirmed { Haptic.success() }
+                                }
+                            },
+                            onReject: {
+                                Task {
+                                    await scheduledPaymentVM.cancelPayment(paymentId: payment.id)
+                                    Haptic.light()
+                                }
+                            }
+                        )
+                    }
+                }
+                .padding(12)
+                .background(Color(UIColor.systemYellow).opacity(0.1))
+                .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .strokeBorder(Color(UIColor.systemYellow).opacity(0.3), lineWidth: 1))
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            }
+
+            // Transactions for Date
+            if txnForDate.isEmpty && readyPaymentsForDate.isEmpty {
                 HStack {
                     Image(systemName: "calendar.badge.exclamationmark")
                         .foregroundColor(ZColor.labelTert)
@@ -334,7 +378,7 @@ struct CalendarView: View {
                 }
                 .padding(16)
                 .zFlowCard()
-            } else {
+            } else if !txnForDate.isEmpty {
                 VStack(spacing: 0) {
                     ForEach(Array(txnForDate.enumerated()), id: \.element.id) { idx, txn in
                         TransactionRow(
@@ -355,8 +399,7 @@ struct CalendarView: View {
                             } label: {
                                 Label(NSLocalizedString("common.edit", comment: "Edit"),
                                       systemImage: "pencil")
-                            }
-                            .tint(ZColor.indigo)
+                            }                            .tint(ZColor.indigo)                            .tint(ZColor.indigo)
                         }
                         .contextMenu {
                             Button {
@@ -379,9 +422,7 @@ struct CalendarView: View {
                     .strokeBorder(AppTheme.cardBorder(for: scheme), lineWidth: 0.5))
             }
         }
-    }
-
-    // MARK: - Apple Calendar Section
+    }    // MARK: - Apple Calendar Section
 
     private var appleCalendarSection: some View {
         VStack(spacing: 10) {
@@ -475,6 +516,8 @@ struct CalendarPermissionView: View {
 
 struct AddCalendarEventView: View {
     @EnvironmentObject var transactionVM: TransactionViewModel
+    @EnvironmentObject var authVM: AuthViewModel
+    @EnvironmentObject var scheduledPaymentVM: ScheduledPaymentViewModel
     @ObservedObject var calMgr: CalendarManager
     @Environment(\.dismiss) var dismiss
 
@@ -484,6 +527,8 @@ struct AddCalendarEventView: View {
     @State private var currency: Currency = .try_
     @State private var eventDate: Date
     @State private var note     = ""
+    @State private var selectedType = "expense"
+    @State private var selectedCategory: UUID? = nil
     @State private var isSaving = false
 
     init(defaultDate: Date, calMgr: CalendarManager) {
@@ -505,6 +550,30 @@ struct AddCalendarEventView: View {
                     }
                     DatePicker(NSLocalizedString("calendar.dateTime", comment: ""), selection: $eventDate)
                 }
+                
+                Section("Type") {
+                    Picker("", selection: $selectedType) {
+                        Text("Expense").tag("expense")
+                        Text("Income").tag("income")
+                    }
+                    .pickerStyle(.segmented)
+                }
+                
+                Section("Category") {
+                    Picker("Select Category", selection: $selectedCategory) {
+                        Text("None").tag(UUID?(nil))
+                        ForEach(transactionVM.categories) { cat in
+                            Label {
+                                Text(cat.name)
+                            } icon: {
+                                Image(systemName: cat.icon!)
+                                    .foregroundColor(Color(hex: cat.color))
+                            }
+                            .tag(UUID?(cat.id))
+                        }
+                    }
+                }
+                
                 Section(NSLocalizedString("transaction.note", comment: "")) {
                     TextField(NSLocalizedString("calendar.optionalNote", comment: ""), text: $note, axis: .vertical).lineLimit(2...4)
                 }
@@ -517,18 +586,52 @@ struct AddCalendarEventView: View {
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(NSLocalizedString("calendar.add", comment: "")) {
-                        isSaving = true
-                        let amt = Double(amount.replacingOccurrences(of: ",", with: ".")) ?? 0
-                        let _ = calMgr.addEvent(title: title, amount: amt, currency: currency.rawValue,
-                                                date: eventDate, notes: note.isEmpty ? nil : note)
-                        Haptic.success()
-                        isSaving = false
-                        dismiss()
+                        saveScheduledPayment()
                     }
                     .disabled(title.isEmpty || isSaving)
                     .foregroundColor(ZColor.indigo)
                 }
             }
+        }
+    }
+    
+    private func saveScheduledPayment() {
+        guard let userId = authVM.currentUserId else { return }
+        isSaving = true
+        
+        let amt = Double(amount.replacingOccurrences(of: ",", with: ".")) ?? 0
+        let transactionType = TransactionType(rawValue: selectedType) ?? .expense
+        
+        Task {
+            // Create scheduled payment in database
+            let success = await scheduledPaymentVM.addScheduledPayment(
+                userId: userId,
+                title: title,
+                amount: amt,
+                currency: currency,
+                type: transactionType,
+                categoryId: selectedCategory,
+                note: note.isEmpty ? nil : note,
+                scheduledDate: eventDate,
+                calendarEventId: nil
+            )
+            
+            if success {
+                // Also add to Apple Calendar if authorized
+                if calMgr.isAuthorized {
+                    _ = calMgr.addEvent(
+                        title: title,
+                        amount: amt,
+                        currency: currency.rawValue,
+                        date: eventDate,
+                        notes: note.isEmpty ? nil : note
+                    )
+                }
+                Haptic.success()
+                dismiss()
+            }
+            
+            isSaving = false
         }
     }
 }

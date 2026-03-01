@@ -102,6 +102,7 @@ struct AddTransactionView: View {
                     .stroke(sel ? color.opacity(0.4) : .clear, lineWidth: 1.5))
         }
         .buttonStyle(.plain)
+        .accessibilityLabel("Select \(label)")
     }
 
     // MARK: - Amount

@@ -121,6 +121,7 @@ struct DashboardView: View {
                     }
                 }
             }
+            .accessibilityLabel("Edit profile")
         }
     }
 
@@ -368,13 +369,15 @@ struct DashboardView: View {
                         .contextMenu {
                             Button {
                                 transactionToEdit = txn
+                                Haptic.light()
                             } label: {
                                 Label(NSLocalizedString("common.edit", comment: "Edit"), systemImage: "pencil")
                             }
                             Button(role: .destructive) {
                                 transactionToDelete = txn
+                                Haptic.medium()
                             } label: {
-                                Label(NSLocalizedString("common.delete", comment: "Delete"), systemImage: "trash")
+                                Label(NSLocalizedString("common.delete", comment: "Delete"), systemImage: "trash.fill")
                             }
                         }
 

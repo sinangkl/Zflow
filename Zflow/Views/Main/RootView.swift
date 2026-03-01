@@ -8,7 +8,7 @@ struct RootView: View {
     @EnvironmentObject var authVM: AuthViewModel
     @EnvironmentObject var transactionVM: TransactionViewModel
     @EnvironmentObject var budgetManager: BudgetManager
-    @StateObject private var scheduledPaymentVM = viewScheduledPaymentViewModel()
+    @StateObject private var scheduledPaymentVM = ScheduledPaymentViewModel()
     @State private var selectedTab = 0
     @State private var showAddSheet = false
     @State private var isTabBarHidden = false

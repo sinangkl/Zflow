@@ -112,6 +112,8 @@ struct TransactionRow: View {
         }
         .padding(.horizontal, 14).padding(.vertical, 11)
         .background(Color(.secondarySystemGroupedBackground))
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(category?.name ?? "Uncategorized") - \(isIncome ? "Income" : "Expense") \(transaction.amount.formattedCurrency(code: transaction.currency))")
     }
 }
 
@@ -304,5 +306,187 @@ struct FABButtonStyle: ButtonStyle {
         configuration.label
             .scaleEffect(configuration.isPressed ? 0.92 : 1.0)
             .animation(.spring(response: 0.2, dampingFraction: 0.6), value: configuration.isPressed)
+    }
+}
+
+// MARK: - AccessibleButton
+
+struct AccessibleButton<Content: View>: View {
+    let action: () -> Void
+    let label: String
+    @ViewBuilder let content: () -> Content
+    
+    var body: some View {
+        Button(action: action, label: content)
+            .accessibilityLabel(label)
+    }
+}
+
+// MARK: - ErrorBanner
+
+struct ErrorBanner: View {
+    let message: String
+    let icon: String = "exclamationmark.circle.fill"
+    var dismissAction: (() -> Void)? = nil
+    
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(.white)
+                .frame(width: 28, height: 28)
+                .background(Circle().fill(Color.red.opacity(0.8)))
+            
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Error").font(.system(size: 13, weight: .semibold)).foregroundColor(.white)
+                Text(message).font(.system(size: 12)).foregroundColor(.white.opacity(0.9))
+                    .lineLimit(2).fixedSize(horizontal: false, vertical: true)
+            }
+            
+            Spacer(minLength: 0)
+            
+            if let action = dismissAction {
+                Button { action(); Haptic.light() } label: {
+                    Image(systemName: "xmark").font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(.white).frame(width: 24, height: 24)
+                }.accessibilityLabel("Dismiss error")
+            }
+        }
+        .padding(12)
+        .background(RoundedRectangle(cornerRadius: 12, style: .continuous)
+            .fill(Color.red.opacity(0.15))
+            .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .strokeBorder(Color.red.opacity(0.3), lineWidth: 1)))
+    }
+}
+
+// MARK: - Icon Grid Picker
+
+struct IconGridPicker: View {
+    @Binding var selectedIcon: String
+    var columns: [GridItem] = Array(repeating: GridItem(.flexible(), spacing: 10), count: 5)
+    
+    let categoryIcons = [
+        ("Income", ["banknote.fill", "dollarsign.circle.fill", "chart.line.uptrend.xyaxis", "percent", "arrow.triangle.2.circlepath"]),
+        ("Food & Dining", ["fork.knife", "cup.and.saucer.fill", "takeoutbag.and.cup.and.straw.fill"]),
+        ("Shopping", ["bag.fill", "cart.fill", "shippingbox.fill", "tag.fill"]),
+        ("Transport", ["car.fill", "airplane", "bicycle", "tram.fill"]),
+        ("Home & Living", ["house.fill", "bolt.fill", "leaf.fill", "water.circle.fill"]),
+        ("Health & Fitness", ["heart.fill", "cross.case.fill", "figure.run", "dumbbell.fill"]),
+        ("Entertainment", ["gamecontroller.fill", "tv.fill", "music.note", "film.fill"]),
+        ("Work & Education", ["briefcase.fill", "book.fill", "graduationcap.fill", "laptopcomputer"]),
+        ("Other", ["ellipsis.circle.fill", "giftbox.fill", "pawprint.fill"])
+    ]
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            ForEach(categoryIcons, id: \.0) { category, icons in
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(category).font(.system(size: 12, weight: .semibold)).foregroundColor(.secondary)
+                    
+                    LazyVGrid(columns: columns, spacing: 8) {
+                        ForEach(icons, id: \.self) { icon in
+                            let isSelected = selectedIcon == icon
+                            Button {
+                                selectedIcon = icon
+                                Haptic.selection()
+                            } label: {
+                                Image(systemName: icon)
+                                    .font(.system(size: 18, weight: .semibold))
+                                    .frame(height: 44)
+                                    .frame(maxWidth: .infinity)
+                                    .background(RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                        .fill(isSelected ? ZColor.indigo.opacity(0.15) : Color(.tertiarySystemFill)))
+                                    .foregroundColor(isSelected ? ZColor.indigo : ZColor.label)
+                                    .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                        .strokeBorder(isSelected ? ZColor.indigo.opacity(0.5) : .clear, lineWidth: 1.5))
+                            }.accessibilityLabel("Select \(icon) icon")
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Layout Padding Constants
+
+enum LayoutPadding {
+    static let screen: CGFloat = 16
+    static let section: CGFloat = 20
+    static let component: CGFloat = 14
+    static let compact: CGFloat = 8
+}
+// MARK: - ReadyPaymentCard
+
+/// Scheduled payment awaiting user approval
+/// Shows payment details and Approve/Reject buttons
+struct ReadyPaymentCard: View {
+    @Environment(\.colorScheme) var scheme
+    let payment: ScheduledPayment
+    let onApprove: () -> Void
+    let onReject: () -> Void
+
+    var body: some View {
+        VStack(spacing: 10) {
+            HStack(spacing: 12) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Payment Awaiting Approval")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(Color(UIColor.systemOrange))
+                        .textCase(.uppercase)
+                        .tracking(0.5)
+                    
+                    Text(payment.title)
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(ZColor.label)
+                        .lineLimit(1)
+                }
+                Spacer()
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text("\(payment.type == "income" ? "+" : "-")\(String(format: "%.0f", payment.amount))")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(ZColor.label)
+                    
+                    Text(payment.currency)
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(ZColor.labelSec)
+                }
+            }
+
+            // Approve/Reject Buttons
+            HStack(spacing: 10) {
+                Button(action: onReject) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "xmark.circle.fill")
+                        Text("Reject")
+                    }
+                    .font(.system(size: 13, weight: .semibold))
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
+                    .foregroundColor(.white)
+                    .background(Color(UIColor.systemRed).opacity(0.8))
+                    .cornerRadius(8)
+                }
+
+                Button(action: onApprove) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "checkmark.circle.fill")
+                        Text("Approve")
+                    }
+                    .font(.system(size: 13, weight: .semibold))
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
+                    .foregroundColor(.white)
+                    .background(Color(UIColor.systemGreen).opacity(0.8))
+                    .cornerRadius(8)
+                }
+            }
+        }
+        .padding(12)
+        .background(scheme == .dark
+            ? Color(UIColor.systemYellow).opacity(0.12)
+            : Color(UIColor.systemYellow).opacity(0.08))
+        .cornerRadius(10)
     }
 }

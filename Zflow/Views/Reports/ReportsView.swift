@@ -96,6 +96,7 @@ struct ReportsView: View {
                             .foregroundColor(selectedPeriod == p ? .white : Color.secondary)
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel("Select \(p.rawValue) period")
                 }
             }
             .padding(5)
@@ -130,6 +131,7 @@ struct ReportsView: View {
             .overlay(RoundedRectangle(cornerRadius: 12).stroke(sel ? color.opacity(0.4) : .clear, lineWidth: 1.5))
         }
         .buttonStyle(.plain)
+        .accessibilityLabel("Show \(label)")
     }
 
     // MARK: - Total Hero

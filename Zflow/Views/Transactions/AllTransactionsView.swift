@@ -90,12 +90,12 @@ struct AllTransactionsView: View {
                                         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                                             Button(role: .destructive) {
                                                 transactionToDelete = txn; Haptic.medium()
-                                            } label: { Label("Delete", systemImage: "trash") }
+                                            } label: { Label("Delete", systemImage: "trash.fill") }
 
                                             Button {
                                                 transactionToEdit = txn; Haptic.light()
                                             } label: { Label("Edit", systemImage: "pencil") }
-                                            .tint(.blue)
+                                            .tint(ZColor.indigo)
                                         }
                                     }
                                 } header: {
@@ -134,6 +134,7 @@ struct AllTransactionsView: View {
                             .font(.system(size: 20))
                             .foregroundColor(ZColor.indigo)
                     }
+                    .accessibilityLabel("Sort transactions")
                 }
             }
             .sheet(item: $transactionToEdit) { txn in

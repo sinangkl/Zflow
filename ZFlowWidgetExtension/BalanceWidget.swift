@@ -66,7 +66,7 @@ struct BalanceWidgetView: View {
 
                 Text(entry.snapshot.netBalance.formattedCurrencySimple(code: entry.snapshot.currency))
                     .font(.system(size: 20, weight: .black, design: .rounded))
-                    .foregroundColor(entry.snapshot.netBalance >= 0 ? .primary : Color(hex: "#FF453A"))
+                    .foregroundColor(entry.snapshot.netBalance >= 0 ? .primary : Color(hex: "#FF7F7F"))
                     .minimumScaleFactor(0.6)
                     .lineLimit(1)
 
@@ -125,7 +125,7 @@ struct BalanceWidgetView: View {
                         label: "Income",
                         value: entry.snapshot.thisMonthIncome,
                         icon: "arrow.down.circle.fill",
-                        color: Color(hex: "#30D158"))
+                        color: Color(hex: "#50C878"))
 
                     Divider()
 
@@ -133,7 +133,7 @@ struct BalanceWidgetView: View {
                         label: "Expense",
                         value: entry.snapshot.thisMonthExpense,
                         icon: "arrow.up.circle.fill",
-                        color: Color(hex: "#FF453A"))
+                        color: Color(hex: "#FF7F7F"))
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.horizontal, 12)
@@ -222,12 +222,12 @@ struct BalanceWidgetView: View {
             Text(diff.formattedShort() + " " + entry.snapshot.currency)
                 .font(.system(size: 10, weight: .semibold))
         }
-        .foregroundColor(positive ? Color(hex: "#30D158") : Color(hex: "#FF453A"))
+        .foregroundColor(positive ? Color(hex: "#50C878") : Color(hex: "#FF7F7F"))
         .padding(.horizontal, 7)
         .padding(.vertical, 4)
         .background(
             Capsule()
-                .fill((positive ? Color(hex: "#30D158") : Color(hex: "#FF453A")).opacity(0.12)))
+                .fill((positive ? Color(hex: "#50C878") : Color(hex: "#FF7F7F")).opacity(0.12)))
     }
 
     private func incomeExpenseRow(label: String, value: Double, icon: String, color: Color) -> some View {
@@ -281,7 +281,7 @@ struct WeeklySparkline: View {
                         RoundedRectangle(cornerRadius: 3)
                             .fill(
                                 LinearGradient(
-                                    colors: [Color(hex: "#FF453A").opacity(0.85), Color(hex: "#FF453A").opacity(0.4)],
+                                    colors: [Color(hex: "#FF7F7F").opacity(0.9), Color(hex: "#FF7F7F").opacity(0.35)],
                                     startPoint: .top, endPoint: .bottom))
                             .frame(
                                 width: barW,
@@ -306,7 +306,7 @@ struct WidgetTransactionRow: View {
     var body: some View {
         HStack(spacing: 10) {
             ZStack {
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                Circle()
                     .fill(Color(hex: txn.categoryColor).opacity(0.14))
                     .frame(width: 30, height: 30)
                 Image(systemName: txn.categoryIcon)
@@ -327,7 +327,7 @@ struct WidgetTransactionRow: View {
             Spacer()
             Text("\(txn.type == "income" ? "+" : "−")\(txn.amount.formattedShort()) \(txn.currency)")
                 .font(.system(size: 12, weight: .bold))
-                .foregroundColor(txn.type == "income" ? Color(hex: "#30D158") : Color(hex: "#FF453A"))
+                .foregroundColor(txn.type == "income" ? Color(hex: "#50C878") : Color(hex: "#FF7F7F"))
         }
         .padding(.vertical, 8)
     }

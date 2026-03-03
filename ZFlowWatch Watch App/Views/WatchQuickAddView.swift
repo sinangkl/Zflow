@@ -49,9 +49,9 @@ struct WatchQuickAddView: View {
     private var typeStep: some View {
         VStack(spacing: 12) {
             typeButton("Expense", icon: "arrow.up.circle.fill",
-                       color: wColor("#FF453A"), value: "expense")
+                       color: wColor("#FF7F7F"), value: "expense")
             typeButton("Income",  icon: "arrow.down.circle.fill",
-                       color: wColor("#30D158"), value: "income")
+                       color: wColor("#50C878"), value: "income")
         }
         .padding(.horizontal, 4)
     }
@@ -82,7 +82,7 @@ struct WatchQuickAddView: View {
 
     private var amountStep: some View {
         let currency  = store.snapshot.currency
-        let typeColor = transactionType == "expense" ? wColor("#FF453A") : wColor("#30D158")
+        let typeColor = transactionType == "expense" ? wColor("#FF7F7F") : wColor("#50C878")
         return VStack(spacing: 10) {
             Text(amount > 0
                  ? amount.formattedCurrencySimple(code: currency)
@@ -146,7 +146,7 @@ struct WatchQuickAddView: View {
     private var confirmStep: some View {
         let cat = quickCategories[selectedCategoryIdx]
         let catColor  = wColor(cat.color)
-        let typeColor = transactionType == "expense" ? wColor("#FF453A") : wColor("#30D158")
+        let typeColor = transactionType == "expense" ? wColor("#FF7F7F") : wColor("#50C878")
 
         let currency = store.snapshot.currency
         return VStack(spacing: 12) {
@@ -188,7 +188,7 @@ struct WatchQuickAddView: View {
         VStack(spacing: 12) {
             Image(systemName: "checkmark.circle.fill")
                 .font(.system(size: 40))
-                .foregroundColor(wColor("#30D158"))
+                .foregroundColor(wColor("#50C878"))
                 .padding(.top, 16)
             Text("Saved!")
                 .font(.system(size: 18, weight: .black, design: .rounded))

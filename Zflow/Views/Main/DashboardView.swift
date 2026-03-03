@@ -30,12 +30,13 @@ struct DashboardView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                PremiumBackground()
+                MeshGradientBackground()
 
                 // Fix: use .vertical axis only, clipped to prevent horizontal overflow
                 ScrollView(.vertical, showsIndicators: false) {
                     VStack(spacing: 20) {
                         heroCard
+                        heroPills
                         statsRow
                         if !insights.isEmpty { aiInsightsSection }
                         budgetSection
@@ -127,75 +128,70 @@ struct DashboardView: View {
     // MARK: - Hero Card
 
     private var heroCard: some View {
-        GradientCard(gradient: AppTheme.accentGradient) {
-            VStack(spacing: 16) {
-                VStack(spacing: 4) {
-                    Text(NSLocalizedString("dashboard.netBalance", comment: ""))
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(.white.opacity(0.75))
-                        .textCase(.uppercase)
-                        .tracking(0.5)
+        VStack(spacing: 6) {
+            Text(NSLocalizedString("dashboard.netBalance", comment: ""))
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(ZColor.labelSec)
+                .textCase(.uppercase)
+                .tracking(0.8)
 
-                    Text(transactionVM.netBalance.formattedCurrency(code: transactionVM.primaryCurrency))
-                        .font(.system(size: 38, weight: .black, design: .rounded))
-                        .foregroundColor(.white)
-                        .contentTransition(.numericText())
-                        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: transactionVM.netBalance)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.6)
-                }
-
-                HStack(spacing: 12) {
-                    incomeExpenseChip(
-                        label: NSLocalizedString("dashboard.income", comment: ""),
-                        amount: transactionVM.thisMonthIncome,
-                        icon: "arrow.down.circle.fill",
-                        tint: Color(hex: "#86EFAC"))
-
-                    Rectangle()
-                        .fill(Color.white.opacity(0.25))
-                        .frame(width: 0.5, height: 44)
-
-                    incomeExpenseChip(
-                        label: NSLocalizedString("dashboard.expense", comment: ""),
-                        amount: transactionVM.thisMonthExpense,
-                        icon: "arrow.up.circle.fill",
-                        tint: Color(hex: "#FCA5A5"))
-                }
-                .padding(.horizontal, 14)
-                .padding(.vertical, 10)
-                .background(
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .fill(Color.white.opacity(0.12))
-                )
-                .frame(maxWidth: .infinity)
-            }
-            .padding(18)
-            .frame(maxWidth: .infinity)
+            Text(transactionVM.netBalance.formattedCurrency(code: transactionVM.primaryCurrency))
+                .font(.system(size: 36, weight: .bold, design: .rounded))
+                .foregroundColor(ZColor.label)
+                .contentTransition(.numericText())
+                .animation(.spring(response: 0.4, dampingFraction: 0.8), value: transactionVM.netBalance)
+                .lineLimit(1)
+                .minimumScaleFactor(0.5)
         }
+        .padding(.vertical, 28)
+        .padding(.horizontal, 40)
+        .frame(maxWidth: .infinity)
+        .liquidGlass(cornerRadius: 28)
+    }
+
+    private var heroPills: some View {
+        HStack(spacing: 12) {
+            incomeExpenseChip(
+                label: NSLocalizedString("dashboard.income", comment: ""),
+                amount: transactionVM.thisMonthIncome,
+                icon: "arrow.down.circle.fill",
+                tint: ZColor.income
+            )
+
+            incomeExpenseChip(
+                label: NSLocalizedString("dashboard.expense", comment: ""),
+                amount: transactionVM.thisMonthExpense,
+                icon: "arrow.up.circle.fill",
+                tint: ZColor.expense
+            )
+        }
+        .frame(maxWidth: .infinity)
     }
 
     private func incomeExpenseChip(label: String, amount: Double, icon: String, tint: Color) -> some View {
         HStack(spacing: 10) {
             Image(systemName: icon)
-                .font(.system(size: 18))
+                .font(.system(size: 20))
                 .foregroundColor(tint)
-                .frame(width: 22)
-            VStack(alignment: .leading, spacing: 1) {
+                .frame(width: 24)
+            VStack(alignment: .leading, spacing: 2) {
                 Text(label)
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(.white.opacity(0.70))
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundColor(ZColor.labelSec)
                     .textCase(.uppercase)
-                    .tracking(0.3)
+                    .tracking(0.4)
                     .lineLimit(1)
                 Text(amount.formattedCurrency(code: transactionVM.primaryCurrency))
-                    .font(.system(size: 13, weight: .bold))
-                    .foregroundColor(.white)
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundColor(ZColor.label)
                     .lineLimit(1)
                     .minimumScaleFactor(0.65)
             }
         }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
         .frame(maxWidth: .infinity, alignment: .leading)
+        .liquidGlass(cornerRadius: 24)
     }
 
     // MARK: - Stats Row
@@ -278,8 +274,7 @@ struct DashboardView: View {
                         }
                     }
                 }
-                .zFlowCard()
-                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .liquidGlass(cornerRadius: 24)
             }
         }
     }
@@ -288,9 +283,9 @@ struct DashboardView: View {
         VStack(spacing: 8) {
             HStack(spacing: 10) {
                 ZStack {
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .fill(Color(hex: cat.color).opacity(0.14))
-                        .frame(width: 34, height: 34)
+                    Circle()
+                        .fill(Color(hex: cat.color).opacity(0.12))
+                        .frame(width: 36, height: 36)
                     Image(systemName: cat.icon ?? "circle")
                         .font(.system(size: 14, weight: .medium))
                         .foregroundColor(Color(hex: cat.color))
@@ -350,7 +345,7 @@ struct DashboardView: View {
                     message: NSLocalizedString("dashboard.addFirst", comment: ""),
                     actionLabel: NSLocalizedString("dashboard.addTransaction", comment: ""),
                     action: onAddTapped)
-                .zFlowCard()
+                .liquidGlass(cornerRadius: 24)
             } else {
                 // Use List for native swipeActions support
                 let recent = Array(transactionVM.transactions.prefix(5))
@@ -387,13 +382,9 @@ struct DashboardView: View {
                 }
                 .listStyle(.plain)
                 .scrollContentBackground(.hidden)
-                .scrollDisabled(true)  // outer ScrollView handles scroll
+                .scrollDisabled(true)
                 .frame(height: CGFloat(min(recent.count, 5)) * 68)
-                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .strokeBorder(AppTheme.cardBorder(for: scheme), lineWidth: 0.5)
-                )
+                .liquidGlass(cornerRadius: 24)
             }
         }
     }
@@ -459,14 +450,8 @@ struct AIInsightCard: View {
             Spacer(minLength: 0)
         }
         .padding(14)
-        .background(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(insight.type.bgColor)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .strokeBorder(insight.type.color.opacity(0.20), lineWidth: 1)
-        )
+        .background(insight.type.bgColor.opacity(0.3))
+        .liquidGlass(cornerRadius: 14)
         .frame(maxWidth: .infinity)  // prevent any horizontal overflow
     }
 }

@@ -271,3 +271,10 @@
 "ai.scan.success" = "%@ mağazasından %.2f %@ tutarında bir fiş buldum. Aşağıdaki detayları kontrol edip 'İşlem Ekle' ile kaydedin.";
 "ai.scan.failed" = "Fişi okuyamadım. %@";
 "ai.scan.unknownMerchant" = "Bilinmeyen mağaza";
+
+// Ödeme
+"payment.awaitingApproval" = "Onay Bekleyen Ödeme";
+"common.reject" = "Reddet";
+"common.approve" = "Onayla";
+"time.tomorrow" = "Yarın";
+"time.daysLeft" = "%d gün kaldı";

@@ -62,7 +62,7 @@ struct AllTransactionsView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                PremiumBackground()
+                MeshGradientBackground()
 
                 VStack(spacing: 0) {
                     // Filter chips
@@ -83,7 +83,9 @@ struct AllTransactionsView: View {
                                     ForEach(group.items) { txn in
                                         TransactionRow(
                                             transaction: txn,
-                                            category: transactionVM.category(for: txn.categoryId))
+                                            category: transactionVM.category(for: txn.categoryId),
+                                            isStandalone: true)
+                                        .liquidScrollTransform()
                                         .listRowBackground(Color.clear)
                                         .listRowSeparator(.hidden)
                                         .listRowInsets(.init(top: 4, leading: 16, bottom: 4, trailing: 16))

@@ -97,6 +97,7 @@ final class TransactionViewModel: ObservableObject {
             group.addTask { await self.fetchCategories(userId: userId, userType: userType) }
         }
         isLoading = false
+        updateEcosystem()
     }
 
     func fetchTransactions(userId: UUID) async {

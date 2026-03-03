@@ -109,7 +109,7 @@ struct WatchDashboardView: View {
                     Text(diff.formattedShort() + " " + snap.currency)
                         .font(.system(size: 11, weight: .semibold))
                 }
-                .foregroundColor(diff >= 0 ? wColor("#30D158") : wColor("#FF453A"))
+                .foregroundColor(diff >= 0 ? wColor("#50C878") : wColor("#FF7F7F"))
             }
             .padding(.vertical, 14)
             .padding(.horizontal, 10)
@@ -160,12 +160,12 @@ struct WatchDashboardView: View {
                 icon: "arrow.down.circle.fill",
                 label: "Income",
                 value: snap.thisMonthIncome,
-                color: wColor("#30D158"))
+                color: wColor("#50C878"))
             statTile(
                 icon: "arrow.up.circle.fill",
                 label: "Expense",
                 value: snap.thisMonthExpense,
-                color: wColor("#FF453A"))
+                color: wColor("#FF7F7F"))
         }
     }
 
@@ -235,7 +235,7 @@ struct WatchDashboardView: View {
                 Spacer()
                 Text("\(txn.type == "income" ? "+" : "−")\(txn.amount.formattedShort())")
                     .font(.system(size: 13, weight: .black, design: .rounded))
-                    .foregroundColor(txn.type == "income" ? wColor("#30D158") : wColor("#FF453A"))
+                    .foregroundColor(txn.type == "income" ? wColor("#50C878") : wColor("#FF7F7F"))
             }
         }
         .padding(10)

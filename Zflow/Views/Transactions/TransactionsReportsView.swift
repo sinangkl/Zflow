@@ -10,21 +10,22 @@ struct TransactionsReportsView: View {
     @EnvironmentObject var scheduledPaymentVM: ScheduledPaymentViewModel
     @EnvironmentObject var budgetManager: BudgetManager
     @Environment(\.colorScheme) var scheme
+    @Namespace private var segmentNS
     @State private var segment = 0  // 0 = Transactions  1 = Reports
     @State private var selectedTransaction: Transaction? = nil
-    
+
     var body: some View {
         NavigationStack {
             ZStack(alignment: .top) {
                 PremiumBackground()
-                
+
                 VStack(spacing: 0) {
-                    // Segment pill — glass style
+                    // Segment pill — matchedGeometryEffect slider
                     segmentControl
                         .padding(.horizontal, 16)
                         .padding(.top, 4)
                         .padding(.bottom, 6)
-                    
+
                     // Content
                     if segment == 0 {
                         TransactionListContent(selectedTransaction: $selectedTransaction)
@@ -52,13 +53,12 @@ struct TransactionsReportsView: View {
         }
         .animation(.spring(response: 0.35, dampingFraction: 0.78), value: segment)
     }
-    
+
     private var segmentControl: some View {
         let items: [(Int, String, String)] = [
             (0, "list.bullet.rectangle.fill", NSLocalizedString("tab.transactions", comment: "")),
             (1, "chart.pie.fill",             NSLocalizedString("reports.title",    comment: ""))
         ]
-        // also build scroll-to-top on double-tap if needed
         return HStack(spacing: 0) {
             ForEach(items, id: \.0) { idx, icon, label in
                 segmentButton(idx: idx, icon: icon, label: label)
@@ -66,11 +66,11 @@ struct TransactionsReportsView: View {
         }
         .padding(4)
         .background(
-            RoundedRectangle(cornerRadius: 13, style: .continuous)
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .fill(scheme == .dark ? Color.white.opacity(0.07) : Color(.tertiarySystemFill))
         )
     }
-    
+
     private func segmentButton(idx: Int, icon: String, label: String) -> some View {
         let isSelected = segment == idx
         return Button {
@@ -86,13 +86,12 @@ struct TransactionsReportsView: View {
             .frame(maxWidth: .infinity)
             .padding(.vertical, 10)
             .background(
-                Group {
+                ZStack {
                     if isSelected {
-                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
                             .fill(scheme == .dark ? Color.white.opacity(0.14) : Color.white.opacity(0.96))
                             .shadow(color: .black.opacity(0.08), radius: 4, y: 1)
-                    } else {
-                        Color.clear
+                            .matchedGeometryEffect(id: "segmentIndicator", in: segmentNS)
                     }
                 }
             )
@@ -217,13 +216,13 @@ struct TransactionsReportsView: View {
                                         }
                                         .tint(ZColor.indigo)
                                     }
-                                    .listRowInsets(EdgeInsets())
-                                    .listRowBackground(Color(.secondarySystemGroupedBackground))
-                                    .listRowSeparatorTint(AppTheme.cardBorder(for: scheme))
+                                    .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
+                                    .listRowBackground(Color.clear)
+                                    .listRowSeparator(.hidden)
                                 }
                             } header: {
                                 groupHeader(group.key, items: group.items)
-                                    .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                                    .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 4, trailing: 16))
                             }
                         }
                         // Bottom padding row
@@ -380,36 +379,29 @@ struct TransactionsReportsView: View {
         let category: Category?
         var primaryCurrency: String = "TRY"
         @Environment(\.colorScheme) var scheme
-        
+
         private var isIncome: Bool { transaction.type == "income" }
         private var catColor: Color { Color(hex: category?.color ?? "#8E8E93") }
-        
+
         var body: some View {
             HStack(spacing: 14) {
-                // Category icon — iOS 26 glass tile
+                // Category icon — Circle
                 ZStack {
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .fill(catColor.opacity(0.14))
+                    Circle()
+                        .fill(catColor.opacity(0.12))
                         .frame(width: 46, height: 46)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                .strokeBorder(catColor.opacity(0.22), lineWidth: 0.5)
-                        )
-                    
+
                     Image(systemName: category?.icon ?? "circle")
                         .font(.system(size: 18, weight: .medium))
-                        .foregroundStyle(
-                            LinearGradient(
-                                colors: [catColor, catColor.opacity(0.75)],
-                                startPoint: .topLeading, endPoint: .bottomTrailing))
+                        .foregroundColor(catColor)
                 }
-                
+
                 // Details
                 VStack(alignment: .leading, spacing: 3) {
                     Text(category?.name ?? NSLocalizedString("category.other", comment: ""))
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundColor(ZColor.label)
-                    
+
                     if let note = transaction.note, !note.isEmpty {
                         Text(note)
                             .font(.system(size: 13))
@@ -421,9 +413,9 @@ struct TransactionsReportsView: View {
                             .foregroundColor(ZColor.labelSec)
                     }
                 }
-                
+
                 Spacer()
-                
+
                 // Amount + converted hint
                 VStack(alignment: .trailing, spacing: 3) {
                     Text("\(isIncome ? "+" : "−")\(transaction.amount.formattedCurrency(code: transaction.currency))")
@@ -441,9 +433,9 @@ struct TransactionsReportsView: View {
                     }
                 }
             }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 12)
-            .background(Color(.secondarySystemGroupedBackground))
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+            .liquidGlass(cornerRadius: 24)
         }
     }
     
@@ -752,6 +744,7 @@ struct TransactionsReportsView: View {
                 .frame(height: 160)
             }
             .padding(18)
+            .ambientGlow()
             .zFlowCard()
         }
         
@@ -796,6 +789,7 @@ struct TransactionsReportsView: View {
                 }
             }
             .padding(18)
+            .ambientGlow()
             .zFlowCard()
         }
         
@@ -814,8 +808,8 @@ struct TransactionsReportsView: View {
                             HStack(spacing: 12) {
                                 // Icon
                                 ZStack {
-                                    RoundedRectangle(cornerRadius: 9, style: .continuous)
-                                        .fill(color.opacity(0.14))
+                                    Circle()
+                                        .fill(color.opacity(0.12))
                                         .frame(width: 36, height: 36)
                                     Image(systemName: item.category?.icon ?? "circle")
                                         .font(.system(size: 15, weight: .medium))
@@ -917,6 +911,7 @@ struct TransactionsReportsView: View {
                 )
             }
             .padding(18)
+            .ambientGlow()
             .zFlowCard()
         }
         

@@ -341,7 +341,7 @@ struct EditProfileView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color(.systemGroupedBackground).ignoresSafeArea()
+                MeshGradientBackground()
 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 24) {
@@ -499,6 +499,7 @@ struct EditProfileView: View {
                 .padding(.leading, 16)
             TextField(placeholder, text: text)
                 .font(.system(size: 16))
+                .textFieldStyle(EliteTextFieldStyle())
         }
         .frame(minHeight: 52)
     }
@@ -785,7 +786,7 @@ struct AddCategorySheet: View {
                 }
                 .padding(16).padding(.bottom, 32)
             }
-            .background(Color(.systemGroupedBackground).ignoresSafeArea())
+            .background(MeshGradientBackground())
             .navigationTitle("New Category")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

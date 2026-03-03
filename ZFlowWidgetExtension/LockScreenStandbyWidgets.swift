@@ -162,11 +162,11 @@ struct TransactionsWidgetView: View {
                         balancePill(
                             label: "Income",
                             value: entry.snapshot.thisMonthIncome,
-                            color: Color(hex: "#30D158"))
+                            color: Color(hex: "#50C878"))
                         balancePill(
                             label: "Expense",
                             value: entry.snapshot.thisMonthExpense,
-                            color: Color(hex: "#FF453A"))
+                            color: Color(hex: "#FF7F7F"))
                     }
                     .padding(.horizontal, 14)
                     .padding(.bottom, 8)
@@ -300,13 +300,13 @@ struct StandbyWidgetView: View {
                         icon: "arrow.down.circle.fill",
                         label: "Income",
                         value: entry.snapshot.thisMonthIncome,
-                        color: Color(hex: "#30D158"))
+                        color: Color(hex: "#50C878"))
                     Rectangle().fill(.white.opacity(0.12)).frame(width: 0.5, height: 40)
                     standbyStatPill(
                         icon: "arrow.up.circle.fill",
                         label: "Expense",
                         value: entry.snapshot.thisMonthExpense,
-                        color: Color(hex: "#FF453A"))
+                        color: Color(hex: "#FF7F7F"))
                 }
                 .padding(.horizontal, 20)
                 .padding(.vertical, 14)

@@ -5,22 +5,8 @@ import SwiftUI
 // Light: Apple system grouped — temiz ve tutarlı
 
 struct PremiumBackground: View {
-    @Environment(\.colorScheme) var scheme
     var body: some View {
-        Group {
-            if scheme == .dark {
-                LinearGradient(
-                    stops: [
-                        .init(color: Color(hex: "#000008"), location: 0),
-                        .init(color: Color(hex: "#070714"), location: 0.55),
-                        .init(color: Color(hex: "#04040E"), location: 1),
-                    ],
-                    startPoint: .topLeading, endPoint: .bottomTrailing)
-            } else {
-                Color(.systemGroupedBackground)
-            }
-        }
-        .ignoresSafeArea()
+        MeshGradientBackground()
     }
 }
 
@@ -28,22 +14,14 @@ struct PremiumBackground: View {
 
 struct GlassCard<Content: View>: View {
     @Environment(\.colorScheme) var scheme
-    var cornerRadius: CGFloat = 16
+    var cornerRadius: CGFloat = 24
     let content: Content
-    init(cornerRadius: CGFloat = 16, @ViewBuilder content: () -> Content) {
+    init(cornerRadius: CGFloat = 24, @ViewBuilder content: () -> Content) {
         self.cornerRadius = cornerRadius; self.content = content()
     }
     var body: some View {
         content
-            .background(
-                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .fill(AppTheme.glassMaterial(for: scheme))
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .strokeBorder(AppTheme.cardBorder(for: scheme), lineWidth: 0.5)
-            )
-            .shadow(color: scheme == .dark ? .clear : .black.opacity(0.04), radius: 10, x: 0, y: 2)
+            .liquidGlass(cornerRadius: cornerRadius)
     }
 }
 
@@ -51,18 +29,24 @@ struct GlassCard<Content: View>: View {
 
 struct GradientCard<Content: View>: View {
     var gradient: LinearGradient = AppTheme.accentGradient
-    var cornerRadius: CGFloat = 20
+    var cornerRadius: CGFloat = 24
     let content: Content
-    init(gradient: LinearGradient = AppTheme.accentGradient, cornerRadius: CGFloat = 20,
+    init(gradient: LinearGradient = AppTheme.accentGradient, cornerRadius: CGFloat = 24,
          @ViewBuilder content: () -> Content) {
         self.gradient = gradient; self.cornerRadius = cornerRadius; self.content = content()
     }
     var body: some View {
         content
-            .background(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous).fill(gradient))
-            .overlay(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                .strokeBorder(Color.white.opacity(0.14), lineWidth: 0.5))
-            .shadow(color: ZColor.indigo.opacity(0.28), radius: 16, x: 0, y: 8)
+            .background(
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .fill(gradient)
+            )
+            .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .strokeBorder(Color.white.opacity(0.2), lineWidth: 0.5)
+            )
+            .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 5)
     }
 }
 
@@ -71,16 +55,17 @@ struct GradientCard<Content: View>: View {
 struct TransactionRow: View {
     let transaction: Transaction
     let category: Category?
+    var isStandalone: Bool = false
     @Environment(\.colorScheme) var scheme
     private var isIncome: Bool { transaction.type == "income" }
     private var catColor: Color { Color(hex: category?.color ?? "#8E8E93") }
 
     var body: some View {
-        HStack(spacing: 12) {
+        let rowContent = HStack(spacing: 12) {
             // Icon
             ZStack {
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .fill(catColor.opacity(0.15))
+                Circle()
+                    .fill(catColor.opacity(0.12))
                     .frame(width: 44, height: 44)
                 Image(systemName: category?.icon ?? "circle")
                     .font(.system(size: 17, weight: .medium))
@@ -111,9 +96,44 @@ struct TransactionRow: View {
             }
         }
         .padding(.horizontal, 14).padding(.vertical, 11)
-        .background(Color(.secondarySystemGroupedBackground))
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(category?.name ?? "Uncategorized") - \(isIncome ? "Income" : "Expense") \(transaction.amount.formattedCurrency(code: transaction.currency))")
+        
+        Group {
+            if isStandalone {
+                rowContent
+                    .liquidGlass(cornerRadius: 16)
+            } else {
+                rowContent
+                    .background(Color.clear)
+            }
+        }
+    }
+}
+
+// MARK: - Liquid Scroll Transform
+
+struct ScrollTransformModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 17.0, *) {
+            content.visualEffect { view, proxy in
+                let frame = proxy.frame(in: .global)
+                let estimatedScreenHeight: CGFloat = 850.0
+                let position = frame.midY
+                let distanceFromCenter = abs(estimatedScreenHeight / 2 - position)
+                let scale = max(0.9, 1 - (distanceFromCenter / (estimatedScreenHeight * 1.5)))
+                
+                return view.scaleEffect(scale)
+            }
+        } else {
+            content
+        }
+    }
+}
+
+extension View {
+    func liquidScrollTransform() -> some View {
+        modifier(ScrollTransformModifier())
     }
 }
 
@@ -257,28 +277,31 @@ struct StatCard: View {
     var trend: Double? = nil
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 12) {
             HStack {
                 ZStack {
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .fill(iconColor.opacity(0.12)).frame(width: 30, height: 30)
-                    Image(systemName: icon).font(.system(size: 14, weight: .semibold)).foregroundColor(iconColor)
+                    Circle()
+                        .fill(iconColor.opacity(0.12)).frame(width: 36, height: 36)
+                    Image(systemName: icon).font(.system(size: 15, weight: .semibold)).foregroundColor(iconColor)
                 }
                 Spacer()
                 if let t = trend {
-                    HStack(spacing: 2) {
+                    HStack(spacing: 3) {
                         Image(systemName: t >= 0 ? "arrow.up.right" : "arrow.down.left")
                         Text("\(String(format: "%.1f", abs(t)))%")
                     }
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(.system(size: 11, weight: .bold))
                     .foregroundColor(t >= 0 ? ZColor.expense : ZColor.income)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Capsule().fill((t >= 0 ? ZColor.expense : ZColor.income).opacity(0.1)))
                 }
             }
-            Text(value).font(.system(size: 20, weight: .bold, design: .rounded)).foregroundColor(valueColor)
+            Text(value).font(.system(size: 22, weight: .bold, design: .rounded)).foregroundColor(valueColor)
                 .lineLimit(1).minimumScaleFactor(0.65)
             Text(title).font(.system(size: 12, weight: .medium)).foregroundColor(ZColor.labelSec)
         }
-        .padding(14).zFlowCard()
+        .padding(16).liquidGlass(cornerRadius: 24)
     }
 }
 
@@ -459,34 +482,38 @@ struct ReadyPaymentCard: View {
                 Button(action: onReject) {
                     HStack(spacing: 6) {
                         Image(systemName: "xmark.circle.fill")
-                        Text("Reject")
+                        Text(NSLocalizedString("common.reject", comment: ""))
                     }
                     .font(.system(size: 13, weight: .semibold))
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 8)
+                    .padding(.vertical, 10)
                     .foregroundColor(.white)
-                    .background(Color(UIColor.systemRed).opacity(0.8))
-                    .cornerRadius(8)
+                    .background(ZColor.expense.opacity(0.85))
+                    .clipShape(Capsule())
                 }
 
                 Button(action: onApprove) {
                     HStack(spacing: 6) {
                         Image(systemName: "checkmark.circle.fill")
-                        Text("Approve")
+                        Text(NSLocalizedString("common.approve", comment: ""))
                     }
                     .font(.system(size: 13, weight: .semibold))
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 8)
+                    .padding(.vertical, 10)
                     .foregroundColor(.white)
-                    .background(Color(UIColor.systemGreen).opacity(0.8))
-                    .cornerRadius(8)
+                    .background(ZColor.income.opacity(0.85))
+                    .clipShape(Capsule())
                 }
             }
         }
-        .padding(12)
-        .background(scheme == .dark
-            ? Color(UIColor.systemYellow).opacity(0.12)
-            : Color(UIColor.systemYellow).opacity(0.08))
-        .cornerRadius(10)
+        .padding(14)
+        .background(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .fill(Color.orange.opacity(scheme == .dark ? 0.12 : 0.06))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .strokeBorder(Color.orange.opacity(0.25), lineWidth: 1)
+        )
     }
 }

@@ -25,9 +25,9 @@ enum ZColor {
     static let violet     = Color(hex: "#7C3AED")
     static let violetDark = Color(hex: "#A78BFA")
 
-    // Semantic — Apple system colors
-    static let income     = Color(hex: "#30D158")
-    static let expense    = Color(hex: "#FF453A")
+    // Semantic — Soft pastel tones
+    static let income     = Color(hex: "#50C878")   // Soft Emerald
+    static let expense    = Color(hex: "#FF7F7F")   // Soft Coral
     static let warning    = Color(hex: "#FF9F0A")
     static let info       = Color(hex: "#0A84FF")
     static let purple     = Color(hex: "#BF5AF2")
@@ -70,9 +70,9 @@ enum ZColor {
 struct AppTheme {
 
     // MARK: Card Radius
-    static let cardRadius: CGFloat = 20
-    static let heroRadius: CGFloat = 24
-    static let smallRadius: CGFloat = 14
+    static let cardRadius: CGFloat = 24
+    static let heroRadius: CGFloat = 28
+    static let smallRadius: CGFloat = 16
 
     // MARK: Accent
     static func accentColor(for scheme: ColorScheme) -> Color {
@@ -91,11 +91,11 @@ struct AppTheme {
         startPoint: .leading, endPoint: .trailing)
 
     static let incomeGradient = LinearGradient(
-        colors: [Color(hex: "#30D158"), Color(hex: "#34C759")],
+        colors: [Color(hex: "#50C878"), Color(hex: "#3DA86B")],
         startPoint: .topLeading, endPoint: .bottomTrailing)
 
     static let expenseGradient = LinearGradient(
-        colors: [Color(hex: "#FF453A"), Color(hex: "#FF6961")],
+        colors: [Color(hex: "#FF7F7F"), Color(hex: "#E86060")],
         startPoint: .topLeading, endPoint: .bottomTrailing)
 
     // Liquid Glass specific gradients
@@ -161,7 +161,7 @@ struct AppTheme {
         scheme == .dark ? Color(white: 1, opacity: 0.18) : Color(white: 0, opacity: 0.08)
     }
     static func glassMaterial(for scheme: ColorScheme) -> Material {
-        scheme == .dark ? .ultraThinMaterial : .thinMaterial
+        return .ultraThinMaterial
     }
     static func glassOverlay(for scheme: ColorScheme) -> Color {
         scheme == .dark ? Color(white: 1, opacity: 0.04) : Color(white: 1, opacity: 0.6)
@@ -185,10 +185,12 @@ extension Double {
 
 struct ZFlowCard: ViewModifier {
     @Environment(\.colorScheme) var scheme
-    var cornerRadius: CGFloat = 20
+    var cornerRadius: CGFloat = 24
     var useMaterial: Bool = false
+    var borderOpacity: CGFloat = 1.0
 
     func body(content: Content) -> some View {
+        let isDark = scheme == .dark
         content
             .background(
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
@@ -198,80 +200,74 @@ struct ZFlowCard: ViewModifier {
             )
             .overlay(
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .strokeBorder(AppTheme.glassBorder(for: scheme), lineWidth: 0.5)
+                    .strokeBorder(
+                        LinearGradient(
+                            colors: [
+                                isDark ? Color.white.opacity(0.3 * borderOpacity) : Color.black.opacity(0.08 * borderOpacity),
+                                isDark ? Color.white.opacity(0.05 * borderOpacity) : Color.black.opacity(0.02 * borderOpacity),
+                                .clear,
+                                .clear
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 0.5
+                    )
             )
             .shadow(color: scheme == .dark
                     ? ZColor.indigo.opacity(0.06)
                     : .black.opacity(0.05),
                     radius: 12, x: 0, y: 4)
-            .shadow(color: scheme == .dark
-                    ? .clear
-                    : .black.opacity(0.02),
-                    radius: 2, x: 0, y: 1)
-    }
-}
-
-extension View {
-    func zFlowCard(cornerRadius: CGFloat = 20, useMaterial: Bool = false) -> some View {
-        modifier(ZFlowCard(cornerRadius: cornerRadius, useMaterial: useMaterial))
-    }
-}
-
-// MARK: - Liquid Glass Card Modifier
-
-struct LiquidGlassModifier: ViewModifier {
-    @Environment(\.colorScheme) var scheme
-    var cornerRadius: CGFloat = 20
-    var tint: Color = ZColor.indigo
-
-    func body(content: Content) -> some View {
-        content
-            .background(
-                ZStack {
-                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                        .fill(.ultraThinMaterial)
-                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                        .fill(AppTheme.glassOverlay(for: scheme))
-                }
-            )
+            // Inner Glow / Glass Thickness Simulation
             .overlay(
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .strokeBorder(
+                    .stroke(
                         LinearGradient(
                             colors: [
-                                Color.white.opacity(scheme == .dark ? 0.25 : 0.5),
-                                tint.opacity(0.15),
-                                Color.white.opacity(scheme == .dark ? 0.08 : 0.2)
+                                isDark ? Color.white.opacity(0.25 * borderOpacity) : Color.black.opacity(0.04 * borderOpacity),
+                                .clear
                             ],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         ),
-                        lineWidth: 0.8
+                        lineWidth: 1.5
                     )
+                    .blur(radius: 2)
+                    .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
             )
-            .shadow(color: tint.opacity(scheme == .dark ? 0.12 : 0.08), radius: 16, x: 0, y: 6)
-            .shadow(color: .black.opacity(0.04), radius: 2, x: 0, y: 1)
     }
 }
 
 extension View {
-    func liquidGlass(cornerRadius: CGFloat = 20, tint: Color = ZColor.indigo) -> some View {
-        modifier(LiquidGlassModifier(cornerRadius: cornerRadius, tint: tint))
+    func zFlowCard(cornerRadius: CGFloat = 24, useMaterial: Bool = false, borderOpacity: CGFloat = 1.0) -> some View {
+        modifier(ZFlowCard(cornerRadius: cornerRadius, useMaterial: useMaterial, borderOpacity: borderOpacity))
     }
 }
+
+
 
 // MARK: - Animated Gradient Border
 
 struct AnimatedGradientBorder: View {
     var cornerRadius: CGFloat = 20
     var lineWidth: CGFloat = 1.5
-    var colors: [Color] = [
-        Color(hex: "#5E5CE6"),
-        Color(hex: "#00D4FF"),
-        Color(hex: "#A855F7"),
-        Color(hex: "#EC4899"),
-        Color(hex: "#5E5CE6")
-    ]
+    @Environment(\.colorScheme) var scheme
+
+    var colors: [Color] {
+        scheme == .dark ? [
+            Color(hex: "#5E5CE6"),
+            Color(hex: "#00D4FF"),
+            Color(hex: "#A855F7"),
+            Color(hex: "#EC4899"),
+            Color(hex: "#5E5CE6")
+        ] : [
+            Color(hex: "#4338CA"),
+            Color(hex: "#0084FF"),
+            Color(hex: "#7C3AED"),
+            Color(hex: "#D4356B"),
+            Color(hex: "#4338CA")
+        ]
+    }
     @State private var rotation: Double = 0
 
     var body: some View {
@@ -298,6 +294,7 @@ struct GlassButtonStyle: ButtonStyle {
     @Environment(\.colorScheme) var scheme
 
     func makeBody(configuration: Configuration) -> some View {
+        let isDark = scheme == .dark
         configuration.label
             .padding(.horizontal, 20)
             .padding(.vertical, 12)
@@ -314,8 +311,8 @@ struct GlassButtonStyle: ButtonStyle {
                     .strokeBorder(
                         LinearGradient(
                             colors: [
-                                Color.white.opacity(scheme == .dark ? 0.2 : 0.4),
-                                Color.white.opacity(scheme == .dark ? 0.05 : 0.15)
+                                isDark ? Color.white.opacity(0.2) : Color.black.opacity(0.08),
+                                isDark ? Color.white.opacity(0.05) : Color.black.opacity(0.03)
                             ],
                             startPoint: .top, endPoint: .bottom
                         ),
@@ -331,6 +328,7 @@ struct GlassButtonStyle: ButtonStyle {
 
 struct PrimaryGlassButtonStyle: ButtonStyle {
     var gradient: LinearGradient = AppTheme.accentGradient
+    @Environment(\.colorScheme) var scheme
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
@@ -344,8 +342,8 @@ struct PrimaryGlassButtonStyle: ButtonStyle {
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
                     .strokeBorder(Color.white.opacity(0.2), lineWidth: 0.5)
             )
-            .shadow(color: ZColor.indigo.opacity(0.3), radius: 12, x: 0, y: 6)
-            .shadow(color: ZColor.indigo.opacity(0.1), radius: 2, x: 0, y: 1)
+            .shadow(color: ZColor.indigo.opacity(scheme == .dark ? 0.3 : 0.2), radius: 12, x: 0, y: 6)
+            .shadow(color: ZColor.indigo.opacity(scheme == .dark ? 0.1 : 0.08), radius: 2, x: 0, y: 1)
             .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
             .opacity(configuration.isPressed ? 0.9 : 1.0)
             .animation(.spring(response: 0.25, dampingFraction: 0.7), value: configuration.isPressed)
@@ -365,7 +363,32 @@ struct GlowModifier: ViewModifier {
     }
 }
 
+// MARK: - Ambient Glow (Ligthing Phase 1)
+
+struct AmbientGlowModifier: ViewModifier {
+    @Environment(\.colorScheme) var scheme
+    
+    func body(content: Content) -> some View {
+        content
+            .background(
+                RadialGradient(
+                    colors: [
+                        scheme == .dark ? ZColor.indigo.opacity(0.2) : ZColor.indigo.opacity(0.15),
+                        .clear
+                    ],
+                    center: .center,
+                    startRadius: 50,
+                    endRadius: 250
+                )
+            )
+    }
+}
+
 extension View {
+    func ambientGlow() -> some View {
+        modifier(AmbientGlowModifier())
+    }
+
     func glow(color: Color = ZColor.indigo, radius: CGFloat = 8) -> some View {
         modifier(GlowModifier(color: color, radius: radius))
     }
@@ -377,7 +400,7 @@ struct CardEntryModifier: ViewModifier {
     var delay: Double = 0
     @State private var appeared = false
 
-    func body(content: Content) -> some View {
+     func body(content: Content) -> some View {
         content
             .opacity(appeared ? 1 : 0)
             .offset(y: appeared ? 0 : 16)

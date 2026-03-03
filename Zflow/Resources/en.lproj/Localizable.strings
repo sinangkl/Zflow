@@ -226,3 +226,10 @@
 "ai.scan.failed" = "I couldn't read the receipt. %@";
 "ai.scan.unknownMerchant" = "Unknown merchant";
 "ai.reply.scanHint" = "Tap the 📷 camera icon in the input bar to scan a receipt. I'll extract the transaction details automatically!";
+
+// Payment
+"payment.awaitingApproval" = "Payment Awaiting Approval";
+"common.reject" = "Reject";
+"common.approve" = "Approve";
+"time.tomorrow" = "Tomorrow";
+"time.daysLeft" = "%d days left";

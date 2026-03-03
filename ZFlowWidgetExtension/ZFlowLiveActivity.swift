@@ -92,12 +92,12 @@ struct LockScreenLiveActivity: View {
                     statRow(
                         icon: "arrow.down.circle.fill",
                         value: state.thisMonthIncome,
-                        color: Color(hex: "#30D158"),
+                        color: Color(hex: "#50C878"),
                         currency: context.attributes.currency)
                     statRow(
                         icon: "arrow.up.circle.fill",
                         value: state.thisMonthExpense,
-                        color: Color(hex: "#FF453A"),
+                        color: Color(hex: "#FF7F7F"),
                         currency: context.attributes.currency)
                 }
 
@@ -173,12 +173,12 @@ struct ExpandedTrailing: View {
             Label(context.state.thisMonthIncome.formattedShort(),
                   systemImage: "arrow.down.circle.fill")
                 .font(.system(size: 11, weight: .semibold))
-                .foregroundColor(Color(hex: "#30D158"))
+                .foregroundColor(Color(hex: "#50C878"))
 
             Label(context.state.thisMonthExpense.formattedShort(),
                   systemImage: "arrow.up.circle.fill")
                 .font(.system(size: 11, weight: .semibold))
-                .foregroundColor(Color(hex: "#FF453A"))
+                .foregroundColor(Color(hex: "#FF7F7F"))
         }
     }
 }
@@ -194,14 +194,14 @@ struct ExpandedCenter: View {
             HStack(spacing: 8) {
                 Image(systemName: icon)
                     .font(.system(size: 14))
-                    .foregroundColor(type == "income" ? Color(hex: "#30D158") : Color(hex: "#FF453A"))
+                    .foregroundColor(type == "income" ? Color(hex: "#50C878") : Color(hex: "#FF7F7F"))
                 VStack(alignment: .leading, spacing: 1) {
                     Text(cat)
                         .font(.system(size: 11, weight: .semibold))
                         .foregroundColor(.white.opacity(0.80))
                     Text("\(type == "income" ? "+" : "−")\(amount.formattedShort()) \(context.attributes.currency)")
                         .font(.system(size: 13, weight: .black, design: .rounded))
-                        .foregroundColor(type == "income" ? Color(hex: "#30D158") : Color(hex: "#FF453A"))
+                        .foregroundColor(type == "income" ? Color(hex: "#50C878") : Color(hex: "#FF7F7F"))
                 }
             }
         }

@@ -40,8 +40,8 @@ struct AddTransactionView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                (Color(.systemGroupedBackground))
-                    .ignoresSafeArea()
+                MeshGradientBackground()
+
 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 20) {
@@ -331,6 +331,7 @@ struct AddTransactionView: View {
                         .frame(width: 20)
                     TextField("Note (optional)", text: $note)
                         .autocorrectionDisabled()
+                        .textFieldStyle(EliteTextFieldStyle())
                 }
                 .padding(16)
 
@@ -495,7 +496,7 @@ struct EditTransactionView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                (Color(.systemGroupedBackground)).ignoresSafeArea()
+                MeshGradientBackground()
 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 20) {
@@ -583,7 +584,7 @@ struct EditTransactionView: View {
                             VStack(spacing: 0) {
                                 HStack(spacing: 12) {
                                     Image(systemName: "note.text").foregroundColor(.secondary).frame(width: 20)
-                                    TextField("Note", text: $note).autocorrectionDisabled()
+                                    TextField("Note", text: $note).autocorrectionDisabled().textFieldStyle(EliteTextFieldStyle())
                                 }.padding(16)
                                 Divider().padding(.leading, 48)
                                 HStack(spacing: 12) {

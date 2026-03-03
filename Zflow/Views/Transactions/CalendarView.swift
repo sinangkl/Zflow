@@ -75,6 +75,12 @@ struct CalendarView: View {
         }
     }
 
+    private var pendingPaymentsForDate: [ScheduledPayment] {
+        scheduledPaymentVM.pendingPayments.filter {
+            cal.isDate($0.scheduledDate, inSameDayAs: selectedDate)
+        }
+    }
+
     private var monthDays: [Date?] {
         guard let range = cal.range(of: .day, in: .month, for: displayedMonth),
               let first = cal.date(from: cal.dateComponents([.year, .month], from: displayedMonth))
@@ -287,9 +293,13 @@ struct CalendarView: View {
             guard let d = $0.date else { return false }
             return cal.isDate(d, inSameDayAs: date)
         }
-        let hasIncome  = txns.contains { $0.type == "income" }
-        let hasExpense = txns.contains { $0.type == "expense" }
-        let appleCount = calMgr.appleEvents.filter { cal.isDate($0.startDate, inSameDayAs: date) }.count
+        let hasIncome   = txns.contains { $0.type == "income" }
+        let hasExpense  = txns.contains { $0.type == "expense" }
+        let appleCount  = calMgr.appleEvents.filter { cal.isDate($0.startDate, inSameDayAs: date) }.count
+        let hasPending  = scheduledPaymentVM.scheduledPayments.contains {
+            ($0.status == "pending" || $0.status == "ready")
+            && cal.isDate($0.scheduledDate, inSameDayAs: date)
+        }
 
         return Button {
             withAnimation(.spring(response: 0.25, dampingFraction: 0.7)) { selectedDate = date }
@@ -320,6 +330,7 @@ struct CalendarView: View {
                     if hasIncome  { Circle().fill(ZColor.income).frame(width: 5, height: 5) }
                     if hasExpense { Circle().fill(ZColor.expense).frame(width: 5, height: 5) }
                     if appleCount > 0 { Circle().fill(ZColor.info).frame(width: 5, height: 5) }
+                    if hasPending { Circle().fill(Color.orange).frame(width: 5, height: 5) }
                 }
                 .frame(height: 5)
             }
@@ -333,6 +344,46 @@ struct CalendarView: View {
     private var selectedDaySection: some View {
         VStack(spacing: 10) {
             SectionHeader(title: selectedDate.formatted(.dateTime.weekday(.wide).day().month(.wide)))
+
+            // Pending Payments Warning (upcoming, not yet due)
+            if !pendingPaymentsForDate.isEmpty {
+                VStack(spacing: 8) {
+                    ForEach(pendingPaymentsForDate, id: \.id) { payment in
+                        HStack(spacing: 12) {
+                            ZStack {
+                                Circle()
+                                    .fill(Color.orange.opacity(0.15))
+                                    .frame(width: 38, height: 38)
+                                Image(systemName: "calendar.badge.clock")
+                                    .font(.system(size: 16, weight: .medium))
+                                    .foregroundColor(.orange)
+                            }
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Yaklaşan Ödeme")
+                                    .font(.system(size: 12, weight: .semibold))
+                                    .foregroundColor(.orange)
+                                Text(payment.title)
+                                    .font(.system(size: 14, weight: .medium))
+                                    .foregroundColor(ZColor.label)
+                                Text(payment.amount.formattedCurrency(code: payment.currency))
+                                    .font(.system(size: 13))
+                                    .foregroundColor(ZColor.labelSec)
+                            }
+                            Spacer()
+                        }
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 10)
+                    }
+                }
+                .background(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .fill(Color.orange.opacity(0.08))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .strokeBorder(Color.orange.opacity(0.25), lineWidth: 1)
+                )
+            }
 
             // Ready Payments Section (Requires Approval)
             if !readyPaymentsForDate.isEmpty {
@@ -368,7 +419,7 @@ struct CalendarView: View {
             }
 
             // Transactions for Date
-            if txnForDate.isEmpty && readyPaymentsForDate.isEmpty {
+            if txnForDate.isEmpty && readyPaymentsForDate.isEmpty && pendingPaymentsForDate.isEmpty {
                 HStack {
                     Image(systemName: "calendar.badge.exclamationmark")
                         .foregroundColor(ZColor.labelTert)
@@ -384,6 +435,7 @@ struct CalendarView: View {
                         TransactionRow(
                             transaction: txn,
                             category: transactionVM.category(for: txn.categoryId))
+                        // Swipe only, no context menu
                         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                             Button(role: .destructive) {
                                 transactionToDelete = txn
@@ -399,19 +451,8 @@ struct CalendarView: View {
                             } label: {
                                 Label(NSLocalizedString("common.edit", comment: "Edit"),
                                       systemImage: "pencil")
-                            }                            .tint(ZColor.indigo)                            .tint(ZColor.indigo)
-                        }
-                        .contextMenu {
-                            Button {
-                                transactionToEdit = txn
-                            } label: {
-                                Label(NSLocalizedString("common.edit", comment: "Edit"), systemImage: "pencil")
                             }
-                            Button(role: .destructive) {
-                                transactionToDelete = txn
-                            } label: {
-                                Label(NSLocalizedString("common.delete", comment: "Delete"), systemImage: "trash")
-                            }
+                            .tint(ZColor.indigo)
                         }
                         
                         if idx < txnForDate.count - 1 { Divider().padding(.leading, 70) }

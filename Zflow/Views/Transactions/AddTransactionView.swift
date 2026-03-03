@@ -18,6 +18,18 @@ struct AddTransactionView: View {
     @State private var showCurrencyPicker = false
     @FocusState private var amountFocused: Bool
 
+    // Pre-fill from receipt scan
+    init(scan: ScannedReceipt? = nil, preselectedCategory: Category? = nil) {
+        self.preselectedCategory = preselectedCategory
+        if let s = scan {
+            _amount = State(initialValue: String(format: "%.2f", s.amount))
+            _note = State(initialValue: s.note)
+            _date = State(initialValue: s.date)
+            _selectedType = State(initialValue: s.type == "income" ? .income : .expense)
+            _selectedCurrency = State(initialValue: Currency(rawValue: s.currency) ?? .try_)
+        }
+    }
+
     private let quickCurrencies: [Currency] = [.try_, .USD, .EUR, .GBP]
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 10), count: 4)
 

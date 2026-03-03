@@ -40,8 +40,19 @@ enum L {
     // MARK: Tabs
     static let tabHome              = "tab.home"
     static let tabTransactions      = "tab.transactions"
+    static let tabAdd               = "tab.add"
     static let tabCalendar          = "tab.calendar"
     static let tabSettings          = "tab.settings"
+
+    // MARK: Action Menu
+    static let actionChooseOption   = "action.chooseOption"
+    static let actionAddTransaction = "action.addTransaction"
+    static let actionScanWithAI     = "action.scanWithAI"
+
+    // MARK: AI Chat
+    static let aiTitle              = "ai.title"
+    static let aiGreeting           = "ai.greeting"
+    static let aiInputPlaceholder   = "ai.inputPlaceholder"
 
     // MARK: Dashboard
     static let netBalance           = "dashboard.netBalance"

@@ -4,21 +4,27 @@ struct DashboardView: View {
     @EnvironmentObject var transactionVM: TransactionViewModel
     @EnvironmentObject var authVM: AuthViewModel
     @EnvironmentObject var budgetManager: BudgetManager
+    @EnvironmentObject var scheduledPaymentVM: ScheduledPaymentViewModel
     @Environment(\.colorScheme) var scheme
 
     var onAddTapped: () -> Void = {}
-    var onScrollChanged: ((Bool) -> Void)? = nil   // true = aşağı, false = yukarı
+    var onScrollChanged: ((Bool) -> Void)? = nil
+    var onSeeAllTransactions: () -> Void = {}  // → switches to Reports tab
+
     @State private var showInsights = false
     @State private var showEditProfile = false
-    @State private var lastScrollOffset: CGFloat = 0
     @State private var transactionToDelete: Transaction? = nil
     @State private var transactionToEdit: Transaction? = nil
+    @State private var selectedTransaction: Transaction? = nil
 
     private var insights: [FinancialInsight] {
         InsightsEngine.generate(
             transactions: transactionVM.transactions,
+            categories: transactionVM.categories,
             primaryCurrency: transactionVM.primaryCurrency,
-            budgets: budgetManager.budgets)
+            budgets: budgetManager.budgets,
+            scheduledPayments: scheduledPaymentVM.scheduledPayments
+        )
     }
 
     var body: some View {
@@ -26,35 +32,21 @@ struct DashboardView: View {
             ZStack {
                 PremiumBackground()
 
-                ScrollView(showsIndicators: false) {
+                // Fix: use .vertical axis only, clipped to prevent horizontal overflow
+                ScrollView(.vertical, showsIndicators: false) {
                     VStack(spacing: 20) {
                         heroCard
                         statsRow
-                        if !insights.isEmpty { insightsSection }
+                        if !insights.isEmpty { aiInsightsSection }
                         budgetSection
                         recentSection
                     }
                     .padding(.horizontal, 16)
                     .padding(.top, 8)
                     .padding(.bottom, 100)
-                    .background(
-                        GeometryReader { geo in
-                            Color.clear.preference(
-                                key: ScrollOffsetKey.self,
-                                value: geo.frame(in: .named("dashScroll")).minY
-                            )
-                        }
-                    )
+                    .frame(maxWidth: .infinity)  // prevent horizontal overflow
                 }
-                .coordinateSpace(name: "dashScroll")
-                .onPreferenceChange(ScrollOffsetKey.self) { offset in
-                    let delta = offset - lastScrollOffset
-                    // Sadece belirgin bir scroll olduğunda tab bar'ı gizle/göster
-                    if abs(delta) > 8 {
-                        onScrollChanged?(delta < 0)  // negatif = aşağı scroll
-                    }
-                    lastScrollOffset = offset
-                }
+                .clipped()  // clip any accidental horizontal overflow
             }
             .navigationTitle(greetingTitle)
             .navigationBarTitleDisplayMode(.large)
@@ -66,6 +58,14 @@ struct DashboardView: View {
                 EditTransactionView(transaction: txn)
                     .environmentObject(transactionVM)
                     .environmentObject(authVM)
+            }
+            .sheet(item: $selectedTransaction) { txn in
+                TransactionDetailView(
+                    transaction: txn,
+                    category: transactionVM.category(for: txn.categoryId)
+                )
+                .environmentObject(transactionVM)
+                .environmentObject(authVM)
             }
             .confirmationDialog(
                 NSLocalizedString("common.delete", comment: "Delete"),
@@ -92,7 +92,6 @@ struct DashboardView: View {
             }
         }
     }
-
 
     // MARK: - Toolbar
 
@@ -126,12 +125,10 @@ struct DashboardView: View {
     }
 
     // MARK: - Hero Card
-    // HIG: Net balance en üst hiyerarşide, büyük ve bold
 
     private var heroCard: some View {
         GradientCard(gradient: AppTheme.accentGradient) {
             VStack(spacing: 16) {
-                // Balance label
                 VStack(spacing: 4) {
                     Text(NSLocalizedString("dashboard.netBalance", comment: ""))
                         .font(.system(size: 13, weight: .medium))
@@ -140,19 +137,20 @@ struct DashboardView: View {
                         .tracking(0.5)
 
                     Text(transactionVM.netBalance.formattedCurrency(code: transactionVM.primaryCurrency))
-                        .font(.system(size: 40, weight: .black, design: .rounded))
+                        .font(.system(size: 38, weight: .black, design: .rounded))
                         .foregroundColor(.white)
                         .contentTransition(.numericText())
                         .animation(.spring(response: 0.4, dampingFraction: 0.8), value: transactionVM.netBalance)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.6)
                 }
 
-                // Income / Expense
                 HStack(spacing: 12) {
                     incomeExpenseChip(
                         label: NSLocalizedString("dashboard.income", comment: ""),
                         amount: transactionVM.thisMonthIncome,
                         icon: "arrow.down.circle.fill",
-                        tint: Color(hex: "#86EFAC")) // soft green, kontrast on purple bg
+                        tint: Color(hex: "#86EFAC"))
 
                     Rectangle()
                         .fill(Color.white.opacity(0.25))
@@ -162,16 +160,17 @@ struct DashboardView: View {
                         label: NSLocalizedString("dashboard.expense", comment: ""),
                         amount: transactionVM.thisMonthExpense,
                         icon: "arrow.up.circle.fill",
-                        tint: Color(hex: "#FCA5A5")) // soft red
+                        tint: Color(hex: "#FCA5A5"))
                 }
-                .padding(.horizontal, 16)
+                .padding(.horizontal, 14)
                 .padding(.vertical, 10)
                 .background(
                     RoundedRectangle(cornerRadius: 14, style: .continuous)
                         .fill(Color.white.opacity(0.12))
                 )
+                .frame(maxWidth: .infinity)
             }
-            .padding(20)
+            .padding(18)
             .frame(maxWidth: .infinity)
         }
     }
@@ -179,19 +178,21 @@ struct DashboardView: View {
     private func incomeExpenseChip(label: String, amount: Double, icon: String, tint: Color) -> some View {
         HStack(spacing: 10) {
             Image(systemName: icon)
-                .font(.system(size: 20))
+                .font(.system(size: 18))
                 .foregroundColor(tint)
+                .frame(width: 22)
             VStack(alignment: .leading, spacing: 1) {
                 Text(label)
                     .font(.system(size: 11, weight: .medium))
                     .foregroundColor(.white.opacity(0.70))
                     .textCase(.uppercase)
                     .tracking(0.3)
+                    .lineLimit(1)
                 Text(amount.formattedCurrency(code: transactionVM.primaryCurrency))
-                    .font(.system(size: 14, weight: .bold))
+                    .font(.system(size: 13, weight: .bold))
                     .foregroundColor(.white)
                     .lineLimit(1)
-                    .minimumScaleFactor(0.7)
+                    .minimumScaleFactor(0.65)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -218,7 +219,7 @@ struct DashboardView: View {
     }
 
     private var expenseChangeText: String {
-        guard let pct = transactionVM.expenseChangePercent else { return "No prev. month" }
+        guard let pct = transactionVM.expenseChangePercent else { return "—" }
         return "\(pct >= 0 ? "+" : "")\(String(format: "%.1f", pct))%"
     }
 
@@ -227,22 +228,24 @@ struct DashboardView: View {
         return pct >= 0 ? ZColor.expense : ZColor.income
     }
 
-    // MARK: - Insights
+    // MARK: - AI Insights Section
 
-    private var insightsSection: some View {
+    private var aiInsightsSection: some View {
         VStack(spacing: 10) {
             SectionHeader(
                 title: NSLocalizedString("dashboard.insights", comment: ""),
-                trailing: showInsights ? NSLocalizedString("dashboard.showLess", comment: "") : NSLocalizedString("dashboard.showMore", comment: "")) {
-                    withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
-                        showInsights.toggle()
-                    }
-                    Haptic.selection()
+                trailing: showInsights
+                    ? NSLocalizedString("dashboard.showLess", comment: "")
+                    : NSLocalizedString("dashboard.showMore", comment: "")) {
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                    showInsights.toggle()
                 }
+                Haptic.selection()
+            }
 
             let displayed = showInsights ? insights : Array(insights.prefix(2))
             ForEach(displayed) { insight in
-                InsightCard(insight: insight) { onAddTapped() }
+                AIInsightCard(insight: insight, onAction: { onAddTapped() })
                     .transition(.asymmetric(
                         insertion: .move(edge: .top).combined(with: .opacity),
                         removal: .opacity))
@@ -252,14 +255,13 @@ struct DashboardView: View {
 
     // MARK: - Budget Tracker
 
+    @ViewBuilder
     private var budgetSection: some View {
         let catsWithBudget = transactionVM.categories.filter {
             budgetManager.budgets[$0.id] != nil
         }
 
-        if catsWithBudget.isEmpty { return AnyView(EmptyView()) }
-
-        return AnyView(
+        if !catsWithBudget.isEmpty {
             VStack(spacing: 10) {
                 SectionHeader(title: NSLocalizedString("dashboard.budgets", comment: ""))
 
@@ -279,7 +281,7 @@ struct DashboardView: View {
                 .zFlowCard()
                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
             }
-        )
+        }
     }
 
     private func budgetRow(cat: Category, spent: Double, limit: Double, ratio: Double) -> some View {
@@ -298,6 +300,7 @@ struct DashboardView: View {
                     Text(cat.name)
                         .font(.system(size: 14, weight: .medium))
                         .foregroundColor(ZColor.label)
+                        .lineLimit(1)
                     Text("\(spent.formattedShort(code: transactionVM.primaryCurrency)) / \(limit.formattedShort(code: transactionVM.primaryCurrency))")
                         .font(.system(size: 12))
                         .foregroundColor(ZColor.labelSec)
@@ -322,11 +325,17 @@ struct DashboardView: View {
         return ZColor.income
     }
 
-    // MARK: - Recent Transactions
+    // MARK: - Recent Transactions (List-based for swipe support)
 
     private var recentSection: some View {
         VStack(spacing: 10) {
-            SectionHeader(title: NSLocalizedString("dashboard.recent", comment: ""))
+            SectionHeader(
+                title: NSLocalizedString("dashboard.recent", comment: ""),
+                trailing: NSLocalizedString("dashboard.seeAll", comment: "")
+            ) {
+                onSeeAllTransactions()
+                Haptic.selection()
+            }
 
             if transactionVM.isLoading {
                 VStack(spacing: 8) {
@@ -343,49 +352,43 @@ struct DashboardView: View {
                     action: onAddTapped)
                 .zFlowCard()
             } else {
-                VStack(spacing: 0) {
-                    ForEach(Array(transactionVM.transactions.prefix(5).enumerated()), id: \.element.id) { idx, txn in
+                // Use List for native swipeActions support
+                let recent = Array(transactionVM.transactions.prefix(5))
+                List {
+                    ForEach(recent) { txn in
                         TransactionRow(
                             transaction: txn,
-                            category: transactionVM.category(for: txn.categoryId))
+                            category: transactionVM.category(for: txn.categoryId)
+                        )
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            selectedTransaction = txn
+                            Haptic.light()
+                        }
                         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                             Button(role: .destructive) {
                                 transactionToDelete = txn
                                 Haptic.medium()
                             } label: {
-                                Label(NSLocalizedString("common.delete", comment: "Delete"),
-                                      systemImage: "trash.fill")
+                                Label(NSLocalizedString("common.delete", comment: ""), systemImage: "trash.fill")
                             }
-                            
                             Button {
                                 transactionToEdit = txn
                                 Haptic.light()
                             } label: {
-                                Label(NSLocalizedString("common.edit", comment: "Edit"),
-                                      systemImage: "pencil")
+                                Label(NSLocalizedString("common.edit", comment: ""), systemImage: "pencil")
                             }
                             .tint(ZColor.indigo)
                         }
-                        .contextMenu {
-                            Button {
-                                transactionToEdit = txn
-                                Haptic.light()
-                            } label: {
-                                Label(NSLocalizedString("common.edit", comment: "Edit"), systemImage: "pencil")
-                            }
-                            Button(role: .destructive) {
-                                transactionToDelete = txn
-                                Haptic.medium()
-                            } label: {
-                                Label(NSLocalizedString("common.delete", comment: "Delete"), systemImage: "trash.fill")
-                            }
-                        }
-
-                        if idx < min(4, transactionVM.transactions.count - 1) {
-                            Divider().padding(.leading, 70)
-                        }
+                        .listRowInsets(EdgeInsets())
+                        .listRowBackground(Color(.secondarySystemGroupedBackground))
+                        .listRowSeparatorTint(AppTheme.cardBorder(for: scheme))
                     }
                 }
+                .listStyle(.plain)
+                .scrollContentBackground(.hidden)
+                .scrollDisabled(true)  // outer ScrollView handles scroll
+                .frame(height: CGFloat(min(recent.count, 5)) * 68)
                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                 .overlay(
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
@@ -407,6 +410,89 @@ struct DashboardView: View {
         default:      greeting = NSLocalizedString("time.goodEvening", comment: "")
         }
         return name.isEmpty ? greeting : "\(greeting), \(name)"
+    }
+}
+
+// MARK: - AI Insight Card
+
+struct AIInsightCard: View {
+    let insight: FinancialInsight
+    let onAction: () -> Void
+    @Environment(\.colorScheme) private var scheme
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 14) {
+            ZStack {
+                Circle()
+                    .fill(insight.type.color.opacity(0.15))
+                    .frame(width: 40, height: 40)
+                Image(systemName: insight.icon)
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundColor(insight.type.color)
+            }
+
+            VStack(alignment: .leading, spacing: 5) {
+                Text(insight.title)
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundColor(ZColor.label)
+                    .lineLimit(1)
+
+                Text(insight.message.markdownBold())
+                    .font(.system(size: 13))
+                    .foregroundColor(ZColor.labelSec)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                if let label = insight.actionLabel {
+                    Button {
+                        onAction()
+                        Haptic.light()
+                    } label: {
+                        Text(label)
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(insight.type.color)
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.top, 2)
+                }
+            }
+
+            Spacer(minLength: 0)
+        }
+        .padding(14)
+        .background(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(insight.type.bgColor)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .strokeBorder(insight.type.color.opacity(0.20), lineWidth: 1)
+        )
+        .frame(maxWidth: .infinity)  // prevent any horizontal overflow
+    }
+}
+
+// MARK: - String Markdown Bold Helper
+
+extension String {
+    func markdownBold() -> AttributedString {
+        var result = AttributedString()
+        var remaining = self
+        while let start = remaining.range(of: "**") {
+            let before = String(remaining[remaining.startIndex..<start.lowerBound])
+            result += AttributedString(before)
+            remaining = String(remaining[start.upperBound...])
+            if let end = remaining.range(of: "**") {
+                var bold = AttributedString(String(remaining[remaining.startIndex..<end.lowerBound]))
+                bold.font = .system(size: 13, weight: .bold)
+                result += bold
+                remaining = String(remaining[end.upperBound...])
+            } else {
+                result += AttributedString("**\(remaining)")
+                remaining = ""
+            }
+        }
+        result += AttributedString(remaining)
+        return result
     }
 }
 

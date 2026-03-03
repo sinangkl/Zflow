@@ -63,14 +63,73 @@ final class ScheduledPaymentViewModel: ObservableObject {
     }
     
     private func sendPaymentNotification(payment: ScheduledPayment) {
+        // "Ready" notification — fired by checkScheduledPayments when day arrives
         let content = UNMutableNotificationContent()
-        content.title = "💰 Ödeme Hatırlatıcısı"
-        content.body = "\(payment.title) için \(payment.amount.formattedCurrency(code: payment.currency)) ödeme günü geldi."
+        content.title = "💰 Ödeme Onayı Bekliyor"
+        content.body = "\(payment.title) için \(payment.amount.formattedCurrency(code: payment.currency)) ödemesi gerçekleştirilsin mi? Onayınızı bekliyoruz."
         content.sound = .default
-        content.userInfo = ["paymentId": payment.id.uuidString]
+        content.userInfo = ["paymentId": payment.id.uuidString, "type": "ready"]
         
-        let request = UNNotificationRequest(identifier: payment.id.uuidString, content: content, trigger: nil)
+        let request = UNNotificationRequest(
+            identifier: "ready-\(payment.id.uuidString)",
+            content: content,
+            trigger: nil  // immediate
+        )
         UNUserNotificationCenter.current().add(request) { _ in }
+    }
+
+    /// Schedules advance notifications: 1 day before at 09:00 AND on payment day at 08:00
+    private func scheduleUpcomingNotifications(for payment: ScheduledPayment) {
+        let cal = Calendar.current
+        let center = UNUserNotificationCenter.current()
+
+        // Remove any old notifications for this payment
+        center.removePendingNotificationRequests(
+            withIdentifiers: [
+                "upcoming-\(payment.id.uuidString)",
+                "due-\(payment.id.uuidString)"
+            ]
+        )
+
+        let scheduledDate = payment.scheduledDate
+
+        // 1) 1 day before at 09:00
+        if let dayBefore = cal.date(byAdding: .day, value: -1, to: scheduledDate) {
+            var comps = cal.dateComponents([.year, .month, .day], from: dayBefore)
+            comps.hour = 9; comps.minute = 0
+            let trigger = UNCalendarNotificationTrigger(dateMatching: comps, repeats: false)
+
+            let content = UNMutableNotificationContent()
+            content.title = "\u{23f0} Yakında: \(payment.title)"
+            content.body = "Yarın \(payment.amount.formattedCurrency(code: payment.currency)) tutarında bir ödemeniz var."
+            content.sound = UNNotificationSound.default
+            content.userInfo = ["paymentId": payment.id.uuidString, "type": "upcoming"]
+
+            let req = UNNotificationRequest(
+                identifier: "upcoming-\(payment.id.uuidString)",
+                content: content,
+                trigger: trigger
+            )
+            center.add(req) { _ in }
+        }
+
+        // 2) Payment day at 08:00
+        var comps = cal.dateComponents([.year, .month, .day], from: scheduledDate)
+        comps.hour = 8; comps.minute = 0
+        let trigger = UNCalendarNotificationTrigger(dateMatching: comps, repeats: false)
+
+        let content2 = UNMutableNotificationContent()
+        content2.title = "💳 Ödeme Günü: \(payment.title)"
+        content2.body = "Bugün \(payment.amount.formattedCurrency(code: payment.currency)) tutarında bir ödemeniz var. Onaylamanızı bekliyoruz."
+        content2.sound = UNNotificationSound.default
+        content2.userInfo = ["paymentId": payment.id.uuidString, "type": "due"]
+
+        let req2 = UNNotificationRequest(
+            identifier: "due-\(payment.id.uuidString)",
+            content: content2,
+            trigger: trigger
+        )
+        center.add(req2) { _ in }
     }
     
     func fetchScheduledPayments(userId: UUID) async {
@@ -119,13 +178,16 @@ final class ScheduledPaymentViewModel: ObservableObject {
         )
         
         do {
-            let _: ScheduledPayment = try await supabase
+            let saved: ScheduledPayment = try await supabase
                 .from("scheduled_payments")
                 .insert(insert)
                 .select()
                 .single()
                 .execute()
                 .value
+            
+            // Schedule advance notifications using the saved record (has real ID + scheduledDate)
+            scheduleUpcomingNotifications(for: saved)
             
             await fetchScheduledPayments(userId: userId)
             return true
@@ -184,7 +246,14 @@ final class ScheduledPaymentViewModel: ObservableObject {
     
     func cancelPayment(paymentId: UUID) async {
         await updatePaymentStatus(paymentId: paymentId, status: .cancelled)
-        UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [paymentId.uuidString])
+        UNUserNotificationCenter.current().removePendingNotificationRequests(
+            withIdentifiers: [
+                paymentId.uuidString,
+                "upcoming-\(paymentId.uuidString)",
+                "due-\(paymentId.uuidString)",
+                "ready-\(paymentId.uuidString)"
+            ]
+        )
     }
     
     func deletePayment(paymentId: UUID, userId: UUID) async {

@@ -34,7 +34,14 @@
 
 // Tabs
 "tab.home" = "Ana Sayfa";
+"tab.add" = "Ekle";
+
+// Action Menu
+"action.chooseOption" = "Ne yapmak istersiniz?";
+"action.addTransaction" = "İşlem Ekle";
+"action.scanWithAI" = "AI ile Tara";
 "tab.transactions" = "İşlemler";
+"tab.reports" = "Raporlar";
 "tab.calendar" = "Takvim";
 "tab.settings" = "Ayarlar";
 
@@ -57,10 +64,12 @@
 // Transactions
 "transaction.new" = "Yeni İşlem";
 "transaction.edit" = "İşlemi Düzenle";
+"transaction.detail" = "İşlem Detayı";
 "transaction.save" = "Kaydet";
 "transaction.update" = "Güncelle";
 "transaction.amount" = "Tutar";
 "transaction.currency" = "Para Birimi";
+"transaction.type" = "Tür";
 "transaction.category" = "Kategori";
 "transaction.note" = "Not";
 "transaction.date" = "Tarih";
@@ -76,6 +85,8 @@
 "common.edit" = "Düzenle";
 "common.save" = "Kaydet";
 "common.search" = "Ara";
+"common.close" = "Kapat";
+"common.deleteWarning" = "Bu işlem geri alınamaz.";
 "time.today" = "Bugün";
 "time.yesterday" = "Dün";
 
@@ -220,3 +231,43 @@
 "bank.securityTitle" = "Verileriniz Güvende";
 "bank.securitySubtitle" = "Banka bağlantıları PSD2 düzenlemesine uygun açık bankacılık API'ları ile sağlanır. Şifre veya kart bilginiz asla saklanmaz.";
 "bank.sectionTitle" = "Banka Bağlantıları";
+
+// AI Sohbet
+"ai.title" = "AI Asistan";
+"ai.greeting" = "Merhaba! Ben ZFlow AI, kişisel finans asistanınım. İşlemlerinizi analiz edebilir, bütçeniz hakkındaki sorularınızı yanıtlayabilir ve fiş/fatura taramanıza yardımcı olabilirim. Size nasıl yardımcı olabilirim?";
+"ai.inputPlaceholder" = "Finanslarınız hakkında bir şey sorun...";
+"ai.reply.expense" = "Bu dönemde toplam harcamanız %.2f %@. Kategorilere göre dökümünü ister misiniz?";
+"ai.reply.income" = "Bu dönemde toplam geliriniz %.2f %@. Kazançlarınızı takip ettiğiniz için harika!";
+"ai.reply.balance" = "Mevcut net bakiyeniz %.2f %@.";
+"ai.reply.transactions" = "Şu ana kadar %d işlem kaydetdiniz.";
+"ai.reply.scan" = "Fiş tarama özelliği çok yakında! Fiş ve faturalarınızın fotoğraflarından işlem bilgilerini otomatik olarak çıkarabilecek olacağım.";
+"ai.reply.hello" = "Merhaba! Bugün finanslarınız konusunda size nasıl yardımcı olabilirim?";
+"ai.reply.thanks" = "Rica ederim! Başka bir şeye ihtiyacınız olursa buradayım.";
+"ai.reply.default" = "Gelir, gider, bakiye ve işlemlerinizi analiz etmenize yardımcı olabilirim. Ayrıca fiş taraması için de bana sorabilirsiniz. Ne öğrenmek istersiniz?";
+"ai.reply.scanHint" = "Fiş taramak için giriş çubuğundaki 📷 kamera simgesine dokunun. İşlem bilgilerini otomatik olarak çıkaracağım!";
+
+// Scan
+"scan.chooseSource" = "Görsel Kaynağı Seçin";
+"scan.camera" = "Kamera";
+"scan.photoLibrary" = "Fotoğraf Kütüphanesi";
+"scan.analyzing" = "Fiş analiz ediliyor...";
+"scan.error.title" = "Tarama Hatası";
+"scan.error.invalidURL" = "Geçersiz API URL'i";
+"scan.error.imageProcessing" = "Görsel işlenemedi";
+"scan.error.network" = "Ağ hatası: %@";
+"scan.error.unauthorized" = "Yetkilendirme hatası";
+"scan.error.rateLimited" = "Çok fazla istek, lütfen bekleyin";
+"scan.error.server" = "Sunucu hatası (%d)";
+"scan.error.invalidResponse" = "Geçersiz sunucu yanıtı";
+"scan.result.title" = "Fiş Tarandı";
+"scan.result.merchant" = "Mağaza";
+"scan.result.amount" = "Tutar";
+"scan.result.category" = "Kategori";
+"scan.result.date" = "Tarih";
+"scan.result.addTransaction" = "İşlem Ekle";
+"scan.result.taxNumber" = "Vergi No";
+"scan.result.items" = "Ürünler";
+"ai.scan.userMessage" = "📸 Fiş taranıyor...";
+"ai.scan.success" = "%@ mağazasından %.2f %@ tutarında bir fiş buldum. Aşağıdaki detayları kontrol edip 'İşlem Ekle' ile kaydedin.";
+"ai.scan.failed" = "Fişi okuyamadım. %@";
+"ai.scan.unknownMerchant" = "Bilinmeyen mağaza";

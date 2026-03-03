@@ -7,8 +7,11 @@ import Charts
 struct TransactionsReportsView: View {
     @EnvironmentObject var transactionVM: TransactionViewModel
     @EnvironmentObject var authVM: AuthViewModel
+    @EnvironmentObject var scheduledPaymentVM: ScheduledPaymentViewModel
+    @EnvironmentObject var budgetManager: BudgetManager
     @Environment(\.colorScheme) var scheme
     @State private var segment = 0  // 0 = Transactions  1 = Reports
+    @State private var selectedTransaction: Transaction? = nil
     
     var body: some View {
         NavigationStack {
@@ -24,7 +27,7 @@ struct TransactionsReportsView: View {
                     
                     // Content
                     if segment == 0 {
-                        TransactionListContent()
+                        TransactionListContent(selectedTransaction: $selectedTransaction)
                             .transition(.asymmetric(
                                 insertion: .move(edge: .leading).combined(with: .opacity),
                                 removal: .move(edge: .trailing).combined(with: .opacity)))
@@ -36,10 +39,16 @@ struct TransactionsReportsView: View {
                     }
                 }
             }
-            .navigationTitle(segment == 0
-                             ? NSLocalizedString("tab.transactions", comment: "")
-                             : NSLocalizedString("reports.title", comment: ""))
+            .navigationTitle(NSLocalizedString("tab.reports", comment: ""))
             .navigationBarTitleDisplayMode(.large)
+            .sheet(item: $selectedTransaction) { txn in
+                TransactionDetailView(
+                    transaction: txn,
+                    category: transactionVM.category(for: txn.categoryId)
+                )
+                .environmentObject(transactionVM)
+                .environmentObject(authVM)
+            }
         }
         .animation(.spring(response: 0.35, dampingFraction: 0.78), value: segment)
     }
@@ -49,6 +58,7 @@ struct TransactionsReportsView: View {
             (0, "list.bullet.rectangle.fill", NSLocalizedString("tab.transactions", comment: "")),
             (1, "chart.pie.fill",             NSLocalizedString("reports.title",    comment: ""))
         ]
+        // also build scroll-to-top on double-tap if needed
         return HStack(spacing: 0) {
             ForEach(items, id: \.0) { idx, icon, label in
                 segmentButton(idx: idx, icon: icon, label: label)
@@ -100,6 +110,8 @@ struct TransactionsReportsView: View {
         @EnvironmentObject var transactionVM: TransactionViewModel
         @EnvironmentObject var authVM: AuthViewModel
         @Environment(\.colorScheme) var scheme
+        
+        @Binding var selectedTransaction: Transaction?  // for detail sheet in parent
         
         @State private var searchText       = ""
         @State private var filterType: TransactionType?   = nil
@@ -174,19 +186,53 @@ struct TransactionsReportsView: View {
                 } else if filtered.isEmpty {
                     emptyState
                 } else {
-                    ScrollView(showsIndicators: false) {
-                        LazyVStack(spacing: 20, pinnedViews: .sectionHeaders) {
-                            ForEach(groupedByDate, id: \.key) { group in
-                                Section {
-                                    transactionGroup(group.items)
-                                } header: {
-                                    groupHeader(group.key, items: group.items)
+                    // List enables native swipeActions support
+                    List {
+                        ForEach(groupedByDate, id: \.key) { group in
+                            Section {
+                                ForEach(group.items) { txn in
+                                    let cat = transactionVM.category(for: txn.categoryId)
+                                    EnhancedTransactionRow(
+                                        transaction: txn,
+                                        category: cat,
+                                        primaryCurrency: transactionVM.primaryCurrency
+                                    )
+                                    .contentShape(Rectangle())
+                                    .onTapGesture {
+                                        selectedTransaction = txn
+                                        Haptic.light()
+                                    }
+                                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                        Button(role: .destructive) {
+                                            transactionToDelete = txn
+                                            Haptic.medium()
+                                        } label: {
+                                            Label(NSLocalizedString("common.delete", comment: ""), systemImage: "trash.fill")
+                                        }
+                                        Button {
+                                            transactionToEdit = txn
+                                            Haptic.light()
+                                        } label: {
+                                            Label(NSLocalizedString("common.edit", comment: ""), systemImage: "pencil")
+                                        }
+                                        .tint(ZColor.indigo)
+                                    }
+                                    .listRowInsets(EdgeInsets())
+                                    .listRowBackground(Color(.secondarySystemGroupedBackground))
+                                    .listRowSeparatorTint(AppTheme.cardBorder(for: scheme))
                                 }
+                            } header: {
+                                groupHeader(group.key, items: group.items)
+                                    .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
                             }
                         }
-                        .padding(.horizontal, 16)
-                        .padding(.bottom, 130)
+                        // Bottom padding row
+                        Color.clear.frame(height: 100)
+                            .listRowBackground(Color.clear)
+                            .listRowSeparator(.hidden)
                     }
+                    .listStyle(.plain)
+                    .scrollContentBackground(.hidden)
                 }
             }
             .confirmationDialog(
@@ -303,57 +349,8 @@ struct TransactionsReportsView: View {
             )
         }
         
-        // MARK: - Transaction Group
-        
-        private func transactionGroup(_ items: [Transaction]) -> some View {
-            VStack(spacing: 0) {
-                ForEach(Array(items.enumerated()), id: \.element.id) { idx, txn in
-                    let cat = transactionVM.category(for: txn.categoryId)
-                    
-                    EnhancedTransactionRow(transaction: txn, category: cat, primaryCurrency: transactionVM.primaryCurrency)
-                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                            Button(role: .destructive) {
-                                transactionToDelete = txn
-                                Haptic.medium()
-                            } label: {
-                                Label(NSLocalizedString("common.delete", comment: ""),
-                                      systemImage: "trash.fill")
-                            }
-                            
-                            Button {
-                                transactionToEdit = txn
-                                Haptic.light()
-                            } label: {
-                                Label(NSLocalizedString("common.edit", comment: ""),
-                                      systemImage: "pencil")
-                            }
-                            .tint(ZColor.indigo)
-                        }
-                        .contextMenu {
-                            Button {
-                                transactionToEdit = txn
-                            } label: {
-                                Label(NSLocalizedString("common.edit", comment: ""), systemImage: "pencil")
-                            }
-                            Button(role: .destructive) {
-                                transactionToDelete = txn
-                            } label: {
-                                Label(NSLocalizedString("common.delete", comment: ""), systemImage: "trash")
-                            }
-                        }
-                    
-                    if idx < items.count - 1 {
-                        Divider().padding(.leading, 70)
-                    }
-                }
-            }
-            .background(Color(.secondarySystemGroupedBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .strokeBorder(AppTheme.cardBorder(for: scheme), lineWidth: 0.5)
-            )
-        }
+        // transactionGroup is no longer used — kept for compatibility
+        private func transactionGroup(_ items: [Transaction]) -> some View { EmptyView() }
         
         // MARK: - Loading & Empty
         
@@ -455,10 +452,13 @@ struct TransactionsReportsView: View {
     
     struct ReportsContent: View {
         @EnvironmentObject var transactionVM: TransactionViewModel
+        @EnvironmentObject var scheduledPaymentVM: ScheduledPaymentViewModel
+        @EnvironmentObject var budgetManager: BudgetManager
         @Environment(\.colorScheme) var scheme
         
         @State private var selectedPeriod: Period       = .month
         @State private var selectedType: TransactionType = .expense
+        @State private var showAIChat                   = false
         
         enum Period: String, CaseIterable {
             case week = "7D", month = "30D", quarter = "90D", year = "1Y"
@@ -485,9 +485,24 @@ struct TransactionsReportsView: View {
             transactionVM.dailyTotals(type: selectedType.rawValue, from: startDate)
         }
         
+        private var aiInsights: [FinancialInsight] {
+            InsightsEngine.generate(
+                transactions: transactionVM.transactions,
+                categories: transactionVM.categories,
+                primaryCurrency: transactionVM.primaryCurrency,
+                budgets: budgetManager.budgets,
+                scheduledPayments: scheduledPaymentVM.scheduledPayments
+            )
+        }
+        
         var body: some View {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 20) {
+                    // AI Insights Panel
+                    if !aiInsights.isEmpty {
+                        aiInsightsPanel
+                    }
+                    
                     // Period + type controls
                     controlRow
                     
@@ -509,6 +524,73 @@ struct TransactionsReportsView: View {
                 .padding(.horizontal, 16)
                 .padding(.bottom, 130)
             }
+            .sheet(isPresented: $showAIChat) {
+                // AIChatView needs to be presented as a sheet
+                NavigationStack {
+                    AIChatView()
+                        .navigationTitle(NSLocalizedString("ai.title", comment: ""))
+                        .navigationBarTitleDisplayMode(.inline)
+                }
+            }
+        }
+        
+        // MARK: - AI Insights Panel
+        
+        private var aiInsightsPanel: some View {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 10) {
+                    ZStack {
+                        Circle()
+                            .fill(AppTheme.accentGradient)
+                            .frame(width: 32, height: 32)
+                        Image(systemName: "sparkles")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(.white)
+                    }
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text("AI Yorumları")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundColor(ZColor.label)
+                        Text("Finansal verilerinizin analizi")
+                            .font(.system(size: 12))
+                            .foregroundColor(ZColor.labelSec)
+                    }
+                    Spacer()
+                    // AI Chat button
+                    Button {
+                        showAIChat = true
+                        Haptic.light()
+                    } label: {
+                        HStack(spacing: 5) {
+                            Image(systemName: "bubble.left.and.bubble.right.fill")
+                                .font(.system(size: 12, weight: .semibold))
+                            Text("Sohbet Et")
+                                .font(.system(size: 13, weight: .semibold))
+                        }
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 7)
+                        .background(AppTheme.accentGradient)
+                        .clipShape(Capsule())
+                    }
+                    .buttonStyle(.plain)
+                }
+                
+                VStack(spacing: 8) {
+                    ForEach(aiInsights.prefix(4)) { insight in
+                        AIInsightCard(insight: insight, onAction: {})
+                    }
+                }
+            }
+            .padding(16)
+            .background(
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .fill(scheme == .dark ? Color.white.opacity(0.05) : Color(.secondarySystemGroupedBackground))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .strokeBorder(AppTheme.cardBorder(for: scheme), lineWidth: 0.5)
+            )
         }
         
         // MARK: - Controls

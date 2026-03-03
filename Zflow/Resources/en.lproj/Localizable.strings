@@ -35,8 +35,15 @@
 // Tabs
 "tab.home" = "Home";
 "tab.transactions" = "Transactions";
+"tab.reports" = "Reports";
+"tab.add" = "Add";
 "tab.calendar" = "Calendar";
 "tab.settings" = "Settings";
+
+// Action Menu
+"action.chooseOption" = "What would you like to do?";
+"action.addTransaction" = "Add Transaction";
+"action.scanWithAI" = "Scan with AI";
 
 // Dashboard
 "dashboard.netBalance" = "Net Balance";
@@ -57,10 +64,12 @@
 // Transactions
 "transaction.new" = "New Transaction";
 "transaction.edit" = "Edit Transaction";
+"transaction.detail" = "Transaction Detail";
 "transaction.save" = "Save Transaction";
 "transaction.update" = "Update Transaction";
 "transaction.amount" = "Amount";
 "transaction.currency" = "Currency";
+"transaction.type" = "Type";
 "transaction.category" = "Category";
 "transaction.note" = "Note (optional)";
 "transaction.date" = "Date";
@@ -76,6 +85,8 @@
 "common.edit" = "Edit";
 "common.save" = "Save";
 "common.search" = "Search";
+"common.close" = "Close";
+"common.deleteWarning" = "This action cannot be undone.";
 "time.today" = "Today";
 "time.yesterday" = "Yesterday";
 
@@ -175,3 +186,43 @@
 "bank.securityTitle" = "Your Data is Secure";
 "bank.securitySubtitle" = "Bank connections use PSD2-compliant Open Banking APIs. Your passwords and card details are never stored.";
 "bank.sectionTitle" = "Bank Connections";
+
+// AI Chat
+"ai.title" = "AI Assistant";
+"ai.greeting" = "Hello! I'm ZFlow AI, your personal finance assistant. I can analyze your transactions, answer questions about your budget, and help you scan receipts. How can I help you today?";
+"ai.inputPlaceholder" = "Ask me anything about your finances...";
+"ai.reply.expense" = "Your total expenses this period are %.2f %@. Would you like a breakdown by category?";
+"ai.reply.income" = "Your total income this period is %.2f %@. Great job on tracking your earnings!";
+"ai.reply.balance" = "Your current net balance is %.2f %@.";
+"ai.reply.transactions" = "You have %d transactions recorded so far.";
+"ai.reply.scan" = "Receipt scanning is coming soon! I'll be able to automatically extract transaction details from photos of your receipts and invoices.";
+"ai.reply.hello" = "Hello! How can I help you with your finances today?";
+"ai.reply.thanks" = "You're welcome! Let me know if you need anything else.";
+"ai.reply.default" = "I can help you analyze your income, expenses, balance, and transactions. You can also ask me to scan receipts. What would you like to know?";
+
+// Receipt Scan
+"scan.chooseSource" = "Choose Image Source";
+"scan.camera" = "Take Photo";
+"scan.photoLibrary" = "Choose from Library";
+"scan.analyzing" = "Analyzing receipt...";
+"scan.error.title" = "Scan Failed";
+"scan.error.invalidURL" = "Invalid API URL. Check ZFlowAPIConfig.";
+"scan.error.imageProcessing" = "Could not process image";
+"scan.error.network" = "Network error: %@";
+"scan.error.unauthorized" = "Invalid API key";
+"scan.error.rateLimited" = "Too many requests. Please wait.";
+"scan.error.server" = "Server error (%d)";
+"scan.error.invalidResponse" = "Invalid server response";
+"scan.result.title" = "Receipt Scanned";
+"scan.result.merchant" = "Merchant";
+"scan.result.amount" = "Amount";
+"scan.result.category" = "Category";
+"scan.result.date" = "Date";
+"scan.result.addTransaction" = "Add Transaction";
+"scan.result.taxNumber" = "Tax Number";
+"scan.result.items" = "Items";
+"ai.scan.userMessage" = "📸 Scanning receipt...";
+"ai.scan.success" = "I found a receipt from %@ for %.2f %@. Check the details below and tap 'Add Transaction' to save it.";
+"ai.scan.failed" = "I couldn't read the receipt. %@";
+"ai.scan.unknownMerchant" = "Unknown merchant";
+"ai.reply.scanHint" = "Tap the 📷 camera icon in the input bar to scan a receipt. I'll extract the transaction details automatically!";

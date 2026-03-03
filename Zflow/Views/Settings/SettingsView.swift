@@ -17,7 +17,6 @@ struct SettingsView: View {
     @State private var showCategoryMgr    = false
     @State private var showExport         = false
     @State private var showSignOutAlert   = false
-    @State private var showBankConnection = false
 
     var body: some View {
         NavigationStack {
@@ -29,7 +28,6 @@ struct SettingsView: View {
                         appearanceSection
                         preferencesSection
                         budgetSection
-                        bankConnectionSection
                         if authVM.userProfile?.isBusiness == true {
                             VATPreviewCard()
                                 .environmentObject(transactionVM)
@@ -58,9 +56,6 @@ struct SettingsView: View {
             }
             .sheet(isPresented: $showExport) {
                 ExportView().environmentObject(transactionVM)
-            }
-            .sheet(isPresented: $showBankConnection) {
-                BankConnectionView().environmentObject(authVM)
             }
             .alert(NSLocalizedString("settings.signOut", comment: ""), isPresented: $showSignOutAlert) {
                 Button(NSLocalizedString("common.cancel", comment: ""), role: .cancel) {}
@@ -211,16 +206,6 @@ struct SettingsView: View {
                        badge: "\(transactionVM.categories.count)") {
                     showCategoryMgr = true; Haptic.light()
                 }
-            }
-        }
-    }
-
-    private var bankConnectionSection: some View {
-        settingsSection(NSLocalizedString("bank.sectionTitle", comment: "")) {
-            navRow(icon: "building.columns.fill", iconColor: Color(hex: "#059669"),
-                   title: NSLocalizedString("bank.connectAccount", comment: ""),
-                   badge: nil) {
-                showBankConnection = true; Haptic.light()
             }
         }
     }

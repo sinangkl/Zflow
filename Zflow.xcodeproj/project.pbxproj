@@ -105,6 +105,13 @@
 			);
 			target = 303515392F4D8FCE00419F58 /* ZFlowWidgetExtensionExtension */;
 		};
+		3079252C2F54868B00CD49B8 /* Exceptions for "Zflow" folder in "Zflow" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 30916A842F48969F001E2B8C /* Zflow */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -124,6 +131,7 @@
 		30916A872F48969F001E2B8C /* Zflow */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
+				3079252C2F54868B00CD49B8 /* Exceptions for "Zflow" folder in "Zflow" target */,
 				303515602F4D913B00419F58 /* Exceptions for "Zflow" folder in "ZFlowWatch Watch App" target */,
 				303515612F4D913B00419F58 /* Exceptions for "Zflow" folder in "ZFlowWidgetExtensionExtension" target */,
 			);
@@ -772,6 +780,9 @@
 				DEVELOPMENT_TEAM = H6FNM9B2WV;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Zflow/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Z Flow";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "ZFlow needs access to your calendar to add and view financial events.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -805,6 +816,9 @@
 				DEVELOPMENT_TEAM = H6FNM9B2WV;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Zflow/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Z Flow";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "ZFlow needs access to your calendar to add and view financial events.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;

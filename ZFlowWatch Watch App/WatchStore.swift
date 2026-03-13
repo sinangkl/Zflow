@@ -12,12 +12,26 @@ final class WatchStore: NSObject, ObservableObject, WCSessionDelegate {
     @Published var budgetAlerts: [BudgetAlertPayload] = []
     @Published var showBudgetAlert: BudgetAlertPayload? = nil
     @Published var isConnected = false
+    @Published var currentLanguage: String = AppGroup.defaults.string(forKey: AppGroup.Key.language) ?? "en"
 
     private let alertSeenKey = "watch.alertsSeen"
     private var seenAlertIds: Set<String> {
         get { Set(UserDefaults.standard.stringArray(forKey: alertSeenKey) ?? []) }
         set { UserDefaults.standard.set(Array(newValue), forKey: alertSeenKey) }
     }
+
+    // MARK: - Dynamic Theme
+    var accentPrimary: Color {
+        if let hex = snapshot.accentPrimaryHex { return wColor(hex) }
+        return wColor("#5E5CE6")
+    }
+
+    var accentSecondary: Color {
+        if let hex = snapshot.accentSecondaryHex { return wColor(hex) }
+        return wColor("#7C3AED")
+    }
+
+    private var cancellables = Set<AnyCancellable>()
 
     private override init() {
         super.init()
@@ -26,6 +40,24 @@ final class WatchStore: NSObject, ObservableObject, WCSessionDelegate {
             WCSession.default.activate()
         }
         checkBudgetAlerts()
+
+        // Observe language changes from AppGroup
+        NotificationCenter.default.publisher(for: UserDefaults.didChangeNotification)
+            .sink { [weak self] _ in
+                let newLang = AppGroup.defaults.string(forKey: AppGroup.Key.language) ?? "en"
+                if self?.currentLanguage != newLang {
+                    self?.currentLanguage = newLang
+                }
+            }
+            .store(in: &cancellables)
+    }
+
+    func updateLanguage(_ lang: String) {
+        currentLanguage = lang
+        AppGroup.defaults.set(lang, forKey: AppGroup.Key.language)
+        AppGroup.defaults.synchronize()
+        // Notify localizer if it exists on watch
+        NotificationCenter.default.post(name: UserDefaults.didChangeNotification, object: nil)
     }
 
     // MARK: - Budget Alert Check
@@ -73,7 +105,16 @@ final class WatchStore: NSObject, ObservableObject, WCSessionDelegate {
     func session(_ session: WCSession,
                  activationDidCompleteWith state: WCSessionActivationState,
                  error: Error?) {
-        isConnected = state == .activated
+        DispatchQueue.main.async {
+            self.isConnected = state == .activated
+        }
+        
+        // Eagerly grab any pending context once activated
+        if state == .activated {
+            if let data = session.receivedApplicationContext["snapshot"] as? Data {
+                handleIncomingData(data)
+            }
+        }
     }
 
     func session(_ session: WCSession, didReceiveMessageData messageData: Data) {

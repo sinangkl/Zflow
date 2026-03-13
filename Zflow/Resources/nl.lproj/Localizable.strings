@@ -32,10 +32,12 @@
 "tab.calendar" = "Kalender";
 "tab.settings" = "Instellingen";
 "dashboard.netBalance" = "Nettosaldo";
+"dashboard.quickActions" = "Snelle acties";
 "dashboard.income" = "Inkomsten";
 "dashboard.expense" = "Uitgaven";
 "dashboard.insights" = "Inzichten";
 "dashboard.budgets" = "Budgetten";
+"dashboard.cashFlow" = "Kasstroomprognose";
 "dashboard.recent" = "Recent";
 "dashboard.showMore" = "Meer Tonen";
 "dashboard.showLess" = "Minder Tonen";
@@ -161,3 +163,82 @@
 "calendar.optionalNote" = "Optionele opmerking...";
 "calendar.newEvent" = "Nieuw Kalender Evenement";
 "calendar.add" = "Toevoegen";
+
+// AI Insights
+"ai.insights.title" = "AI Insights";
+"ai.insights.subtitle" = "Analysis of your financial data";
+"ai.chat.open" = "Chat";
+"ai.action.calendar" = "Go to Calendar";
+
+// Budget Manager
+"budget.noCategories" = "No Categories Yet";
+"budget.noCategoriesHint" = "Add categories in Settings → Categories first.";
+"budget.tapHint" = "Tap a category to set its monthly budget";
+"budget.set" = "Set Budget";
+"budget.monthlyLimit" = "Monthly limit";
+"budget.limitFor" = "Monthly limit for %@";
+"budget.notSet" = "No budget set";
+
+// Common additional
+"common.error" = "Error";
+
+// Payments
+"payment.awaitingApproval" = "Payment Awaiting Approval";
+"widget.recentTransactions" = "Recent Transactions";
+
+// Settings (additional)
+"settings.cardTheme" = "Kaartthema";
+"settings.personalInfo" = "Persoonlijke info";
+"settings.security" = "Beveiliging";
+"settings.changeEmail" = "E-mail wijzigen";
+"settings.changePassword" = "Wachtwoord wijzigen";
+"settings.appLock" = "App vergrendeling";
+"settings.updateEmail" = "E-mail bijwerken";
+"settings.newPassword" = "Nieuw wachtwoord";
+"settings.confirmPassword" = "Wachtwoord bevestigen";
+"settings.both" = "Beide";
+
+// Added for full localization support
+"budget.totalIncome" = "Totaal maandelijks inkomen";
+"budget.categoryBudgets" = "Categoriebudgetten";
+"budget.enterSalary" = "Voer uw totale maandelijkse inkomen in";
+"export.formatCSVDesc" = "Voor Excel, Numbers of Google Sheets";
+"export.formatPDFDesc" = "Opgemaakt rapport voor afdrukken of delen";
+"export.buttonCSV" = "CSV exporteren";
+"export.buttonPDF" = "PDF exporteren";
+"export.transactionsCount" = "%d transacties beschikbaar";
+"transaction.income" = "Inkomsten";
+"transaction.expense" = "Uitgave";
+"common.more" = "Meer";
+"settings.appVersion" = "Versie 1.0  •  Gebouwd met SwiftUI + Supabase";
+"category.noCategories" = "Geen categorieën";
+"category.noCategoriesHint" = "Tik op + om categorieën toe te voegen of standaardcategorieën te herstellen.";
+
+"common.none" = "Geen";
+"payment.upcoming" = "Aankomende Betaling";
+"transaction.type" = "Type";
+"common.name" = "Naam";
+"common.color" = "Kleur";
+"common.icon" = "Icoon";
+"common.all" = "Alles";
+"common.select" = "Selecteren";
+"bulk.deleteSelected" = "%d geselecteerde verwijderen";
+"category.namePlaceholder" = "Categorienaam";
+"auth.resetLinkExpired" = "Uw wachtwoord reset link is ongeldig of verlopen. Probeer het opnieuw.";
+"auth.enterEmailFirst" = "Voer eerst uw e-mailadres in.";
+"auth.resetPasswordDesc" = "Stel een nieuw wachtwoord in voor uw account.";
+"auth.updatePassword" = "Wachtwoord bijwerken";
+"auth.passwordTooShort" = "Wachtwoord moet minimaal 6 tekens zijn.";
+"auth.passwordMismatch" = "Wachtwoorden komen niet overeen.";
+"auth.pwWeak" = "Zwak";
+"auth.pwFair" = "Redelijk";
+"auth.pwStrong" = "Sterk";
+"auth.continueWithGoogle" = "Doorgaan met Google";
+"auth.continueWithApple" = "Doorgaan met Apple";
+"auth.continueWithEmail" = "Doorgaan met E-mail";
+"auth.orDivider" = "of";
+"auth.googleFailed" = "Google-aanmelding mislukt.";
+"auth.comingSoon" = "Binnenkort";
+"category.incoming_transfer" = "Inkomende Overschrijving";
+"category.outgoing_transfer" = "Uitgaande Overschrijving";
+"category.bank_fees" = "Bankkosten";

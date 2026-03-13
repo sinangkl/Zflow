@@ -2,22 +2,15 @@ import Foundation
 import UIKit
 import Supabase
 
-// MARK: - API Config
-
-enum ZFlowAPIConfig {
-    static let webhookBaseURL  = "https://api.zflow.online"
-    static let receiptEndpoint = "\(webhookBaseURL)/webhook/receipt-scan"
-    static let apiKey          = "21d412ffb2f5b69de6f4dfd1fcddebe5a8d1373628d35ebe52bbef3cdf27136d"
-    static let storageBucket   = "receipts"
-}
-
 // MARK: - Scanned Receipt Model
 
-struct ScannedReceipt {
+struct ScannedReceipt: Identifiable {
+    let id = UUID()
     let amount: Double
     let currency: String
     let merchant: String
     let category: String
+    let categoryId: String? // "groceries", "shopping" etc.
     let date: Date
     let note: String
     let type: String // "expense" | "income"
@@ -55,172 +48,110 @@ enum ScanError: LocalizedError {
 // MARK: - Receipt Scan Service
 
 actor ReceiptScanService {
+    struct ReceiptResponse: Codable {
+        let status: String
+        let receipt_data: ReceiptInfo?
+    }
+
+    struct ReceiptInfo: Codable {
+        let market: String?
+        let total: Double?
+        let category_id: String?
+        let note: String?
+        let image_url: String?
+        let date: String?
+    }
+    
     static let shared = ReceiptScanService()
     private init() {}
 
     func scan(image: UIImage, userId: String, businessId: String? = nil) async throws -> ScannedReceipt {
-        // 1. Görseli sıkıştır — UIImage işlemi actor dışında (nonisolated helper) yapılır
-        let resized = zf_resizeImage(image, toMaxDimension: 1024)
-        guard let jpegData = resized.jpegData(compressionQuality: 0.7) else {
-            throw ScanError.imageProcessingFailed
+        guard let url = URL(string: ZFlowAPIConfig.fullUploadURL) else {
+            throw ScanError.invalidURL
         }
 
-        // 2. Supabase Storage'a yükle
-        let imageUrl = try await uploadToStorage(data: jpegData, userId: userId)
-        print("🔍 [ReceiptScan] Image uploaded: \(imageUrl)")
-
-        // 3. Config değerlerini yerel değişkene al (actor isolation sorununu giderir)
-        let endpoint = await ZFlowAPIConfig.receiptEndpoint
-        let apiKey   = await ZFlowAPIConfig.apiKey
-
-        guard let url = URL(string: endpoint) else {
-            throw ScanError.invalidURL
+        // Prepare image
+        guard let imageData = image.jpegData(compressionQuality: 0.5) else {
+            throw ScanError.imageProcessingFailed
         }
 
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue(apiKey, forHTTPHeaderField: "X-API-Key")
-        request.timeoutInterval = 90
+        request.timeoutInterval = 60
+        
+        let boundary = "Boundary-\(UUID().uuidString)"
+        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
 
-        var payload: [String: Any] = [
-            "imageUrl": imageUrl,
-            "userId": userId
-        ]
-        if let bizId = businessId {
-            payload["businessId"] = bizId
-        }
-        request.httpBody = try JSONSerialization.data(withJSONObject: payload)
+        var body = Data()
+        // user_id
+        body.append("--\(boundary)\r\n".data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"user_id\"\r\n\r\n".data(using: .utf8)!)
+        body.append("\(userId)\r\n".data(using: .utf8)!)
 
-        // 4. İstek gönder
-        let data: Data
-        let response: URLResponse
-        do {
-            (data, response) = try await URLSession.shared.data(for: request)
-        } catch {
-            throw ScanError.networkError(error)
-        }
+        // file
+        body.append("--\(boundary)\r\n".data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"file\"; filename=\"receipt.jpg\"\r\n".data(using: .utf8)!)
+        body.append("Content-Type: image/jpeg\r\n\r\n".data(using: .utf8)!)
+        body.append(imageData)
+        body.append("\r\n".data(using: .utf8)!)
+        body.append("--\(boundary)--\r\n".data(using: .utf8)!)
 
-        guard let http = response as? HTTPURLResponse else {
-            throw ScanError.networkError(URLError(.badServerResponse))
-        }
+        request.httpBody = body
 
-        // DEBUG log
-        if let rawString = String(data: data, encoding: .utf8) {
-            print("🔍 [ReceiptScan] HTTP \(http.statusCode) - Raw response: \(rawString)")
-        }
+        let (data, response) = try await URLSession.shared.data(for: request)
 
-        switch http.statusCode {
-        case 200...299:
-            return try parseResponse(data, fallbackImageUrl: imageUrl)
-        case 401:
-            throw ScanError.unauthorized
-        case 429:
-            throw ScanError.rateLimited
-        default:
-            let body = String(data: data, encoding: .utf8) ?? ""
-            throw ScanError.serverError(http.statusCode, body)
-        }
-    }
-
-    // MARK: - Upload to Supabase Storage
-
-    private func uploadToStorage(data: Data, userId: String) async throws -> String {
-        let fileName = "\(userId)/\(Int(Date().timeIntervalSince1970)).jpg"
-        let bucket   = await ZFlowAPIConfig.storageBucket
-
-        do {
-            // Updated API: upload(_:data:options:)  — path is first arg, no label
-            let client = await SupabaseManager.shared.client
-            _ = try await client.storage
-                .from(bucket)
-                .upload(
-                    fileName,
-                    data: data,
-                    options: FileOptions(contentType: "image/jpeg", upsert: true)
-                )
-        } catch {
-            throw ScanError.uploadFailed(error.localizedDescription)
-        }
-
-        // Public URL — must await client access and try getPublicURL
-        let client = await SupabaseManager.shared.client
-        let publicURL = try client.storage
-            .from(bucket)
-            .getPublicURL(path: fileName)
-
-        return publicURL.absoluteString
-    }
-
-    // MARK: - Parse
-
-    private func parseResponse(_ data: Data, fallbackImageUrl: String) throws -> ScannedReceipt {
-        // n8n "Respond to Webhook" tüm itemleri array olarak döner
-        let json: [String: Any]
-        if let array = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]],
-           let first = array.first {
-            if let output = first["output"] as? [String: Any] {
-                json = output
-            } else {
-                json = first
-            }
-        } else if let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
-            if let output = obj["output"] as? [String: Any] {
-                json = output
-            } else {
-                json = obj
-            }
-        } else {
+        guard let httpResponse = response as? HTTPURLResponse else {
             throw ScanError.invalidResponse
         }
 
-        // amount Int veya Double gelebilir
-        let amount: Double
-        if let d = json["amount"] as? Double {
-            amount = d
-        } else if let i = json["amount"] as? Int {
-            amount = Double(i)
+        if httpResponse.statusCode != 200 {
+            throw ScanError.serverError(httpResponse.statusCode, String(data: data, encoding: .utf8) ?? "Unknown Error")
+        }
+
+        let decoder = JSONDecoder()
+        let result = try decoder.decode(ReceiptResponse.self, from: data)
+
+        if result.status == "success", let info = result.receipt_data {
+            let merchant = info.market ?? ""
+            let amount = info.total ?? 0.0
+            let catId = info.category_id ?? "other"
+            let note = info.note ?? merchant
+            let imgUrl = info.image_url ?? ""
+            
+            // Parse date if possible
+            var scanDate = Date()
+            let isoFormatter = ISO8601DateFormatter()
+            let ymdFormatter = DateFormatter()
+            ymdFormatter.dateFormat = "yyyy-MM-dd"
+
+            if let dateStr = info.date, let d = isoFormatter.date(from: dateStr) {
+                scanDate = d
+            } else if let dateStr = info.date, let d = ymdFormatter.date(from: dateStr) {
+                // If it's today's date, we use the current exact time so it appears at the top of lists.
+                if Calendar.current.isDateInToday(d) {
+                    scanDate = Date()
+                } else {
+                    scanDate = d
+                }
+            } else {
+                scanDate = .now
+            }
+
+            return ScannedReceipt(
+                amount: amount,
+                currency: "TRY",
+                merchant: merchant,
+                category: catId,
+                categoryId: catId,
+                date: scanDate,
+                note: note,
+                type: "expense",
+                taxNumber: "",
+                salesItems: [],
+                imageUrl: imgUrl
+            )
         } else {
-            amount = 0
+            throw ScanError.invalidResponse
         }
-
-        let merchant   = json["store_name"] as? String ?? ""
-        let category   = json["category"]   as? String ?? ""
-        let type       = json["type"]       as? String ?? "expense"
-        let taxNumber  = json["tax_number"] as? String ?? ""
-        let imageUrl   = json["image_url"]  as? String ?? fallbackImageUrl
-        let salesItems = json["sales_data"] as? [[String: Any]] ?? []
-
-        var date = Date()
-        if let dateStr = json["receipt_date"] as? String, !dateStr.isEmpty {
-            let fmt = DateFormatter()
-            fmt.dateFormat = "yyyy-MM-dd"
-            date = fmt.date(from: dateStr) ?? Date()
-        }
-
-        return ScannedReceipt(
-            amount: amount,
-            currency: "TRY",
-            merchant: merchant,
-            category: category,
-            date: date,
-            note: merchant,
-            type: type,
-            taxNumber: taxNumber,
-            salesItems: salesItems,
-            imageUrl: imageUrl
-        )
     }
-}
-
-// MARK: - UIImage Resize Helper (free function — no actor isolation)
-
-/// Resizes a UIImage so its longest side doesn't exceed `maxDim`.
-/// Free function avoids @MainActor isolation that would come from a UIImage extension.
-nonisolated private func zf_resizeImage(_ image: UIImage, toMaxDimension maxDim: CGFloat) -> UIImage {
-    let ratio = min(maxDim / image.size.width, maxDim / image.size.height, 1.0)
-    guard ratio < 1.0 else { return image }
-    let newSize = CGSize(width: image.size.width * ratio, height: image.size.height * ratio)
-    let renderer = UIGraphicsImageRenderer(size: newSize)
-    return renderer.image { _ in image.draw(in: CGRect(origin: .zero, size: newSize)) }
 }

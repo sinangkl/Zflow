@@ -40,10 +40,12 @@
 
 // Dashboard
 "dashboard.netBalance" = "Saldo Neto";
+"dashboard.quickActions" = "Acciones rápidas";
 "dashboard.income" = "Ingresos";
 "dashboard.expense" = "Gastos";
 "dashboard.insights" = "Análisis";
 "dashboard.budgets" = "Presupuestos";
+"dashboard.cashFlow" = "Pronóstico de Flujo de Caja";
 "dashboard.recent" = "Reciente";
 "dashboard.showMore" = "Ver Más";
 "dashboard.showLess" = "Ver Menos";
@@ -143,7 +145,66 @@
 "vat.aiIntegration" = "Integración IVA con IA — Próximamente";
 
 // Categories
+// Categories
 "category.other" = "Otro";
+"category.salary" = "Salario";
+"category.freelance" = "Freelance";
+"category.investment" = "Inversión";
+"category.rental" = "Alquiler";
+"category.bonus" = "Bonificación";
+"category.dividend" = "Dividendo";
+"category.side_hustle" = "Ingreso extra";
+"category.gift_received" = "Regalo recibido";
+"category.groceries" = "Supermercado";
+"category.shopping" = "Compras";
+"category.dining_out" = "Restaurante";
+"category.coffee" = "Café";
+"category.entertainment" = "Entretenimiento";
+"category.streaming" = "Streaming";
+"category.housing" = "Vivienda";
+"category.transport" = "Transporte";
+"category.health" = "Salud";
+"category.pharmacy" = "Farmacia";
+"category.education" = "Educación";
+"category.clothing" = "Ropa";
+"category.travel" = "Viaje";
+"category.subscriptions" = "Suscripciones";
+"category.pets" = "Mascotas";
+"category.personal_care" = "Cuidado personal";
+"category.sports_&_gym" = "Deporte & Gym";
+"category.electronics" = "Electrónica";
+"category.home_&_garden" = "Hogar & Jardín";
+"category.tax" = "Impuestos";
+"category.product_sales" = "Ventas";
+"category.service_fee" = "Servicio";
+"category.commission" = "Comisión";
+"category.consulting" = "Consultoría";
+"category.licensing" = "Licencia";
+"category.grant_/_fund" = "Subvención / Fondo";
+"category.partnership" = "Asociación";
+"category.return" = "Devolución";
+"category.payroll" = "Nómina";
+"category.office_rent" = "Alquiler oficina";
+"category.raw_materials" = "Materias primas";
+"category.manufacturing" = "Fabricación";
+"category.marketing" = "Marketing";
+"category.advertising" = "Publicidad";
+"category.utilities" = "Servicios";
+"category.insurance" = "Seguro";
+"category.software/saas" = "Software / SaaS";
+"category.logistics" = "Logística";
+"category.corporate_tax" = "Impuesto de sociedades";
+"category.legal_&_admin" = "Legal & Admin";
+"category.r&d" = "I+D";
+"category.equipment" = "Equipamiento";
+"category.office_supplies" = "Material oficina";
+"category.training" = "Formación";
+"category.bank_charges" = "Gastos bancarios";
+"category.kdv_/_vat" = "IVA";
+"category.travel_(biz)" = "Viaje de negocios";
+"category.subcontracting" = "Subcontratación";
+"category.gift" = "Regalo";
+
 "time.goodMorning" = "Buenos Días";
 "time.goodAfternoon" = "Buenas Tardes";
 "time.goodEvening" = "Buenas Noches";
@@ -187,3 +248,82 @@
 "calendar.optionalNote" = "Nota opcional...";
 "calendar.newEvent" = "Nuevo Evento";
 "calendar.add" = "Agregar";
+
+// AI Insights
+"ai.insights.title" = "AI Insights";
+"ai.insights.subtitle" = "Analysis of your financial data";
+"ai.chat.open" = "Chat";
+"ai.action.calendar" = "Go to Calendar";
+
+// Budget Manager
+"budget.noCategories" = "No Categories Yet";
+"budget.noCategoriesHint" = "Add categories in Settings → Categories first.";
+"budget.tapHint" = "Tap a category to set its monthly budget";
+"budget.set" = "Set Budget";
+"budget.monthlyLimit" = "Monthly limit";
+"budget.limitFor" = "Monthly limit for %@";
+"budget.notSet" = "No budget set";
+
+// Common additional
+"common.error" = "Error";
+
+// Payments
+"payment.awaitingApproval" = "Payment Awaiting Approval";
+"widget.recentTransactions" = "Recent Transactions";
+
+// Settings (additional)
+"settings.cardTheme" = "Tema de tarjeta";
+"settings.personalInfo" = "Información personal";
+"settings.security" = "Seguridad";
+"settings.changeEmail" = "Cambiar correo";
+"settings.changePassword" = "Cambiar contraseña";
+"settings.appLock" = "Bloqueo de app";
+"settings.updateEmail" = "Actualizar correo";
+"settings.newPassword" = "Nueva contraseña";
+"settings.confirmPassword" = "Confirmar contraseña";
+"settings.both" = "Ambos";
+
+// Added for full localization support
+"budget.totalIncome" = "Ingreso mensual total";
+"budget.categoryBudgets" = "Presupuestos por categoría";
+"budget.enterSalary" = "Introduce tu ingreso mensual total";
+"export.formatCSVDesc" = "Para Excel, Numbers o Google Sheets";
+"export.formatPDFDesc" = "Informe formateado para imprimir o compartir";
+"export.buttonCSV" = "Exportar CSV";
+"export.buttonPDF" = "Exportar PDF";
+"export.transactionsCount" = "%d transacciones disponibles";
+"transaction.income" = "Ingreso";
+"transaction.expense" = "Gasto";
+"common.more" = "Más";
+"settings.appVersion" = "Versión 1.0  •  Creado con SwiftUI + Supabase";
+"category.noCategories" = "Sin categorías";
+"category.noCategoriesHint" = "Toca + para añadir categorías o restaurar las predeterminadas.";
+
+"common.none" = "Ninguno";
+"payment.upcoming" = "Pago Próximo";
+"transaction.type" = "Tipo";
+"common.name" = "Nombre";
+"common.color" = "Color";
+"common.icon" = "Icono";
+"common.all" = "Todos";
+"common.select" = "Seleccionar";
+"bulk.deleteSelected" = "Eliminar %d seleccionados";
+"category.namePlaceholder" = "Nombre de categoría";
+"auth.resetLinkExpired" = "Su enlace para restablecer la contraseña no es válido o ha caducado. Inténtelo de nuevo.";
+"auth.enterEmailFirst" = "Por favor ingresa tu correo primero.";
+"auth.resetPasswordDesc" = "Establece una nueva contraseña para tu cuenta.";
+"auth.updatePassword" = "Actualizar Contraseña";
+"auth.passwordTooShort" = "La contraseña debe tener al menos 6 caracteres.";
+"auth.passwordMismatch" = "Las contraseñas no coinciden.";
+"auth.pwWeak" = "Débil";
+"auth.pwFair" = "Regular";
+"auth.pwStrong" = "Fuerte";
+"auth.continueWithGoogle" = "Continuar con Google";
+"auth.continueWithApple" = "Continuar con Apple";
+"auth.continueWithEmail" = "Continuar con Email";
+"auth.orDivider" = "o";
+"auth.googleFailed" = "Error al iniciar sesión con Google.";
+"auth.comingSoon" = "Próximamente";
+"category.incoming_transfer" = "Transferencia Entrante";
+"category.outgoing_transfer" = "Transferencia Saliente";
+"category.bank_fees" = "Comisiones Bancarias";

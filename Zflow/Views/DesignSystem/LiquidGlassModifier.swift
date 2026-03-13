@@ -16,36 +16,17 @@ public struct LiquidGlassModifier: ViewModifier {
                     .stroke(
                         LinearGradient(
                             colors: [
-                                isDarkContent ? Color.white.opacity(0.3) : Color.black.opacity(0.08),
-                                isDarkContent ? Color.white.opacity(0.05) : Color.black.opacity(0.02),
-                                .clear,
+                                isDarkContent ? Color.white.opacity(0.2) : Color.black.opacity(0.08),
                                 .clear
                             ],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         ),
-                        lineWidth: 0.5
+                        lineWidth: 1
                     )
             )
-            // Reduced Drop Shadow
-            .shadow(color: Color.black.opacity(isDarkContent ? 0.15 : 0.05), radius: 10, x: 0, y: 5)
-            // Inner Glow / Glass Thickness Simulation
-            .overlay(
-                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .stroke(
-                        LinearGradient(
-                            colors: [
-                                isDarkContent ? Color.white.opacity(0.25) : Color.black.opacity(0.04),
-                                .clear
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        lineWidth: 1.5
-                    )
-                    .blur(radius: 2)
-                    .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
-            )
+            // Single Shadow — optimized
+            .shadow(color: Color.black.opacity(isDarkContent ? 0.15 : 0.06), radius: 10, x: 0, y: 4)
     }
 }
 

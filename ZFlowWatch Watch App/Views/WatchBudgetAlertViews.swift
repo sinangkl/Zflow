@@ -60,7 +60,7 @@ struct WatchBudgetAlertModal: View {
                         Text("\(Int((payload.spent / payload.limit) * 100))%")
                             .font(.system(size: 16, weight: .black, design: .rounded))
                             .foregroundColor(alertColor)
-                        Text(payload.categoryName)
+                        Text(Localizer.shared.category(payload.categoryName))
                             .font(.system(size: 8, weight: .medium))
                             .foregroundColor(.secondary)
                             .lineLimit(1)
@@ -68,20 +68,21 @@ struct WatchBudgetAlertModal: View {
                 }
 
                 HStack(spacing: 0) {
-                    budgetFigure(label: "Spent", value: payload.spent, color: alertColor)
+                    budgetFigure(label: Localizer.shared.l("budget.spent"), value: payload.spent, color: alertColor)
                     Divider().frame(height: 32)
-                    budgetFigure(label: "Limit", value: payload.limit, color: .secondary)
+                    budgetFigure(label: Localizer.shared.l("budget.limit"), value: payload.limit, color: .white.opacity(0.6))
                 }
                 .padding(.horizontal, 8)
-                .padding(.vertical, 10)
-                .background(RoundedRectangle(cornerRadius: 12).fill(Color.gray.opacity(0.15)))
+                .padding(.vertical, 12)
+                .background(.ultraThinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
 
                 Button {
                     WKInterfaceDevice.current().play(.success)
                     store.dismissAlert()
                     dismiss()
                 } label: {
-                    Text("Got It")
+                    Text(Localizer.shared.l("watch.gotIt"))
                         .font(.system(size: 14, weight: .bold))
                         .frame(maxWidth: .infinity)
                 }
@@ -92,7 +93,7 @@ struct WatchBudgetAlertModal: View {
                     store.dismissAlert()
                     dismiss()
                 } label: {
-                    Text("Dismiss")
+                    Text(Localizer.shared.l("watch.dismiss"))
                         .font(.system(size: 12))
                         .foregroundColor(.secondary)
                 }
@@ -131,7 +132,7 @@ struct WatchBudgetAlertsView: View {
                         Image(systemName: "checkmark.circle.fill")
                             .font(.system(size: 28))
                             .foregroundColor(wColor("#30D158"))
-                        Text("All budgets on track!")
+                        Text(Localizer.shared.l("watch.allOnTrack"))
                             .font(.system(size: 13, weight: .semibold))
                     }
                     .frame(maxWidth: .infinity)
@@ -144,11 +145,11 @@ struct WatchBudgetAlertsView: View {
                 }
             }
             .listStyle(.plain)
-            .navigationTitle("Alerts")
+            .navigationTitle(Localizer.shared.l("watch.alerts"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") { dismiss() }
+                    Button(Localizer.shared.l("common.done")) { dismiss() }
                         .foregroundColor(wColor("#5E5CE6"))
                 }
             }
@@ -178,9 +179,9 @@ struct BudgetAlertRow: View {
                     .foregroundColor(alertColor)
             }
             VStack(alignment: .leading, spacing: 2) {
-                Text(payload.categoryName)
+                Text(Localizer.shared.category(payload.categoryName))
                     .font(.system(size: 13, weight: .bold))
-                Text("\(Int((payload.spent / payload.limit) * 100))% used")
+                Text(String(format: Localizer.shared.l("watch.percentUsed"), Int((payload.spent / payload.limit) * 100)))
                     .font(.system(size: 11))
                     .foregroundColor(alertColor)
             }
@@ -192,7 +193,10 @@ struct BudgetAlertRow: View {
                 .font(.system(size: 14))
                 .foregroundColor(alertColor)
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, 6)
+        .padding(.horizontal, 8)
+        .background(.ultraThinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
     }
 }
 
@@ -228,49 +232,50 @@ struct WatchBudgetDetailView: View {
                 }
                 .padding(.top, 8)
 
-                Text(budget.categoryName)
+                Text(Localizer.shared.category(budget.categoryName))
                     .font(.system(size: 15, weight: .bold))
 
                 HStack(spacing: 0) {
-                    budgetStat("Spent", budget.spent.formattedShort(), color)
+                    budgetStat(Localizer.shared.l("budget.spent"), budget.spent.formattedShort(), color)
                     Divider().frame(height: 36)
-                    budgetStat("Left",
+                    budgetStat(Localizer.shared.l("watch.left"),
                         max(0, budget.limit - budget.spent).formattedShort(),
                         budget.isExceeded ? wColor("#FF453A") : wColor("#30D158"))
                     Divider().frame(height: 36)
-                    budgetStat("Limit", budget.limit.formattedShort(), .secondary)
+                    budgetStat(Localizer.shared.l("budget.limit"), budget.limit.formattedShort(), .secondary)
                 }
-                .padding(.vertical, 10)
-                .background(RoundedRectangle(cornerRadius: 12).fill(Color.gray.opacity(0.15)))
+                .padding(.vertical, 12)
+                .background(.ultraThinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
 
                 if budget.isExceeded {
-                    Label("Budget Exceeded!", systemImage: "exclamationmark.octagon.fill")
+                    Label(Localizer.shared.l("watch.budgetExceeded"), systemImage: "exclamationmark.octagon.fill")
                         .font(.system(size: 12, weight: .bold))
                         .foregroundColor(wColor("#FF453A"))
                 } else if budget.isCritical {
-                    Label("Almost at limit", systemImage: "exclamationmark.triangle.fill")
+                    Label(Localizer.shared.l("watch.almostAtLimit"), systemImage: "exclamationmark.triangle.fill")
                         .font(.system(size: 12, weight: .semibold))
                         .foregroundColor(wColor("#FF6961"))
                 } else if budget.isWarning {
-                    Label("80% used", systemImage: "bell.badge.fill")
+                    Label(String(format: Localizer.shared.l("watch.percentUsed"), 80), systemImage: "bell.badge.fill")
                         .font(.system(size: 12, weight: .medium))
                         .foregroundColor(wColor("#FF9F0A"))
                 } else {
-                    Label("On track", systemImage: "checkmark.circle.fill")
+                    Label(Localizer.shared.l("watch.onTrack"), systemImage: "checkmark.circle.fill")
                         .font(.system(size: 12, weight: .medium))
                         .foregroundColor(wColor("#30D158"))
                 }
             }
             .padding(.horizontal, 4)
         }
-        .navigationTitle(budget.categoryName)
+        .navigationTitle(Localizer.shared.category(budget.categoryName))
         .navigationBarTitleDisplayMode(.inline)
     }
 
     private func budgetStat(_ label: String, _ value: String, _ color: Color) -> some View {
         VStack(spacing: 2) {
             Text(label)
-                .font(.system(size: 9, weight: .medium))
+                .font(.system(size: 9, weight: .bold))
                 .foregroundColor(.secondary)
             Text(value)
                 .font(.system(size: 13, weight: .black, design: .rounded))

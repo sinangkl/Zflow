@@ -11,17 +11,17 @@ public enum ThemeColors {
     public static let textPrimary = Color.primary
     public static let textSecondary = Color.secondary
 
-    // Mesh Gradient Core Colors — Dark Mode
-    public static let meshDarkOcean = Color(hex: "#050B14")
-    public static let meshDarkNeonPurple = Color(hex: "#2B0B3B")
-    public static let meshDarkDeepAzure = Color(hex: "#0B1536")
-    public static let meshDarkVibrantViolet = Color(hex: "#340A59")
+    // Mesh Gradient Core Colors — Dark Mode (vivid, NO black areas)
+    public static let meshDarkOcean = Color(hex: "#0E1145")          // deep indigo (NOT black)
+    public static let meshDarkNeonPurple = Color(hex: "#2E0E6B")     // vivid deep violet
+    public static let meshDarkDeepAzure = Color(hex: "#0C1D5E")      // rich navy blue
+    public static let meshDarkVibrantViolet = Color(hex: "#4D1590")  // bright purple accent
 
-    // Mesh Gradient Core Colors — Light Mode (Lavender / Mint / Sky Blue)
-    public static let meshLightPastelLilac = Color(hex: "#E8D5F5")   // Soft lavender
-    public static let meshLightIceBlue = Color(hex: "#D0F0F7")       // Sky blue
-    public static let meshLightSoftBlue = Color(hex: "#C8E6C9")      // Mint green
-    public static let meshLightWarmWhite = Color(hex: "#F8F7FC")     // Off-white lavender tint
+    // Mesh Gradient Core Colors — Light Mode (Lavender / Mint / Sky palette — vibrant but soft)
+    public static let meshLightPastelLilac = Color(hex: "#E0C7F5")  // lavender (more vibrant)
+    public static let meshLightIceBlue = Color(hex: "#C5E8F5")      // sky blue (more saturated)
+    public static let meshLightSoftBlue = Color(hex: "#D4F1DB")     // mint green (fresher)
+    public static let meshLightWarmWhite = Color(hex: "#FDFBFF")    // near-white base (warmer)
 
     // Dynamic background for Light and Dark modes
     public static let background = Color(UIColor { traitCollection in

@@ -35,7 +35,8 @@ struct ReportsView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                PremiumBackground()
+                MeshGradientBackground()
+                    .ignoresSafeArea()
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 20) {
                         // Controls
@@ -61,7 +62,7 @@ struct ReportsView: View {
                     }
                     .padding(.horizontal, 16)
                     .padding(.top, 8)
-                    .padding(.bottom, 110)
+                    .padding(.bottom, 85)
                 }
             }
             .navigationTitle("Reports")
@@ -81,7 +82,7 @@ struct ReportsView: View {
                         Haptic.selection()
                     } label: {
                         Text(p.rawValue)
-                            .font(.system(size: 13, weight: .bold))
+                            .eliteBody()
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 9)
                             .background(
@@ -89,7 +90,7 @@ struct ReportsView: View {
                                     if selectedPeriod == p {
                                         RoundedRectangle(cornerRadius: 10).fill(AppTheme.accentGradient)
                                     } else {
-                                        RoundedRectangle(cornerRadius: 10).fill(Color(.secondarySystemGroupedBackground))
+                                        RoundedRectangle(cornerRadius: 10).fill(ZColor.bgSec)
                                     }
                                 }
                             )
@@ -100,7 +101,7 @@ struct ReportsView: View {
                 }
             }
             .padding(5)
-            .background(RoundedRectangle(cornerRadius: 14).fill(Color(.secondarySystemGroupedBackground)))
+            .background(RoundedRectangle(cornerRadius: 14).fill(ZColor.bgSec))
 
             // Type toggle
             HStack(spacing: 6) {
@@ -121,17 +122,18 @@ struct ReportsView: View {
                     .fill(sel ? color : color.opacity(0.4))
                     .frame(width: 8, height: 8)
                 Text(label)
-                    .font(.system(size: 14, weight: .semibold))
+                    .eliteFont(size: 15, weight: .semibold, textStyle: .body)
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 11)
             .background(sel ? color.opacity(0.12) : Color(.secondarySystemGroupedBackground))
-            .foregroundColor(sel ? color : .secondary)
+            .foregroundStyle(sel ? color : ThemeColors.textSecondary)
             .clipShape(RoundedRectangle(cornerRadius: 12))
             .overlay(RoundedRectangle(cornerRadius: 12).stroke(sel ? color.opacity(0.4) : .clear, lineWidth: 1.5))
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Show \(label)")
+        .accessibilityAddTraits(.isButton)
     }
 
     // MARK: - Total Hero
@@ -142,15 +144,15 @@ struct ReportsView: View {
             cornerRadius: 20) {
             VStack(spacing: 8) {
                 Text("Total \(selectedType.displayName)")
-                    .font(.system(size: 14))
-                    .foregroundColor(.white.opacity(0.8))
+                    .eliteBody()
+                    .foregroundColor(ZColor.label.opacity(0.8))
                 Text(filteredTotal.formattedCurrency(code: transactionVM.primaryCurrency))
-                    .font(.system(size: 34, weight: .black, design: .rounded))
-                    .foregroundColor(.white)
+                    .eliteHeroBalance()
+                    .foregroundColor(ZColor.label)
                     .contentTransition(.numericText())
                 Text("\(transactionsFiltered(type: selectedType, from: startDate).count) transactions · \(selectedPeriod.rawValue)")
-                    .font(.system(size: 13))
-                    .foregroundColor(.white.opacity(0.7))
+                    .eliteCaption()
+                    .foregroundColor(ZColor.label.opacity(0.7))
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 24)
@@ -163,34 +165,30 @@ struct ReportsView: View {
         GlassCard {
             VStack(alignment: .leading, spacing: 14) {
                 Text("Daily Trend")
-                    .font(.system(size: 16, weight: .bold))
+                    .eliteTitle()
 
                 let color: Color = selectedType == .income ? ZColor.income : ZColor.expense
 
                 Chart(dailyData, id: \.date) { item in
-                    LineMark(
+                    BarMark(
                         x: .value("Date", item.date),
-                        y: .value("Amount", item.total))
-                    .foregroundStyle(color)
-                    .lineStyle(StrokeStyle(lineWidth: 2.5))
-
-                    AreaMark(
-                        x: .value("Date", item.date),
-                        y: .value("Amount", item.total))
-                    .foregroundStyle(color.opacity(0.1))
-
-                    PointMark(
-                        x: .value("Date", item.date),
-                        y: .value("Amount", item.total))
-                    .foregroundStyle(color)
-                    .symbolSize(20)
+                        y: .value("Amount", item.total)
+                    )
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [color.opacity(0.9), color.opacity(0.2)],
+                            startPoint: .top, endPoint: .bottom
+                        )
+                    )
+                    .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
                 }
                 .frame(height: 180)
                 .chartXAxis {
                     AxisMarks(values: .stride(
                         by: selectedPeriod == .week ? .day : .month)) { _ in
+                        // Adaptive opacity: visible in both Light & Dark without harsh contrast
                         AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5))
-                            .foregroundStyle(Color.secondary.opacity(0.3))
+                            .foregroundStyle(ThemeColors.textSecondary.opacity(0.2))
                         AxisValueLabel(
                             format: selectedPeriod == .week
                                 ? .dateTime.weekday(.abbreviated)
@@ -200,12 +198,11 @@ struct ReportsView: View {
                 .chartYAxis {
                     AxisMarks { val in
                         AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5))
-                            .foregroundStyle(Color.secondary.opacity(0.2))
+                            .foregroundStyle(ThemeColors.textSecondary.opacity(0.15))
                         AxisValueLabel {
                             if let d = val.as(Double.self) {
                                 Text(d.formattedShort())
-                                    .font(.system(size: 10))
-                                    .foregroundColor(.secondary)
+                                    .eliteCaption()
                             }
                         }
                     }
@@ -220,7 +217,7 @@ struct ReportsView: View {
     private var donutCard: some View {
         GlassCard {
             VStack(alignment: .leading, spacing: 16) {
-                Text("Distribution").font(.system(size: 16, weight: .bold))
+                Text("Distribution").eliteTitle()
 
                 ZStack {
                     Chart(Array(breakdown.enumerated()), id: \.offset) { idx, item in
@@ -235,9 +232,9 @@ struct ReportsView: View {
 
                     VStack(spacing: 4) {
                         Text(filteredTotal.formattedShort())
-                            .font(.system(size: 26, weight: .black))
+                            .eliteTitle()
                         Text(transactionVM.primaryCurrency)
-                            .font(.system(size: 12))
+                            .eliteCaption()
                             .foregroundColor(.secondary)
                     }
                 }
@@ -249,12 +246,12 @@ struct ReportsView: View {
                             RoundedRectangle(cornerRadius: 3)
                                 .fill(Color(hex: item.category?.color ?? "#94A3B8"))
                                 .frame(width: 10, height: 10)
-                            Text(item.category?.name ?? "Other")
-                                .font(.system(size: 11))
+                            Text(item.category?.localizedName ?? "Other")
+                                .eliteCaption()
                                 .lineLimit(1)
                             Spacer()
                             Text("\(Int(item.percent))%")
-                                .font(.system(size: 11, weight: .bold))
+                                .eliteBody()
                                 .foregroundColor(.secondary)
                         }
                     }
@@ -269,7 +266,7 @@ struct ReportsView: View {
     private var topCategoriesCard: some View {
         GlassCard {
             VStack(alignment: .leading, spacing: 16) {
-                Text("Top Categories").font(.system(size: 16, weight: .bold))
+                Text("Top Categories").eliteTitle()
 
                 ForEach(Array(breakdown.prefix(5).enumerated()), id: \.offset) { idx, item in
                     let c = Color(hex: item.category?.color ?? "#94A3B8")
@@ -277,7 +274,7 @@ struct ReportsView: View {
                         HStack(spacing: 12) {
                             // Rank badge
                             Text("\(idx + 1)")
-                                .font(.system(size: 12, weight: .black))
+                                .eliteBody()
                                 .foregroundColor(.white)
                                 .frame(width: 24, height: 24)
                                 .background(Circle().fill(c))
@@ -288,15 +285,15 @@ struct ReportsView: View {
                                         .font(.system(size: 13))
                                         .foregroundColor(c)
                                 }
-                                Text(item.category?.name ?? "Uncategorized")
-                                    .font(.system(size: 14, weight: .semibold))
+                                Text(item.category?.localizedName ?? "Uncategorized")
+                                    .eliteBody()
                             }
                             Spacer()
                             VStack(alignment: .trailing, spacing: 1) {
                                 Text(item.total.formattedCurrency(code: transactionVM.primaryCurrency))
-                                    .font(.system(size: 14, weight: .bold))
+                                    .eliteTitle()
                                 Text("\(Int(item.percent))%")
-                                    .font(.system(size: 11))
+                                    .eliteCaption()
                                     .foregroundColor(.secondary)
                             }
                         }
@@ -314,11 +311,11 @@ struct ReportsView: View {
     private var fullBreakdownCard: some View {
         GlassCard {
             VStack(alignment: .leading, spacing: 14) {
-                Text("All Categories").font(.system(size: 16, weight: .bold))
+                Text("All Categories").eliteTitle()
 
                 if breakdown.isEmpty {
                     Text("No data for this period.")
-                        .font(.system(size: 14))
+                        .eliteBody()
                         .foregroundColor(.secondary)
                         .frame(maxWidth: .infinity, alignment: .center)
                         .padding(.vertical, 20)
@@ -329,15 +326,15 @@ struct ReportsView: View {
                             ZStack {
                                 Circle().fill(c.opacity(0.15)).frame(width: 38, height: 38)
                                 Image(systemName: item.category?.icon ?? "questionmark.circle")
-                                    .font(.system(size: 14)).foregroundColor(c)
+                                    .eliteBody().foregroundColor(c)
                             }
                             VStack(alignment: .leading, spacing: 4) {
                                 HStack {
-                                    Text(item.category?.name ?? "Other")
-                                        .font(.system(size: 14, weight: .semibold))
+                                    Text(item.category?.localizedName ?? "Other")
+                                        .eliteBody()
                                     Spacer()
                                     Text(item.total.formattedCurrency(code: transactionVM.primaryCurrency))
-                                        .font(.system(size: 14, weight: .bold))
+                                        .eliteTitle()
                                 }
                                 BudgetProgressBar(spent: item.percent, limit: 100, color: c, height: 5)
                             }
@@ -358,7 +355,7 @@ struct ReportsView: View {
 
         return GlassCard {
             VStack(alignment: .leading, spacing: 14) {
-                Text("Month Comparison").font(.system(size: 16, weight: .bold))
+                Text("Month Comparison").eliteTitle()
 
                 HStack(spacing: 20) {
                     comparisonItem("This Month", value: thisMonth, color: ZColor.expense)
@@ -371,7 +368,7 @@ struct ReportsView: View {
                     HStack(spacing: 6) {
                         Image(systemName: pct >= 0 ? "arrow.up.right" : "arrow.down.left")
                         Text("\(pct >= 0 ? "+" : "")\(String(format: "%.1f", pct))% vs last month")
-                            .font(.system(size: 13, weight: .semibold))
+                            .eliteBody()
                     }
                     .foregroundColor(pct >= 0 ? ZColor.expense : ZColor.income)
                     .padding(.top, 4)
@@ -383,9 +380,9 @@ struct ReportsView: View {
 
     private func comparisonItem(_ label: String, value: Double, color: Color) -> some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(label).font(.system(size: 12)).foregroundColor(.secondary)
+            Text(label).eliteCaption().foregroundColor(.secondary)
             Text(value.formattedCurrency(code: transactionVM.primaryCurrency))
-                .font(.system(size: 16, weight: .bold))
+                .eliteTitle()
                 .foregroundColor(color)
         }
         .frame(maxWidth: .infinity, alignment: .leading)

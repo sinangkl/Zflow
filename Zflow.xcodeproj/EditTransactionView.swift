@@ -110,8 +110,8 @@ struct EditTransactionView: View {
 
     private var typeToggle: some View {
         HStack(spacing: 6) {
-            typeButton(.income,  NSLocalizedString("dashboard.income", comment: ""),  "arrow.down.circle.fill", ZColor.income)
-            typeButton(.expense, NSLocalizedString("dashboard.expense", comment: ""), "arrow.up.circle.fill",   ZColor.expense)
+            typeButton(.income,  NSLocalizedString("dashboard.income", comment: ""),  "arrow.up.circle.fill", ZColor.income)
+            typeButton(.expense, NSLocalizedString("dashboard.expense", comment: ""), "arrow.down.circle.fill",   ZColor.expense)
         }
         .padding(5)
         .background(RoundedRectangle(cornerRadius: 16).fill(Color(.secondarySystemGroupedBackground)))

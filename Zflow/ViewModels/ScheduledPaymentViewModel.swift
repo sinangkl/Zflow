@@ -8,6 +8,7 @@
 import SwiftUI
 import Combine
 import Supabase
+import PostgREST
 import UserNotifications
 
 @MainActor
@@ -19,10 +20,22 @@ final class ScheduledPaymentViewModel: ObservableObject {
     
     private let supabase = SupabaseManager.shared.client
     private var timer: Timer?
+    private var cancellables: Set<AnyCancellable> = []
     
     init() {
         startDailyCheck()
         requestNotificationPermission()
+        
+        NotificationCenter.default
+            .publisher(for: Notification.Name("ZFlowDidLogout"))
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.clearData() }
+            .store(in: &cancellables)
+    }
+    
+    func clearData() {
+        scheduledPayments.removeAll()
+        errorMessage = nil
     }
     
     deinit {

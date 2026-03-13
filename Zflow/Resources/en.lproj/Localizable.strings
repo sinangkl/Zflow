@@ -21,8 +21,9 @@
 "auth.signUp" = "Sign Up";
 "auth.email" = "Email";
 "auth.password" = "Password";
-"auth.fullName" = "Full Name";
-"auth.businessName" = "Company / Brand Name";
+"auth.fullName"             = "Full Name";
+"auth.phoneNumber"          = "Phone Number";
+"auth.businessName"         = "Company / Brand Name";
 "auth.rememberMe" = "Stay Signed In";
 "auth.noAccount" = "Don't have an account?";
 "auth.haveAccount" = "Already have an account?";
@@ -31,6 +32,8 @@
 "auth.business" = "Business";
 "auth.createAccount" = "Create Account";
 "auth.welcomeBack" = "Welcome Back";
+"auth.forgotPassword" = "Forgot Password?";
+"auth.resetEmailSent" = "Password reset link sent to your email.";
 
 // Tabs
 "tab.home" = "Home";
@@ -43,14 +46,17 @@
 // Action Menu
 "action.chooseOption" = "What would you like to do?";
 "action.addTransaction" = "Add Transaction";
+"action.addFile" = "Add File (PDF/CSV)";
 "action.scanWithAI" = "Scan with AI";
 
 // Dashboard
 "dashboard.netBalance" = "Net Balance";
+"dashboard.quickActions" = "Quick Actions";
 "dashboard.income" = "Income";
 "dashboard.expense" = "Expense";
 "dashboard.insights" = "Insights";
 "dashboard.budgets" = "Budgets";
+"dashboard.cashFlow" = "Cash Flow Forecast";
 "dashboard.recent" = "Recent";
 "dashboard.showMore" = "Show More";
 "dashboard.showLess" = "Show Less";
@@ -60,6 +66,10 @@
 "dashboard.addTransaction" = "Add Transaction";
 "dashboard.monthlyChange" = "Monthly Change";
 "dashboard.transactions" = "transactions";
+
+"widgets.budgets" = "Budgets";
+"widgets.noBudgets" = "No Budgets Set";
+"widgets.netBalance" = "Net Balance";
 
 // Transactions
 "transaction.new" = "New Transaction";
@@ -86,9 +96,17 @@
 "common.save" = "Save";
 "common.search" = "Search";
 "common.close" = "Close";
+"common.copy" = "Copy";
+"common.reply" = "Reply";
 "common.deleteWarning" = "This action cannot be undone.";
+"chat.you" = "You";
+"chat.assistant" = "ZFlow AI";
 "time.today" = "Today";
 "time.yesterday" = "Yesterday";
+"time.daily" = "Daily";
+"time.weekly" = "Weekly";
+"time.monthly" = "Monthly";
+"time.yearly" = "Yearly";
 
 // Reports
 "reports.title" = "Reports";
@@ -167,6 +185,63 @@
 
 // Categories
 "category.other" = "Other";
+"category.salary" = "Salary";
+"category.freelance" = "Freelance";
+"category.investment" = "Investment";
+"category.rental" = "Rental";
+"category.bonus" = "Bonus";
+"category.dividend" = "Dividend";
+"category.side_hustle" = "Side Hustle";
+"category.gift_received" = "Gift Received";
+"category.groceries" = "Groceries";
+"category.shopping" = "Shopping";
+"category.dining_out" = "Dining Out";
+"category.coffee" = "Coffee";
+"category.entertainment" = "Entertainment";
+"category.streaming" = "Streaming";
+"category.housing" = "Housing";
+"category.transport" = "Transport";
+"category.health" = "Health";
+"category.pharmacy" = "Pharmacy";
+"category.education" = "Education";
+"category.clothing" = "Clothing";
+"category.travel" = "Travel";
+"category.subscriptions" = "Subscriptions";
+"category.pets" = "Pets";
+"category.personal_care" = "Personal Care";
+"category.sports_&_gym" = "Sports & Gym";
+"category.electronics" = "Electronics";
+"category.home_&_garden" = "Home & Garden";
+"category.tax" = "Tax";
+"category.product_sales" = "Product Sales";
+"category.service_fee" = "Service Fee";
+"category.commission" = "Commission";
+"category.consulting" = "Consulting";
+"category.licensing" = "Licensing";
+"category.grant_/_fund" = "Grant / Fund";
+"category.partnership" = "Partnership";
+"category.return" = "Return";
+"category.payroll" = "Payroll";
+"category.office_rent" = "Office Rent";
+"category.raw_materials" = "Raw Materials";
+"category.manufacturing" = "Manufacturing";
+"category.marketing" = "Marketing";
+"category.advertising" = "Advertising";
+"category.utilities" = "Utilities";
+"category.insurance" = "Insurance";
+"category.software/saas" = "Software / SaaS";
+"category.logistics" = "Logistics";
+"category.corporate_tax" = "Corporate Tax";
+"category.legal_&_admin" = "Legal & Admin";
+"category.r&d" = "R&D";
+"category.equipment" = "Equipment";
+"category.office_supplies" = "Office Supplies";
+"category.training" = "Training";
+"category.bank_charges" = "Bank Charges";
+"category.kdv_/_vat" = "KDV / VAT";
+"category.travel_(biz)" = "Travel (Business)";
+"category.subcontracting" = "Subcontracting";
+"category.gift" = "Gift";
 "time.goodMorning" = "Good Morning";
 "time.goodAfternoon" = "Good Afternoon";
 "time.goodEvening" = "Good Evening";
@@ -199,6 +274,12 @@
 "ai.reply.hello" = "Hello! How can I help you with your finances today?";
 "ai.reply.thanks" = "You're welcome! Let me know if you need anything else.";
 "ai.reply.default" = "I can help you analyze your income, expenses, balance, and transactions. You can also ask me to scan receipts. What would you like to know?";
+"ai.reply.error" = "I'm sorry, I'm having trouble communicating with my brain right now. Please check your connection or try again later.";
+"ai.scan.saveSuccess" = "All set! I've successfully saved the %@ %@ %@ transaction. ✅";
+"ai.prompt.summary" = "📊 My summary for this month";
+"ai.prompt.expenses" = "💰 My recent expenses";
+"ai.prompt.budget" = "🎯 Give me budget advice";
+"ai.prompt.mostSpent" = "🧾 What did I spend the most on?";
 
 // Receipt Scan
 "scan.chooseSource" = "Choose Image Source";
@@ -227,9 +308,161 @@
 "ai.scan.unknownMerchant" = "Unknown merchant";
 "ai.reply.scanHint" = "Tap the 📷 camera icon in the input bar to scan a receipt. I'll extract the transaction details automatically!";
 
-// Payment
-"payment.awaitingApproval" = "Payment Awaiting Approval";
-"common.reject" = "Reject";
-"common.approve" = "Approve";
+// Watch
+"watch.reports" = "Reports";
+"watch.convert" = "Convert";
+"watch.lastTransaction" = "Last Transaction";
+"watch.connection" = "Connection";
+"watch.connected" = "Connected";
+"watch.disconnected" = "Disconnected";
+"watch.upcomingPayments" = "Upcoming Payments";
+"watch.noUpcomingPayments" = "No upcoming payments";
+"watch.next" = "Next";
+"watch.confirm" = "Confirm";
+"watch.saved" = "Saved!";
+"watch.sendingToPhone" = "Sending to iPhone...";
+"watch.from" = "From";
+"watch.to" = "To";
+"watch.gotIt" = "Got It";
+"watch.dismiss" = "Dismiss";
+"watch.allOnTrack" = "All budgets on track!";
+"watch.onTrack" = "On track";
+"watch.percentUsed" = "%d%% used";
+"watch.almostAtLimit" = "Almost at limit";
+"watch.budgetExceeded" = "Budget Exceeded!";
+"watch.alerts" = "Alerts";
+"watch.left" = "Left";
+"watch.noCategories" = "No categories";
+"watch.addCategoriesIPhone" = "Add categories on iPhone";
+"watch.both" = "Both";
+"watch.shortInc" = "Inc";
+"watch.shortExp" = "Exp";
+"watch.shortAll" = "All";
+"reports.weeklyExpenses" = "Weekly Expenses";
+
 "time.tomorrow" = "Tomorrow";
 "time.daysLeft" = "%d days left";
+
+// AI Insights (Reports panel)
+"ai.insights.title" = "AI Insights";
+"ai.insights.subtitle" = "Analysis of your financial data";
+"ai.chat.open" = "Chat";
+"ai.action.calendar" = "Go to Calendar";
+
+// Budget Manager
+"budget.noCategories" = "No Categories Yet";
+"budget.noCategoriesHint" = "Add categories in Settings → Categories first, then come back to set budgets.";
+"budget.tapHint" = "Tap a category to set its monthly budget";
+"budget.set" = "Set Budget";
+"budget.monthlyLimit" = "Monthly limit";
+"budget.limitFor" = "Monthly limit for %@";
+"budget.notSet" = "No budget set";
+
+// Common additional
+"common.error" = "Error";
+"common.approve" = "Approve";
+"common.showLess" = "Show Less";
+"common.showMoreCount" = "+%d More";
+"common.reject" = "Reject";
+
+// Payments
+"payment.awaitingApproval" = "Payment Awaiting Approval";
+"widget.recentTransactions" = "Recent Transactions";
+
+// Settings (additional)
+"settings.cardTheme" = "Card Theme";
+"settings.personalInfo" = "Personal Info";
+"settings.security" = "Security";
+"settings.changeEmail" = "Change Email";
+"settings.changePassword" = "Change Password";
+"settings.appLock" = "App Lock";
+"settings.updateEmail" = "Update Email";
+"settings.newPassword" = "New Password";
+"settings.confirmPassword" = "Confirm Password";
+"settings.both" = "Both";
+
+// Added for full localization support
+"budget.totalIncome" = "Total Monthly Income";
+"budget.categoryBudgets" = "Category Budgets";
+"budget.enterSalary" = "Enter your total monthly income";
+"export.formatCSVDesc" = "For Excel, Numbers or Google Sheets";
+"export.formatPDFDesc" = "Formatted report for printing or sharing";
+"export.buttonCSV" = "Export CSV";
+"export.buttonPDF" = "Export PDF";
+"export.transactionsCount" = "%d transactions available";
+"transaction.income" = "Income";
+"transaction.expense" = "Expense";
+"common.more" = "More";
+"settings.appVersion" = "Version 1.0  •  Built with SwiftUI + Supabase";
+"category.noCategories" = "No Categories";
+"category.noCategoriesHint" = "Tap + to add custom categories, or restore built-in defaults.";
+
+"common.none" = "None";
+"payment.upcoming" = "Upcoming Payment";
+"common.name" = "Name";
+"common.color" = "Color";
+"common.icon" = "Icon";
+"common.all" = "All";
+"common.select" = "Select";
+"bulk.deleteSelected" = "Delete %d Selected";
+"category.namePlaceholder" = "Category name";
+"auth.resetLinkExpired" = "Your password reset link is invalid or has expired. Please try again.";
+"auth.enterEmailFirst" = "Please enter your email address first.";
+"auth.resetPasswordDesc" = "Set a new password for your account.";
+"auth.updatePassword" = "Update Password";
+"auth.passwordTooShort" = "Password must be at least 6 characters.";
+"auth.passwordMismatch" = "Passwords do not match.";
+"auth.pwWeak" = "Weak";
+"auth.pwFair" = "Fair";
+"auth.pwStrong" = "Strong";
+"auth.continueWithGoogle" = "Continue with Google";
+"auth.continueWithApple" = "Continue with Apple";
+"auth.continueWithEmail" = "Continue with Email";
+"auth.orDivider" = "or";
+"auth.googleFailed" = "Google sign in failed.";
+"auth.comingSoon" = "Coming Soon";
+
+// Bulk Import
+"bulk.importAction" = "Import Statement (PDF/CSV)";
+"bulk.importSub" = "Analyze statements with AI";
+"bulk.verifyTitle" = "Approve Transactions";
+"bulk.countSub" = "%d transactions found.";
+"bulk.selectCategory" = "Select Category";
+"bulk.saveAllCount" = "Save %d Transactions to Z-Flow";
+"bulk.pickCategory" = "Pick Category";
+"bulk.automaticNote" = "Imported from Bank Statement";
+"bulk.saving" = "Saving your transactions...";
+"bulk.doneTitle" = "Success!";
+"bulk.doneSub" = "%d transactions imported successfully.";
+"ai.analyzingTitle" = "AI is analyzing your statement...";
+"ai.loadingSub" = "Transactions are being intelligently categorized.";
+"category.incoming_transfer" = "Incoming Transfer";
+"category.outgoing_transfer" = "Outgoing Transfer";
+"category.bank_fees" = "Bank Fees";
+
+// Recurring Transaction & Reminder
+"recurring.alertTitle" = "Recurring Transaction?";
+"recurring.alertMessage" = "Does this {type} repeat every month? Add a calendar reminder?";
+"recurring.addReminder" = "Set Reminder";
+"recurring.title" = "Recurring Transactions";
+"recurring.noItems" = "No recurring transactions yet";
+
+// Recurring manager (settings)
+"settings.recurring.manage" = "Manage Recurring Payments";
+"recurring.manageTitle" = "Recurring Payments";
+"recurring.emptyTitle" = "No recurring payments found";
+"recurring.emptySubtitle" = "Create and manage monthly rent, salary, bills and subscriptions here.";
+"recurring.details" = "Details";
+"recurring.dayOfMonth" = "Every month on day %d";
+"recurring.dayPicker" = "Day of Month";
+"recurring.isActive" = "Active";
+"recurring.editTitle" = "Edit Recurring Payment";
+"recurring.variableAmount" = "Variable";
+
+// Spending Trend Card
+"tip.monthlyComparison" = "Monthly Comparison";
+"tip.lastMonth" = "Last Month";
+"tip.thisMonth" = "This Month";
+"tip.increased" = "increased";
+"tip.decreased" = "decreased";
+"tip.noLastMonth" = "No data from last month";

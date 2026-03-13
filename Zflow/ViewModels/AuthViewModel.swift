@@ -3,6 +3,10 @@ import SwiftUI
 import Combine
 import Supabase
 import PostgREST
+import GoogleSignIn
+import UIKit
+import AuthenticationServices
+import CryptoKit
 
 @MainActor
 final class AuthViewModel: ObservableObject {
@@ -10,12 +14,16 @@ final class AuthViewModel: ObservableObject {
     @Published var isLoading   = false
     @Published var errorMessage: String?
     @Published var currentUserId: UUID?
+    @Published var currentUserEmail: String?
     @Published var userProfile: Profile?
     @Published var userAvatarData: Data?   // In-memory cached avatar
+    @Published var showResetPasswordSheet = false  // Deep link'ten tetiklenir
+    @Published var isCheckingAuth = true           // Splash screen kontrolü
 
     @AppStorage("rememberMe") var rememberMe: Bool = true
 
     private let supabase = SupabaseManager.shared.client
+    private var currentNonce: String?
 
     init() {
         Task { await checkSession(); listenAuthChanges() }
@@ -24,10 +32,13 @@ final class AuthViewModel: ObservableObject {
     // MARK: - Session
 
     func checkSession() async {
+        defer { isCheckingAuth = false }
         if !rememberMe { await signOut(); return }
         do {
             let session = try await supabase.auth.session
             currentUserId = session.user.id
+            AppGroup.defaults.set(session.user.id.uuidString, forKey: "current_user_id")
+            currentUserEmail = session.user.email
             isLoggedIn    = true
             await fetchProfile()
         } catch {
@@ -42,10 +53,15 @@ final class AuthViewModel: ObservableObject {
                 switch event {
                 case .signedIn:
                     currentUserId = session?.user.id
+                    if let uid = session?.user.id {
+                        AppGroup.defaults.set(uid.uuidString, forKey: "current_user_id")
+                    }
+                    currentUserEmail = session?.user.email
                     isLoggedIn    = true
                     await fetchProfile()
                 case .signedOut:
                     currentUserId = nil
+                    currentUserEmail = nil
                     userProfile   = nil
                     isLoggedIn    = false
                 default: break
@@ -61,6 +77,8 @@ final class AuthViewModel: ObservableObject {
         do {
             let s = try await supabase.auth.signIn(email: email, password: password)
             currentUserId = s.user.id
+            AppGroup.defaults.set(s.user.id.uuidString, forKey: "current_user_id")
+            currentUserEmail = s.user.email
             isLoggedIn    = true
             await fetchProfile()
             Haptic.success()
@@ -71,7 +89,7 @@ final class AuthViewModel: ObservableObject {
         isLoading = false
     }
 
-    func signUp(email: String, password: String, fullName: String,
+    func signUp(email: String, password: String, fullName: String, phoneNumber: String?,
                 userType: UserType, businessName: String? = nil) async {
         isLoading = true; errorMessage = nil
         do {
@@ -87,18 +105,26 @@ final class AuthViewModel: ObservableObject {
                 fullName: fullName,
                 userType: userType.rawValue,
                 businessName: bName,
+                phoneNumber: phoneNumber,
                 avatarURL: nil
             )
 
+            // 1. First insert profile
             try await supabase.from("profiles")
                 .insert(profileInsert)
                 .execute()
 
+            // 2. Seed categories
             await seedCategories(userId: userId, userType: userType.rawValue)
 
+            // 3. Update state AFTER success
             currentUserId = userId
-            isLoggedIn    = true
+            currentUserEmail = auth.user.email
+            
+            // Explicitly fetch the profile we just created to ensure it's in memory
             await fetchProfile()
+            
+            isLoggedIn = true // This triggers the UI transition
             Haptic.success()
         } catch {
             errorMessage = friendlyError(error)
@@ -142,11 +168,70 @@ final class AuthViewModel: ObservableObject {
     func signOut() async {
         do {
             try await supabase.auth.signOut()
-        } catch { errorMessage = error.localizedDescription }
-        isLoggedIn    = false
-        currentUserId = nil
-        userProfile   = nil
-        userAvatarData = nil
+        } catch { 
+            errorMessage = error.localizedDescription 
+        }
+        // Always clear local state even if the network fails
+        await MainActor.run {
+            self.isLoggedIn    = false
+            self.currentUserId = nil
+            AppGroup.defaults.removeObject(forKey: "current_user_id")
+            self.currentUserEmail = nil
+            self.userProfile   = nil
+            self.userAvatarData = nil
+            NotificationCenter.default.post(name: Notification.Name("ZFlowDidLogout"), object: nil)
+        }
+    }
+
+    // MARK: - Sign in with Apple
+
+    func signInWithApple() async {
+        isLoading = true; errorMessage = nil
+        let nonce = randomNonceString()
+        currentNonce = nonce
+
+        let coordinator = AppleSignInCoordinator(nonce: nonce)
+        do {
+            let result = try await coordinator.triggerRequest()
+            // Authenticate against Supabase using the Apple ID token
+            let session = try await supabase.auth.signInWithIdToken(
+                credentials: .init(
+                    provider: .apple,
+                    idToken: result.idToken,
+                    nonce: result.nonce
+                )
+            )
+            let userId = session.user.id
+
+            // Build a full name from Apple's components (only given on first sign-in)
+            if let components = result.fullName,
+               let givenName = components.givenName {
+                let family = components.familyName ?? ""
+                let fullName = "\(givenName) \(family)".trimmingCharacters(in: .whitespaces)
+                // Upsert profile so it's created for brand-new users
+                let insert = ProfileInsert(
+                    id: userId,
+                    fullName: fullName,
+                    userType: "personal",
+                    businessName: nil,
+                    phoneNumber: nil,
+                    avatarURL: nil
+                )
+                _ = try? await supabase.from("profiles").upsert(insert).execute()
+                await seedCategories(userId: userId, userType: "personal")
+            }
+
+            currentUserId = userId
+            currentUserEmail = session.user.email
+            AppGroup.defaults.set(userId.uuidString, forKey: "current_user_id")
+            await fetchProfile()
+            isLoggedIn = true
+            Haptic.success()
+        } catch {
+            errorMessage = friendlyError(error)
+            Haptic.error()
+        }
+        isLoading = false
     }
 
     func fetchProfile() async {
@@ -163,10 +248,11 @@ final class AuthViewModel: ObservableObject {
         }
     }
 
-    func updateProfile(fullName: String, businessName: String?) async -> Bool {
+    func updateProfile(fullName: String, phoneNumber: String?, businessName: String?) async -> Bool {
         guard let uid = currentUserId else { return false }
         do {
             var updates: [String: String] = ["full_name": fullName]
+            if let pn = phoneNumber { updates["phone_number"] = pn }
             if let bn = businessName { updates["business_name"] = bn }
 
             try await supabase.from("profiles")
@@ -182,11 +268,157 @@ final class AuthViewModel: ObservableObject {
         }
     }
 
+    func updateProfileThemes(appTheme: String, familyHex: String, walletHex: String) async -> Bool {
+        guard let uid = currentUserId else { return false }
+        do {
+            try await supabase.from("profiles")
+                .update([
+                    "theme_app": appTheme,
+                    "theme_family_card": familyHex,
+                    "theme_wallet_card": walletHex
+                ])
+                .eq("id", value: uid.uuidString)
+                .execute()
+            
+            await fetchProfile()
+            return true
+        } catch {
+            print("⚠️ [Theme] Supabase sync failed (local save already done): \(error)")
+            print("   → Supabase: profiles tablosunda theme_app, theme_family_card, theme_wallet_card kolonlarını ve UPDATE RLS policy'sini kontrol et")
+            return false
+        }
+    }
+
+    func updateEmail(newEmail: String) async -> Bool {
+        isLoading = true; errorMessage = nil
+        do {
+            let attrs = UserAttributes(email: newEmail)
+            let updatedUser = try await supabase.auth.update(user: attrs)
+            currentUserEmail = updatedUser.email
+            isLoading = false
+            Haptic.success()
+            return true
+        } catch {
+            errorMessage = friendlyError(error)
+            isLoading = false
+            Haptic.error()
+            return false
+        }
+    }
+
+    func updatePassword(newPassword: String) async -> Bool {
+        isLoading = true; errorMessage = nil
+        do {
+            let attrs = UserAttributes(password: newPassword)
+            _ = try await supabase.auth.update(user: attrs)
+            isLoading = false
+            Haptic.success()
+            return true
+        } catch {
+            errorMessage = friendlyError(error)
+            isLoading = false
+            Haptic.error()
+            return false
+        }
+    }
+
+    func sendPasswordResetEmail(email: String) async -> Bool {
+        isLoading = true; errorMessage = nil
+        do {
+            try await supabase.auth.resetPasswordForEmail(
+                email,
+                redirectTo: URL(string: "zflow://reset-password")
+            )
+            isLoading = false
+            Haptic.success()
+            return true
+        } catch {
+            errorMessage = friendlyError(error)
+            isLoading = false
+            Haptic.error()
+            return false
+        }
+    }
+
+    // MARK: - Google Sign In
+
+    func signInWithGoogle() async {
+        isLoading = true; errorMessage = nil
+        do {
+            // En üstteki VC'yi bul (iOS 15+ deprecated keyWindow yerine windows kullan)
+            guard let windowScene = UIApplication.shared.connectedScenes
+                    .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene,
+                  let window = windowScene.windows.first(where: { $0.isKeyWindow }),
+                  let root   = window.rootViewController else {
+                errorMessage = NSLocalizedString("auth.googleFailed", comment: "")
+                isLoading = false; return
+            }
+            // Sheet/overlay açıksa onun üstüne sun
+            var topVC: UIViewController = root
+            while let presented = topVC.presentedViewController { topVC = presented }
+
+            // GIDConfiguration ZFlowApp.init() içinde bir kez ayarlandı, burada tekrar gerek yok.
+            let result = try await GIDSignIn.sharedInstance.signIn(withPresenting: topVC)
+
+            guard let idToken = result.user.idToken?.tokenString else {
+                errorMessage = NSLocalizedString("auth.googleFailed", comment: "")
+                isLoading = false; return
+            }
+
+            // Supabase'e idToken + accessToken gönder (nonce gereksiz — panel yapılandırması yeterli)
+            let session = try await supabase.auth.signInWithIdToken(
+                credentials: OpenIDConnectCredentials(
+                    provider: .google,
+                    idToken: idToken,
+                    accessToken: result.user.accessToken.tokenString
+                )
+            )
+
+            currentUserId    = session.user.id
+            currentUserEmail = session.user.email
+            AppGroup.defaults.set(session.user.id.uuidString, forKey: "current_user_id")
+
+            await handleSocialProfile(
+                userId:   session.user.id,
+                email:    session.user.email,
+                fullName: result.user.profile?.name
+            )
+            isLoggedIn = true
+            Haptic.success()
+        } catch {
+            let nsErr = error as NSError
+            // GIDSignInError.canceled (code -5) — kullanıcı iptal etti, sessizce çık
+            guard nsErr.code != -5 else { isLoading = false; return }
+            print("❌ [Google] SignIn hatası: \(error)")
+            errorMessage = friendlyError(error)
+            Haptic.error()
+        }
+        isLoading = false
+    }
+
+    private func handleSocialProfile(userId: UUID, email: String?, fullName: String?) async {
+        do {
+            let existing: [Profile] = (try? await supabase.from("profiles")
+                .select().eq("id", value: userId.uuidString).execute().value) ?? []
+            if existing.isEmpty {
+                let insert = ProfileInsert(
+                    id: userId, fullName: fullName ?? "", userType: "personal",
+                    businessName: nil, phoneNumber: nil, avatarURL: nil
+                )
+                try await supabase.from("profiles").insert(insert).execute()
+                await seedCategories(userId: userId, userType: "personal")
+            }
+            await fetchProfile()
+        } catch {
+            print("❌ [Auth] Social profile error: \(error)")
+        }
+    }
+
     // MARK: - Private
 
     private func seedCategories(userId: UUID, userType: String) async {
         let inserts = filteredDefaultCategories(for: userType).map {
-            CategoryInsert(userId: userId, name: $0.name, color: $0.color, icon: $0.icon, type: $0.type)
+            CategoryInsert(userId: userId, familyId: nil, name: $0.name, color: $0.color, icon: $0.icon, type: $0.type)
         }
         print("🔐 [Auth] Seeding \(inserts.count) categories for userType: \(userType), userId: \(userId.uuidString)")
         do {

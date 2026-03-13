@@ -81,7 +81,8 @@ struct InsightsEngine {
 
         func catName(_ id: UUID?) -> String {
             guard let id else { return "?" }
-            return categories.first(where: { $0.id == id })?.name ?? "Diğer"
+            let name = categories.first(where: { $0.id == id })?.name ?? Localizer.shared.l("category.other")
+            return Localizer.shared.category(name)
         }
 
         let thisExpense = thisMonth.filter { $0.type == "expense" }.reduce(0.0) { $0 + converted($1) }
@@ -105,7 +106,7 @@ struct InsightsEngine {
                 title: "Yaklaşan Ödeme",
                 message: "**\(payment.title)** için \(amtText) ödemeniz \(dayText) gerçekleşmesi için onay bekliyor.",
                 type: .upcoming,
-                actionLabel: "Kalendere Git",
+                actionLabel: "Takvime Git",
                 scheduledPaymentId: payment.id
             ))
         }

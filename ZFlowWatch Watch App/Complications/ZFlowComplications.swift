@@ -31,6 +31,7 @@ struct ZFlowComplicationBundle: WidgetBundle {
     var body: some Widget {
         ZFlowBudgetComplication()
         ZFlowBalanceComplication()
+        ZFlowTodayComplication()
     }
 }
 
@@ -50,6 +51,7 @@ struct ZFlowBudgetComplication: Widget {
             .accessoryCircular,
             .accessoryRectangular,
             .accessoryInline,
+            .accessoryCorner,
         ])
     }
 }
@@ -63,6 +65,7 @@ struct BudgetComplicationView: View {
         switch family {
         case .accessoryCircular:    circularView
         case .accessoryRectangular: rectangularView
+        case .accessoryCorner:      cornerView
         default:                    inlineView
         }
     }
@@ -124,7 +127,25 @@ struct BudgetComplicationView: View {
             }
         }
     }
+
+    private var cornerView: some View {
+        Group {
+            if let b = top {
+                Image(systemName: b.categoryIcon)
+                    .font(.system(size: 18))
+                    .widgetAccentable()
+                    .widgetLabel {
+                        Text("\(b.percentage)%")
+                            .foregroundColor(wColor(b.statusColor.hex))
+                    }
+            } else {
+                Image(systemName: "chart.bar.fill")
+                    .widgetAccentable()
+            }
+        }
+    }
 }
+
 
 // MARK: - Balance Complication
 
@@ -142,6 +163,7 @@ struct ZFlowBalanceComplication: Widget {
             .accessoryCircular,
             .accessoryRectangular,
             .accessoryInline,
+            .accessoryCorner,
         ])
     }
 }
@@ -190,10 +212,78 @@ struct BalanceComplicationView: View {
             }
             .widgetAccentable()
 
+        case .accessoryCorner:
+            Image(systemName: "dollarsign.circle.fill")
+                .font(.system(size: 18))
+                .widgetAccentable()
+                .widgetLabel {
+                    Text(snap.netBalance.formattedShort())
+                        .foregroundColor(wAccent)
+                }
+
         default:
             Label(snap.netBalance.formattedCurrencySimple(code: snap.currency),
                   systemImage: "chart.line.uptrend.xyaxis")
             .widgetAccentable()
+        }
+    }
+}
+
+// MARK: - Today's Spent Complication
+
+struct ZFlowTodayComplication: Widget {
+    let kind = "ZFlowTodayComplication"
+
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: WatchProvider()) { entry in
+            TodayComplicationView(entry: entry)
+                .containerBackground(.fill.tertiary, for: .widget)
+        }
+        .configurationDisplayName("ZFlow Today")
+        .description("Your total spending today.")
+        .supportedFamilies([
+            .accessoryCircular,
+            .accessoryCorner,
+            .accessoryInline
+        ])
+    }
+}
+
+struct TodayComplicationView: View {
+    let entry: WatchEntry
+    @Environment(\.widgetFamily) var family
+
+    private var todaySpent: Double {
+        // Simple logic: user the weeklyExpenses[last] as today's proxy if not strictly tracked 
+        // or just show recent transactions from today
+        let today = Calendar.current.startOfDay(for: Date())
+        return entry.snapshot.recentTransactions
+            .filter { $0.type == "expense" && $0.date >= today }
+            .reduce(0) { $0 + $1.amount }
+    }
+
+    var body: some View {
+        switch family {
+        case .accessoryCircular:
+            ZStack {
+                Circle().stroke(wExpense.opacity(0.15), lineWidth: 3)
+                Text(todaySpent.formattedShort())
+                    .font(.system(size: 11, weight: .bold, design: .rounded))
+                    .minimumScaleFactor(0.6)
+            }
+            .widgetAccentable()
+            
+        case .accessoryCorner:
+            Image(systemName: "cart.fill")
+                .font(.system(size: 18))
+                .foregroundColor(wExpense)
+                .widgetLabel {
+                    Text(todaySpent.formattedShort() + " " + entry.snapshot.currency)
+                }
+
+        default:
+            Label(todaySpent.formattedShort() + " " + entry.snapshot.currency, systemImage: "cart.fill")
+                .widgetAccentable()
         }
     }
 }

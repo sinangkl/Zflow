@@ -14,6 +14,14 @@ extension Color {
         }
         self.init(.sRGB, red: Double(r)/255, green: Double(g)/255, blue: Double(b)/255, opacity: 1)
     }
+
+    func toHex() -> String {
+        guard let components = UIColor(self).cgColor.components else { return "#5E5CE6" }
+        let r = Float(components[0])
+        let g = Float(components[1])
+        let b = Float(components[2])
+        return String(format: "#%02lX%02lX%02lX", lroundf(r * 255), lroundf(g * 255), lroundf(b * 255))
+    }
 }
 
 // MARK: - ZColor — Apple System + Brand Tokens (2026 Liquid Glass)
@@ -39,6 +47,10 @@ enum ZColor {
     static let neonPink   = Color(hex: "#EC4899")
     static let mint       = Color(hex: "#34D399")
     static let amber      = Color(hex: "#FBBF24")
+    
+    // Premium Assist (Burgundy & Gold)
+    static let burgundy   = Color(hex: "#4A0404")
+    static let gold       = Color(hex: "#D4AF37")
 
     // Adaptive system surfaces
     static let bg         = Color(.systemBackground)
@@ -74,21 +86,51 @@ struct AppTheme {
     static let heroRadius: CGFloat = 28
     static let smallRadius: CGFloat = 16
 
-    // MARK: Accent
-    static func accentColor(for scheme: ColorScheme) -> Color {
-        scheme == .dark ? ZColor.indigoDark : ZColor.indigo
+    // MARK: Dynamic Theme Color
+    static var baseColorHex: String {
+        UserDefaults.standard.string(forKey: "profileCardColor") ?? "#5E5CE6"
+    }
+    
+    static var baseColor: Color {
+        Color(hex: baseColorHex)
     }
 
-    static let accentPrimary   = ZColor.indigo
-    static let accentSecondary = Color(hex: "#7D7AFF")
+    static var accentSecondary: Color {
+        switch baseColorHex.uppercased() {
+        case "#5E5CE6": return Color(hex: "#7C3AED") // Indigo -> Deep Violet
+        case "#0A84FF": return Color(hex: "#5AC8FA") // Blue -> Cyan
+        case "#30D158": return Color(hex: "#34C759") // Green -> Mint
+        case "#FF9F0A": return Color(hex: "#FFD60A") // Orange -> Yellow
+        case "#FF375F": return Color(hex: "#FF6482") // Pink -> Lighter Pink
+        case "#BF5AF2": return Color(hex: "#D484FA") // Purple -> Lighter Purple
+        case "#00C7BE": return Color(hex: "#5AC8FA") // Teal -> Sky
+        case "#FF6B6B": return Color(hex: "#FF3B30") // Coral -> Red
+        case "#FFD60A": return Color(hex: "#FF9F0A") // Gold -> Orange
+        case "#34D399": return Color(hex: "#30D158") // Mint -> Green
+        case "#FF3B30": return Color(hex: "#FF6B6B") // Red -> Coral
+        case "#5AC8FA": return Color(hex: "#00C7BE") // Sky -> Teal
+        default: return baseColor.opacity(0.8)
+        }
+    }
 
-    static let accentGradient = LinearGradient(
-        colors: [Color(hex: "#5E5CE6"), Color(hex: "#7D7AFF")],
-        startPoint: .topLeading, endPoint: .bottomTrailing)
+    // MARK: Accent
+    static func accentColor(for scheme: ColorScheme) -> Color {
+        baseColor
+    }
 
-    static let accentGradientH = LinearGradient(
-        colors: [Color(hex: "#5E5CE6"), Color(hex: "#7D7AFF")],
-        startPoint: .leading, endPoint: .trailing)
+    static var accentPrimary: Color { baseColor }
+
+    static var accentGradient: LinearGradient {
+        LinearGradient(
+            colors: [baseColor, accentSecondary],
+            startPoint: .topLeading, endPoint: .bottomTrailing)
+    }
+
+    static var accentGradientH: LinearGradient {
+        LinearGradient(
+            colors: [baseColor, accentSecondary],
+            startPoint: .leading, endPoint: .trailing)
+    }
 
     static let incomeGradient = LinearGradient(
         colors: [Color(hex: "#50C878"), Color(hex: "#3DA86B")],
@@ -99,13 +141,15 @@ struct AppTheme {
         startPoint: .topLeading, endPoint: .bottomTrailing)
 
     // Liquid Glass specific gradients
-    static let liquidGlassGradient = LinearGradient(
-        colors: [
-            Color(hex: "#5E5CE6").opacity(0.6),
-            Color(hex: "#7C3AED").opacity(0.4),
-            Color(hex: "#A855F7").opacity(0.3)
-        ],
-        startPoint: .topLeading, endPoint: .bottomTrailing)
+    static var liquidGlassGradient: LinearGradient {
+        LinearGradient(
+            colors: [
+                baseColor.opacity(0.6),
+                Color(hex: "#7C3AED").opacity(0.4),
+                baseColor.opacity(0.3)
+            ],
+            startPoint: .topLeading, endPoint: .bottomTrailing)
+    }
 
     static let frostGlassGradient = LinearGradient(
         colors: [
@@ -115,30 +159,38 @@ struct AppTheme {
         ],
         startPoint: .topLeading, endPoint: .bottomTrailing)
 
-    static let neonAccentGradient = LinearGradient(
-        colors: [
-            Color(hex: "#00D4FF"),
-            Color(hex: "#5E5CE6"),
-            Color(hex: "#A855F7")
-        ],
-        startPoint: .leading, endPoint: .trailing)
+    static var neonAccentGradient: LinearGradient {
+        LinearGradient(
+            colors: [
+                Color(hex: "#00D4FF"),
+                baseColor,
+                Color(hex: "#A855F7")
+            ],
+            startPoint: .leading, endPoint: .trailing)
+    }
 
-    static let heroGradient = LinearGradient(
-        colors: [
-            Color(hex: "#4338CA"),
-            Color(hex: "#5E5CE6"),
-            Color(hex: "#7C3AED")
-        ],
-        startPoint: .topLeading, endPoint: .bottomTrailing)
+    static var heroGradient: LinearGradient {
+        LinearGradient(
+            colors: [
+                Color(hex: "#4338CA"),
+                baseColor,
+                Color(hex: "#7C3AED")
+            ],
+            startPoint: .topLeading, endPoint: .bottomTrailing)
+    }
 
     // Legacy aliases
-    static let accent  = accentGradient
+    static var accent: LinearGradient { accentGradient }
     static let income  = incomeGradient
     static let expense = expenseGradient
-    static let gold    = LinearGradient(colors: [ZColor.warning, Color(hex: "#FFD60A")],
+    static var gold    = LinearGradient(colors: [ZColor.gold, Color(hex: "#FFD60A")],
                                         startPoint: .topLeading, endPoint: .bottomTrailing)
-    static let cardPrimary = LinearGradient(colors: [Color(hex: "#1C1C1E"), Color(hex: "#2C2C2E")],
-                                            startPoint: .topLeading, endPoint: .bottomTrailing)
+    static let burgundy = LinearGradient(colors: [ZColor.burgundy, Color(hex: "#2D0202")],
+                                        startPoint: .topLeading, endPoint: .bottomTrailing)
+    static var cardPrimary: LinearGradient {
+        LinearGradient(colors: [Color(hex: "#1C1C1E"), Color(hex: "#2C2C2E")],
+                       startPoint: .topLeading, endPoint: .bottomTrailing)
+    }
     static let incomeColor  = ZColor.income
     static let expenseColor = ZColor.expense
     static let warningColor = ZColor.warning
@@ -215,7 +267,7 @@ struct ZFlowCard: ViewModifier {
                     )
             )
             .shadow(color: scheme == .dark
-                    ? ZColor.indigo.opacity(0.06)
+                    ? AppTheme.baseColor.opacity(0.06)
                     : .black.opacity(0.05),
                     radius: 12, x: 0, y: 4)
             // Inner Glow / Glass Thickness Simulation
@@ -342,8 +394,8 @@ struct PrimaryGlassButtonStyle: ButtonStyle {
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
                     .strokeBorder(Color.white.opacity(0.2), lineWidth: 0.5)
             )
-            .shadow(color: ZColor.indigo.opacity(scheme == .dark ? 0.3 : 0.2), radius: 12, x: 0, y: 6)
-            .shadow(color: ZColor.indigo.opacity(scheme == .dark ? 0.1 : 0.08), radius: 2, x: 0, y: 1)
+            .shadow(color: AppTheme.baseColor.opacity(scheme == .dark ? 0.3 : 0.2), radius: 12, x: 0, y: 6)
+            .shadow(color: AppTheme.baseColor.opacity(scheme == .dark ? 0.1 : 0.08), radius: 2, x: 0, y: 1)
             .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
             .opacity(configuration.isPressed ? 0.9 : 1.0)
             .animation(.spring(response: 0.25, dampingFraction: 0.7), value: configuration.isPressed)
@@ -373,7 +425,7 @@ struct AmbientGlowModifier: ViewModifier {
             .background(
                 RadialGradient(
                     colors: [
-                        scheme == .dark ? ZColor.indigo.opacity(0.2) : ZColor.indigo.opacity(0.15),
+                        scheme == .dark ? AppTheme.baseColor.opacity(0.2) : AppTheme.baseColor.opacity(0.15),
                         .clear
                     ],
                     center: .center,
@@ -389,7 +441,7 @@ extension View {
         modifier(AmbientGlowModifier())
     }
 
-    func glow(color: Color = ZColor.indigo, radius: CGFloat = 8) -> some View {
+    func glow(color: Color = AppTheme.baseColor, radius: CGFloat = 8) -> some View {
         modifier(GlowModifier(color: color, radius: radius))
     }
 }
@@ -464,6 +516,6 @@ struct AIBadge: View {
                     )
                 )
         )
-        .shadow(color: ZColor.indigo.opacity(0.3), radius: 4, x: 0, y: 2)
+        .shadow(color: AppTheme.baseColor.opacity(0.3), radius: 4, x: 0, y: 2)
     }
 }

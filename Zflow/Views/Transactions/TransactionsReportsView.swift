@@ -13,11 +13,14 @@ struct TransactionsReportsView: View {
     @Namespace private var segmentNS
     @State private var segment = 0  // 0 = Transactions  1 = Reports
     @State private var selectedTransaction: Transaction? = nil
+    var onAddTapped: () -> Void = {}
+    @AppStorage("profileCardColor") private var appThemeColorHex: String = "#5E5CE6"
 
     var body: some View {
         NavigationStack {
-            ZStack(alignment: .top) {
-                PremiumBackground()
+            ZStack {
+                MeshGradientBackground()
+                    .ignoresSafeArea()
 
                 VStack(spacing: 0) {
                     // Segment pill — matchedGeometryEffect slider
@@ -33,7 +36,7 @@ struct TransactionsReportsView: View {
                                 insertion: .move(edge: .leading).combined(with: .opacity),
                                 removal: .move(edge: .trailing).combined(with: .opacity)))
                     } else {
-                        ReportsContent()
+                        ReportsContent(onAddTapped: onAddTapped)
                             .transition(.asymmetric(
                                 insertion: .move(edge: .trailing).combined(with: .opacity),
                                 removal: .move(edge: .leading).combined(with: .opacity)))
@@ -109,7 +112,8 @@ struct TransactionsReportsView: View {
         @EnvironmentObject var transactionVM: TransactionViewModel
         @EnvironmentObject var authVM: AuthViewModel
         @Environment(\.colorScheme) var scheme
-        
+        @AppStorage("profileCardColor") private var appThemeColorHex: String = "#5E5CE6"
+
         @Binding var selectedTransaction: Transaction?  // for detail sheet in parent
         
         @State private var searchText       = ""
@@ -178,12 +182,20 @@ struct TransactionsReportsView: View {
                 // Search + filter bar
                 filterBar
                     .padding(.horizontal, 16)
-                    .padding(.bottom, 8)
+                    .padding(.bottom, filterPanelSpacing)
+
+                if showFilters {
+                    filterPanel
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 12)
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                }
                 
                 if transactionVM.isLoading {
                     loadingSkeletons
                 } else if filtered.isEmpty {
                     emptyState
+                    Spacer()
                 } else {
                     // List enables native swipeActions support
                     List {
@@ -214,7 +226,7 @@ struct TransactionsReportsView: View {
                                         } label: {
                                             Label(NSLocalizedString("common.edit", comment: ""), systemImage: "pencil")
                                         }
-                                        .tint(ZColor.indigo)
+                                        .tint(Color(hex: appThemeColorHex))
                                     }
                                     .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
                                     .listRowBackground(Color.clear)
@@ -234,27 +246,81 @@ struct TransactionsReportsView: View {
                     .scrollContentBackground(.hidden)
                 }
             }
-            .confirmationDialog(
-                NSLocalizedString("common.delete", comment: ""),
+            .alert(
+                NSLocalizedString("common.delete", comment: "Delete"),
                 isPresented: Binding(
                     get: { transactionToDelete != nil },
-                    set: { if !$0 { transactionToDelete = nil } }),
-                titleVisibility: .visible) {
-                    Button(NSLocalizedString("common.delete", comment: ""), role: .destructive) {
-                        if let txn = transactionToDelete, let uid = authVM.currentUserId {
-                            Task { await transactionVM.deleteTransaction(id: txn.id, userId: uid) }
+                    set: { if !$0 { transactionToDelete = nil } }
+                )
+            ) {
+                Button(NSLocalizedString("common.delete", comment: "Delete"), role: .destructive) {
+                    if let txn = transactionToDelete, let uid = authVM.currentUserId {
+                        Task { await transactionVM.deleteTransaction(id: txn.id, userId: uid) }
+                    }
+                    transactionToDelete = nil
+                }
+                Button(NSLocalizedString("common.cancel", comment: "Cancel"), role: .cancel) {
+                    transactionToDelete = nil
+                }
+            } message: {
+                if let t = transactionToDelete {
+                    Text("\(t.amount.formattedCurrency(code: t.currency)) - \(NSLocalizedString("common.deleteWarning", comment: ""))")
+                }
+            }
+            .sheet(item: $transactionToEdit) { txn in
+                EditTransactionView(transaction: txn)
+                    .environmentObject(transactionVM)
+                    .environmentObject(authVM)
+            }
+        }
+
+        private var filterPanelSpacing: CGFloat {
+            showFilters ? 8 : 8
+        }
+
+        private var filterPanel: some View {
+            HStack(spacing: 8) {
+                // All
+                filterToggleButton(nil, label: NSLocalizedString("common.all", comment: ""), color: AppTheme.baseColor)
+                // Income
+                filterToggleButton(.income, label: NSLocalizedString("dashboard.income", comment: ""), color: ZColor.income)
+                // Expense
+                filterToggleButton(.expense, label: NSLocalizedString("dashboard.expense", comment: ""), color: ZColor.expense)
+            }
+            .padding(4)
+            .background(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(scheme == .dark ? Color.white.opacity(0.06) : Color.black.opacity(0.03))
+            )
+        }
+
+        private func filterToggleButton(_ type: TransactionType?, label: String, color: Color) -> some View {
+            let isSelected = filterType == type
+            return Button {
+                withAnimation(.spring(response: 0.25, dampingFraction: 0.75)) {
+                    filterType = type
+                }
+                Haptic.selection()
+            } label: {
+                Text(label)
+                    .font(.system(size: 13, weight: isSelected ? .bold : .medium))
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
+                    .background(
+                        ZStack {
+                            if isSelected {
+                                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                    .fill(color.opacity(0.15))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                            .stroke(color.opacity(0.3), lineWidth: 1)
+                                    )
+                            }
                         }
-                        transactionToDelete = nil
-                    }
-                    Button(NSLocalizedString("common.cancel", comment: ""), role: .cancel) {
-                        transactionToDelete = nil
-                    }
-                }
-                .sheet(item: $transactionToEdit) { txn in
-                    EditTransactionView(transaction: txn)
-                        .environmentObject(transactionVM)
-                        .environmentObject(authVM)
-                }
+                    )
+                    .foregroundColor(isSelected ? color : ZColor.labelSec)
+            }
+            .buttonStyle(.plain)
         }
         
         // MARK: - Filter Bar
@@ -289,12 +355,12 @@ struct TransactionsReportsView: View {
                 } label: {
                     Image(systemName: "slider.horizontal.3")
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(showFilters ? ZColor.indigo : ZColor.labelSec)
+                        .foregroundColor(showFilters ? Color(hex: appThemeColorHex) : ZColor.labelSec)
                         .frame(width: 40, height: 38)
                         .background(
                             RoundedRectangle(cornerRadius: 12, style: .continuous)
                                 .fill(showFilters
-                                      ? ZColor.indigo.opacity(0.12)
+                                      ? Color(hex: appThemeColorHex).opacity(0.12)
                                       : (scheme == .dark ? Color.white.opacity(0.08) : Color(.tertiarySystemFill)))
                         )
                 }
@@ -330,22 +396,18 @@ struct TransactionsReportsView: View {
             }
             return HStack {
                 Text(title)
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(ZColor.labelSec)
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundColor(ZColor.label)
                 Spacer()
                 if total > 0 {
                     Text("−" + total.formattedShort(code: transactionVM.primaryCurrency))
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(ZColor.expense.opacity(0.80))
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundColor(ZColor.expense.opacity(0.90))
                 }
             }
-            .padding(.vertical, 6)
-            .padding(.horizontal, 2)
-            .background(
-                scheme == .dark
-                ? AnyShapeStyle(Color(hex: "#000000").opacity(0.01))
-                : AnyShapeStyle(Color(.systemGroupedBackground))
-            )
+            .padding(.vertical, 10)
+            .padding(.horizontal, 16)
+            .liquidGlass(cornerRadius: 16)
         }
         
         // transactionGroup is no longer used — kept for compatibility
@@ -398,7 +460,7 @@ struct TransactionsReportsView: View {
 
                 // Details
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(category?.name ?? NSLocalizedString("category.other", comment: ""))
+                    Text(category?.localizedName ?? NSLocalizedString("category.other", comment: ""))
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundColor(ZColor.label)
 
@@ -446,11 +508,14 @@ struct TransactionsReportsView: View {
         @EnvironmentObject var transactionVM: TransactionViewModel
         @EnvironmentObject var scheduledPaymentVM: ScheduledPaymentViewModel
         @EnvironmentObject var budgetManager: BudgetManager
+        @EnvironmentObject var calMgr: CalendarManager
         @Environment(\.colorScheme) var scheme
+        @SceneStorage("selectedTab") private var selectedTab = 0
         
         @State private var selectedPeriod: Period       = .month
         @State private var selectedType: TransactionType = .expense
         @State private var showAIChat                   = false
+        var onAddTapped: () -> Void = {}
         
         enum Period: String, CaseIterable {
             case week = "7D", month = "30D", quarter = "90D", year = "1Y"
@@ -512,16 +577,19 @@ struct TransactionsReportsView: View {
                     
                     // Month comparison
                     comparisonCard
+                    
+                    Spacer(minLength: 50)
                 }
                 .padding(.horizontal, 16)
-                .padding(.bottom, 130)
+                .padding(.bottom, 85)
+                .frame(maxHeight: .infinity, alignment: .top)
             }
             .sheet(isPresented: $showAIChat) {
-                // AIChatView needs to be presented as a sheet
                 NavigationStack {
                     AIChatView()
                         .navigationTitle(NSLocalizedString("ai.title", comment: ""))
                         .navigationBarTitleDisplayMode(.inline)
+                        .environmentObject(calMgr)
                 }
             }
         }
@@ -540,10 +608,10 @@ struct TransactionsReportsView: View {
                             .foregroundColor(.white)
                     }
                     VStack(alignment: .leading, spacing: 1) {
-                        Text("AI Yorumları")
+                        Text(NSLocalizedString("ai.insights.title", comment: "AI Insights"))
                             .font(.system(size: 16, weight: .bold))
                             .foregroundColor(ZColor.label)
-                        Text("Finansal verilerinizin analizi")
+                        Text(NSLocalizedString("ai.insights.subtitle", comment: "Analysis of your financial data"))
                             .font(.system(size: 12))
                             .foregroundColor(ZColor.labelSec)
                     }
@@ -556,7 +624,7 @@ struct TransactionsReportsView: View {
                         HStack(spacing: 5) {
                             Image(systemName: "bubble.left.and.bubble.right.fill")
                                 .font(.system(size: 12, weight: .semibold))
-                            Text("Sohbet Et")
+                            Text(NSLocalizedString("ai.chat.open", comment: "Chat"))
                                 .font(.system(size: 13, weight: .semibold))
                         }
                         .foregroundColor(.white)
@@ -570,14 +638,20 @@ struct TransactionsReportsView: View {
                 
                 VStack(spacing: 8) {
                     ForEach(aiInsights.prefix(4)) { insight in
-                        AIInsightCard(insight: insight, onAction: {})
+                        AIInsightCard(insight: insight) {
+                            if insight.type == .upcoming || insight.actionLabel == NSLocalizedString("ai.action.calendar", comment: "") {
+                                selectedTab = 3
+                            } else if insight.actionLabel == NSLocalizedString("action.addTransaction", comment: "") || insight.actionLabel == "İşlem Ekle" {
+                                onAddTapped()
+                            }
+                        }
                     }
                 }
             }
             .padding(16)
             .background(
                 RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .fill(scheme == .dark ? Color.white.opacity(0.05) : Color(.secondarySystemGroupedBackground))
+                    .fill(Color.white.opacity(scheme == .dark ? 0.05 : 0.06))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 18, style: .continuous)
@@ -621,7 +695,7 @@ struct TransactionsReportsView: View {
                 .padding(4)
                 .background(
                     RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .fill(scheme == .dark ? Color.white.opacity(0.05) : Color(.secondarySystemGroupedBackground))
+                        .fill(Color.white.opacity(scheme == .dark ? 0.05 : 0.06))
                 )
                 
                 // Type toggle
@@ -706,20 +780,17 @@ struct TransactionsReportsView: View {
                 
                 let color = selectedType == .income ? ZColor.income : ZColor.expense
                 Chart(dailyData, id: \.date) { pt in
-                    LineMark(
+                    BarMark(
                         x: .value("Date", pt.date),
-                        y: .value("Amount", pt.total))
-                    .foregroundStyle(color)
-                    .interpolationMethod(.catmullRom)
-                    
-                    AreaMark(
-                        x: .value("Date", pt.date),
-                        y: .value("Amount", pt.total))
+                        y: .value("Amount", pt.total)
+                    )
                     .foregroundStyle(
                         LinearGradient(
-                            colors: [color.opacity(0.28), .clear],
-                            startPoint: .top, endPoint: .bottom))
-                    .interpolationMethod(.catmullRom)
+                            colors: [color.opacity(0.9), color.opacity(0.2)],
+                            startPoint: .top, endPoint: .bottom
+                        )
+                    )
+                    .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
                 }
                 .chartXAxis {
                     AxisMarks(preset: .aligned, values: .stride(by: .day, count: max(1, selectedPeriod.days / 5))) { _ in
@@ -775,7 +846,7 @@ struct TransactionsReportsView: View {
                                 Circle()
                                     .fill(Color(hex: item.category?.color ?? "#8E8E93"))
                                     .frame(width: 9, height: 9)
-                                Text(item.category?.name ?? NSLocalizedString("category.other", comment: ""))
+                                Text(item.category?.localizedName ?? NSLocalizedString("category.other", comment: ""))
                                     .font(.system(size: 12, weight: .medium))
                                     .foregroundColor(ZColor.label)
                                     .lineLimit(1)
@@ -820,7 +891,7 @@ struct TransactionsReportsView: View {
                                 }
                                 
                                 VStack(alignment: .leading, spacing: 1) {
-                                    Text(item.category?.name ?? NSLocalizedString("category.other", comment: ""))
+                                    Text(item.category?.localizedName ?? NSLocalizedString("category.other", comment: ""))
                                         .font(.system(size: 14, weight: .semibold))
                                         .foregroundColor(ZColor.label)
                                     Text("\(Int(item.percent))% of total")
@@ -860,7 +931,7 @@ struct TransactionsReportsView: View {
                         }
                     }
                 }
-                .background(Color(.secondarySystemGroupedBackground))
+                .background(Color.white.opacity(scheme == .dark ? 0.06 : 0.04))
                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                 .overlay(
                     RoundedRectangle(cornerRadius: 16, style: .continuous)

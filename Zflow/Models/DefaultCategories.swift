@@ -80,8 +80,11 @@ let allDefaultCategories: [DefaultCategory] = [
     DefaultCategory(name: "Subcontracting",color: "#C084FC", icon: "person.crop.rectangle.fill",  type: "expense", userType: "business"),
 
     // ─── SHARED / BOTH ────────────────────────────────────────
-    DefaultCategory(name: "Gift",          color: "#F472B6", icon: "gift.fill",                    type: "both",    userType: nil),
-    DefaultCategory(name: "Other",         color: "#94A3B8", icon: "ellipsis.circle.fill",         type: "both",    userType: nil),
+    DefaultCategory(name: "Gift",              color: "#F472B6", icon: "gift.fill",                          type: "both",    userType: nil),
+    DefaultCategory(name: "Other",             color: "#94A3B8", icon: "ellipsis.circle.fill",               type: "both",    userType: nil),
+    DefaultCategory(name: "Incoming Transfer", color: "#34D399", icon: "arrow.down.circle.fill",             type: "income",  userType: nil),
+    DefaultCategory(name: "Outgoing Transfer", color: "#60A5FA", icon: "arrow.up.circle.fill",               type: "expense", userType: nil),
+    DefaultCategory(name: "Bank Fees",         color: "#94A3B8", icon: "creditcard.trianglebadge.exclamationmark", type: "expense", userType: nil),
 ]
 
 func filteredDefaultCategories(for userType: String) -> [DefaultCategory] {

@@ -8,7 +8,8 @@ struct OnboardingView: View {
 
     var body: some View {
         ZStack {
-            LiquidNightBackground()
+            MeshGradientBackground()
+                .ignoresSafeArea()
 
             if stage == 0 {
                 ZFlowSplash()
@@ -34,111 +35,86 @@ struct OnboardingView: View {
     }
 }
 
-// MARK: - Liquid Night Background
-// 5 katman renk + conic halo — iOS 26 Liquid Glass zemini
 
-struct LiquidNightBackground: View {
-    @State private var a = false
-
-    var body: some View {
-        ZStack {
-            // Deep space base
-            LinearGradient(
-                stops: [
-                    .init(color: Color(hex: "#000000"), location: 0),
-                    .init(color: Color(hex: "#050510"), location: 0.45),
-                    .init(color: Color(hex: "#020208"), location: 1),
-                ],
-                startPoint: .top, endPoint: .bottom)
-            .ignoresSafeArea()
-
-            // --- Aurora orbs ---
-
-            // Indigo — top-left (primary)
-            Circle()
-                .fill(
-                    RadialGradient(
-                        colors: [Color(hex: "#5E5CE6").opacity(0.70), .clear],
-                        center: .center, startRadius: 0, endRadius: 200))
-                .frame(width: 400)
-                .blur(radius: 60)
-                .offset(x: a ? -70 : -120, y: a ? -200 : -260)
-                .animation(.easeInOut(duration: 9).repeatForever(autoreverses: true), value: a)
-
-            // Violet — top-right
-            Circle()
-                .fill(
-                    RadialGradient(
-                        colors: [Color(hex: "#7C3AED").opacity(0.55), .clear],
-                        center: .center, startRadius: 0, endRadius: 170))
-                .frame(width: 340)
-                .blur(radius: 55)
-                .offset(x: a ? 130 : 80, y: a ? -140 : -190)
-                .animation(.easeInOut(duration: 12).repeatForever(autoreverses: true), value: a)
-
-            // Cyan — mid accent
-            Circle()
-                .fill(
-                    RadialGradient(
-                        colors: [Color(hex: "#0EA5E9").opacity(0.28), .clear],
-                        center: .center, startRadius: 0, endRadius: 150))
-                .frame(width: 300)
-                .blur(radius: 70)
-                .offset(x: a ? 30 : -15, y: a ? 40 : 100)
-                .animation(.easeInOut(duration: 10).repeatForever(autoreverses: true), value: a)
-
-            // Emerald — bottom-left
-            Circle()
-                .fill(
-                    RadialGradient(
-                        colors: [Color(hex: "#059669").opacity(0.22), .clear],
-                        center: .center, startRadius: 0, endRadius: 170))
-                .frame(width: 340)
-                .blur(radius: 90)
-                .offset(x: a ? -90 : -45, y: a ? 390 : 330)
-                .animation(.easeInOut(duration: 14).repeatForever(autoreverses: true), value: a)
-
-            // Rose — bottom-right (contrast accent)
-            Circle()
-                .fill(
-                    RadialGradient(
-                        colors: [Color(hex: "#EC4899").opacity(0.14), .clear],
-                        center: .center, startRadius: 0, endRadius: 130))
-                .frame(width: 260)
-                .blur(radius: 80)
-                .offset(x: a ? 110 : 75, y: a ? 500 : 420)
-                .animation(.easeInOut(duration: 11).repeatForever(autoreverses: true), value: a)
-
-            // Fine noise overlay — depth
-            Rectangle()
-                .fill(.ultraThinMaterial.opacity(0.04))
-                .ignoresSafeArea()
-        }
-        .onAppear { a = true }
-    }
-}
-
-// MARK: - Splash Screen
-// World-class reveal: logo assembles from particles, rings bloom
+// MARK: - ZFlow Splash
+// World-class reveal. Fully adaptive for light & dark mode.
 
 struct ZFlowSplash: View {
-    @State private var logoScale: CGFloat   = 0.18
-    @State private var logoOp: Double       = 0
-    @State private var ringOp: Double       = 0
-    @State private var ringScale: CGFloat   = 0.6
-    @State private var textOp: Double       = 0
-    @State private var subOp: Double        = 0
-    @State private var subY: CGFloat        = 24
-    @State private var pulse                = false
-    @State private var orbiting            = false
-    @State private var haloRotation: Double = 0
-    @State private var particleOp: Double   = 0
+    @Environment(\.colorScheme) var scheme
+
+    @State private var logoScale:    CGFloat = 0.18
+    @State private var logoOp:       Double  = 0
+    @State private var ringOp:       Double  = 0
+    @State private var ringScale:    CGFloat = 0.6
+    @State private var textOp:       Double  = 0
+    @State private var subOp:        Double  = 0
+    @State private var subY:         CGFloat = 24
+    @State private var pulse                 = false
+    @State private var orbiting              = false
+    @State private var haloRotation: Double  = 0
 
     // Floating feature pills
     @State private var pill1Y: CGFloat = 60
     @State private var pill2Y: CGFloat = -60
     @State private var pill3Y: CGFloat = 80
     @State private var pillOp: Double  = 0
+
+    // ── Adaptive colours ──────────────────────────────────────────────
+
+    private var base:     Color { AppTheme.baseColor }
+    private var baseAlt:  Color { AppTheme.accentSecondary }
+
+    /// "ZFlow" wordmark gradient
+    private var titleGradient: LinearGradient {
+        scheme == .dark
+            ? LinearGradient(
+                colors: [.white, Color(hex: "#E8E4FF"), base.opacity(0.80)],
+                startPoint: .topLeading, endPoint: .bottomTrailing)
+            : LinearGradient(
+                colors: [base, baseAlt],
+                startPoint: .topLeading, endPoint: .bottomTrailing)
+    }
+
+    /// Tagline / subtitle color
+    private var subtitleColor: Color {
+        scheme == .dark ? Color.white.opacity(0.50) : Color(.secondaryLabel)
+    }
+
+    /// Logo icon gradient
+    private var iconGradient: LinearGradient {
+        scheme == .dark
+            ? LinearGradient(colors: [.white, Color(hex: "#C4B5FD")], startPoint: .top, endPoint: .bottom)
+            : LinearGradient(colors: [base, baseAlt], startPoint: .top, endPoint: .bottom)
+    }
+
+    /// Glass circle fill
+    private var glassFill: AnyShapeStyle {
+        scheme == .dark ? AnyShapeStyle(.ultraThinMaterial) : AnyShapeStyle(Color.white.opacity(0.92))
+    }
+
+    /// Glass circle stroke
+    private var glassBorder: LinearGradient {
+        scheme == .dark
+            ? LinearGradient(
+                colors: [Color.white.opacity(0.45), Color.white.opacity(0.05), base.opacity(0.20)],
+                startPoint: .topLeading, endPoint: .bottomTrailing)
+            : LinearGradient(
+                colors: [Color.white, base.opacity(0.38)],
+                startPoint: .topLeading, endPoint: .bottomTrailing)
+    }
+
+    /// Inner dashed ring stroke
+    private var dashedRingGradient: LinearGradient {
+        scheme == .dark
+            ? LinearGradient(
+                colors: [Color.white.opacity(0.18), Color.white.opacity(0.04)],
+                startPoint: .topLeading, endPoint: .bottomTrailing)
+            : LinearGradient(
+                colors: [base.opacity(0.22), base.opacity(0.05)],
+                startPoint: .topLeading, endPoint: .bottomTrailing)
+    }
+
+    // MARK: - Body
 
     var body: some View {
         GeometryReader { geo in
@@ -149,14 +125,13 @@ struct ZFlowSplash: View {
                 VStack(spacing: 0) {
                     Spacer()
 
-                    // Logo assembly
+                    // ── Logo assembly ─────────────────────────────────
                     ZStack {
                         // Outer glow halo
                         Circle()
-                            .fill(
-                                RadialGradient(
-                                    colors: [Color(hex: "#5E5CE6").opacity(0.35), .clear],
-                                    center: .center, startRadius: 0, endRadius: 140))
+                            .fill(RadialGradient(
+                                colors: [base.opacity(scheme == .dark ? 0.38 : 0.20), .clear],
+                                center: .center, startRadius: 0, endRadius: 140))
                             .frame(width: 280)
                             .blur(radius: 30)
                             .scaleEffect(pulse ? 1.15 : 0.9)
@@ -169,10 +144,10 @@ struct ZFlowSplash: View {
                             .stroke(
                                 AngularGradient(
                                     colors: [
-                                        Color(hex: "#5E5CE6").opacity(0.9),
-                                        Color(hex: "#7D7AFF").opacity(0.6),
+                                        base.opacity(scheme == .dark ? 0.90 : 0.70),
+                                        baseAlt.opacity(scheme == .dark ? 0.60 : 0.40),
                                         .clear,
-                                        Color(hex: "#5E5CE6").opacity(0.9),
+                                        base.opacity(scheme == .dark ? 0.90 : 0.70),
                                     ],
                                     center: .center),
                                 style: StrokeStyle(lineWidth: 1.5, lineCap: .round))
@@ -183,9 +158,7 @@ struct ZFlowSplash: View {
                         // Inner dashed ring
                         Circle()
                             .stroke(
-                                LinearGradient(
-                                    colors: [Color.white.opacity(0.18), Color.white.opacity(0.04)],
-                                    startPoint: .topLeading, endPoint: .bottomTrailing),
+                                dashedRingGradient,
                                 style: StrokeStyle(lineWidth: 0.5, dash: [3, 4]))
                             .frame(width: 118)
                             .rotationEffect(.degrees(-haloRotation * 0.5))
@@ -195,7 +168,8 @@ struct ZFlowSplash: View {
                         ForEach(0..<3) { i in
                             Circle()
                                 .stroke(
-                                    Color(hex: "#5E5CE6").opacity(0.30 - Double(i) * 0.08),
+                                    base.opacity(
+                                        (scheme == .dark ? 0.30 : 0.18) - Double(i) * 0.06),
                                     lineWidth: 0.6)
                                 .frame(width: CGFloat(128 + i * 38))
                                 .scaleEffect(pulse ? 1.06 : 0.95)
@@ -210,9 +184,9 @@ struct ZFlowSplash: View {
                         // Orbiting dot
                         ZStack {
                             Circle()
-                                .fill(Color(hex: "#7D7AFF"))
+                                .fill(baseAlt)
                                 .frame(width: 7, height: 7)
-                                .shadow(color: Color(hex: "#5E5CE6"), radius: 6)
+                                .shadow(color: base, radius: 6)
                         }
                         .offset(y: -72)
                         .rotationEffect(.degrees(orbiting ? 360 : 0))
@@ -224,29 +198,18 @@ struct ZFlowSplash: View {
                         // Glass logo circle
                         ZStack {
                             Circle()
-                                .fill(.ultraThinMaterial)
+                                .fill(glassFill)
                                 .frame(width: 100, height: 100)
                                 .overlay(
                                     Circle()
-                                        .strokeBorder(
-                                            LinearGradient(
-                                                colors: [
-                                                    Color.white.opacity(0.45),
-                                                    Color.white.opacity(0.05),
-                                                    Color(hex: "#5E5CE6").opacity(0.20),
-                                                ],
-                                                startPoint: .topLeading,
-                                                endPoint: .bottomTrailing),
-                                            lineWidth: 0.8)
+                                        .strokeBorder(glassBorder, lineWidth: 0.8)
                                 )
-                                .shadow(color: Color(hex: "#5E5CE6").opacity(0.8), radius: 40, y: 16)
+                                .shadow(color: base.opacity(scheme == .dark ? 0.80 : 0.35), radius: 40, y: 16)
+                                .shadow(color: base.opacity(scheme == .dark ? 0.20 : 0.10), radius: 8, y: 4)
 
                             Image(systemName: "chart.line.uptrend.xyaxis")
                                 .font(.system(size: 38, weight: .bold))
-                                .foregroundStyle(
-                                    LinearGradient(
-                                        colors: [Color.white, Color(hex: "#C4B5FD")],
-                                        startPoint: .top, endPoint: .bottom))
+                                .foregroundStyle(iconGradient)
                         }
                         .scaleEffect(logoScale)
                         .opacity(logoOp)
@@ -254,25 +217,18 @@ struct ZFlowSplash: View {
 
                     Spacer().frame(height: 38)
 
-                    // Wordmark
+                    // ── Wordmark ──────────────────────────────────────
                     VStack(spacing: 10) {
                         Text("ZFlow")
                             .font(.system(size: 52, weight: .black, design: .rounded))
-                            .foregroundStyle(
-                                LinearGradient(
-                                    colors: [
-                                        Color.white,
-                                        Color(hex: "#C4B5FD"),
-                                        Color(hex: "#818CF8"),
-                                    ],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing))
+                            .foregroundStyle(titleGradient)
                             .tracking(-1.2)
+                            .shadow(color: base.opacity(scheme == .dark ? 0.40 : 0.16), radius: 10, y: 4)
                             .opacity(textOp)
 
                         Text(NSLocalizedString("onboarding.tagline", comment: ""))
                             .font(.system(size: 15, weight: .medium))
-                            .foregroundColor(Color.white.opacity(0.48))
+                            .foregroundColor(subtitleColor)
                             .tracking(0.2)
                             .opacity(subOp)
                             .offset(y: subY)
@@ -286,7 +242,7 @@ struct ZFlowSplash: View {
         .onAppear { startAnimations() }
     }
 
-    // MARK: - Feature Pills (blurry background)
+    // MARK: - Feature Pills ────────────────────────────────────────────
 
     @ViewBuilder
     private func featurePills(geo: GeometryProxy) -> some View {
@@ -294,16 +250,20 @@ struct ZFlowSplash: View {
         let cy = geo.size.height / 2
 
         Group {
-            featurePill("chart.pie.fill", "Smart Reports", [Color(hex: "#10B981"), Color(hex: "#0EA5E9")])
+            featurePill("chart.pie.fill", "Smart Reports",
+                        [Color(hex: "#10B981"), Color(hex: "#0EA5E9")])
                 .offset(x: -cx * 0.55, y: pill1Y - cy * 0.22)
 
-            featurePill("lock.shield.fill", "Bank-Level Security", [Color(hex: "#BF5AF2"), Color(hex: "#5E5CE6")])
+            featurePill("lock.shield.fill", "Bank-Level Security",
+                        [Color(hex: "#BF5AF2"), base])
                 .offset(x: cx * 0.52, y: pill2Y + cy * 0.15)
 
-            featurePill("calendar.badge.plus", "Apple Calendar", [Color(hex: "#F59E0B"), Color(hex: "#EF4444")])
+            featurePill("calendar.badge.plus", "Apple Calendar",
+                        [Color(hex: "#F59E0B"), Color(hex: "#EF4444")])
                 .offset(x: -cx * 0.35, y: pill3Y + cy * 0.32)
 
-            featurePill("building.2.fill", "KDV / VAT Ready", [Color(hex: "#0EA5E9"), Color(hex: "#5E5CE6")])
+            featurePill("building.2.fill", "KDV / VAT Ready",
+                        [Color(hex: "#0EA5E9"), base])
                 .offset(x: cx * 0.38, y: -cy * 0.40)
         }
         .opacity(pillOp)
@@ -316,75 +276,77 @@ struct ZFlowSplash: View {
                 .foregroundStyle(LinearGradient(colors: colors, startPoint: .topLeading, endPoint: .bottomTrailing))
             Text(label)
                 .font(.system(size: 12, weight: .medium))
-                .foregroundColor(Color.white.opacity(0.72))
+                .foregroundColor(scheme == .dark
+                    ? Color.white.opacity(0.72)
+                    : Color.primary.opacity(0.70))
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 9)
         .background(
             Capsule(style: .continuous)
-                .fill(.ultraThinMaterial)
+                .fill(scheme == .dark
+                      ? AnyShapeStyle(.ultraThinMaterial)
+                      : AnyShapeStyle(Color.white.opacity(0.88)))
                 .overlay(
                     Capsule(style: .continuous)
-                        .strokeBorder(Color.white.opacity(0.12), lineWidth: 0.5))
+                        .strokeBorder(
+                            scheme == .dark
+                                ? Color.white.opacity(0.12)
+                                : Color.black.opacity(0.07),
+                            lineWidth: 0.5))
         )
-        .blur(radius: 0.5)
-        .shadow(color: colors[0].opacity(0.25), radius: 10, y: 4)
+        .blur(radius: 0.4)
+        .shadow(color: colors[0].opacity(scheme == .dark ? 0.25 : 0.15), radius: 10, y: 4)
     }
 
-    // MARK: - Animation Sequence
+    // MARK: - Animation Sequence ───────────────────────────────────────
 
     private func startAnimations() {
-        // Logo
         withAnimation(.spring(response: 0.8, dampingFraction: 0.58).delay(0.08)) {
             logoScale = 1.0; logoOp = 1
         }
-        // Rings
         withAnimation(.spring(response: 0.6, dampingFraction: 0.65).delay(0.30)) {
             ringOp = 1; ringScale = 1.0
         }
-        // Wordmark
         withAnimation(.spring(response: 0.55, dampingFraction: 0.68).delay(0.52)) {
             textOp = 1
         }
         withAnimation(.spring(response: 0.52, dampingFraction: 0.68).delay(0.70)) {
             subOp = 1; subY = 0
         }
-        // Pills
         withAnimation(.spring(response: 0.6, dampingFraction: 0.7).delay(0.90)) {
             pillOp = 1
             pill1Y = 0; pill2Y = 0; pill3Y = 0
         }
-
-        // Continuous loops
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
             pulse = true; orbiting = true
         }
-
-        // Halo rotation
         withAnimation(.linear(duration: 8).repeatForever(autoreverses: false).delay(0.3)) {
             haloRotation = 360
         }
     }
 }
 
+
 // MARK: - Onboarding Carousel
 
 struct OnboardingCarousel: View {
     var onComplete: () -> Void
+    @Environment(\.colorScheme) var scheme
     @State private var current = 0
 
     struct Page: Identifiable {
-        let id = UUID()
-        let icon: String
+        let id        = UUID()
+        let icon:      String
         let gradient: [Color]
-        let titleKey: String
+        let titleKey:  String
         let subtitleKey: String
-        let badge: String?
+        let badge:     String?
     }
 
     private let pages: [Page] = [
         Page(icon: "chart.line.uptrend.xyaxis",
-             gradient: [Color(hex: "#5E5CE6"), Color(hex: "#7D7AFF")],
+             gradient: [AppTheme.baseColor, AppTheme.accentSecondary],
              titleKey: "onboarding.page1.title",
              subtitleKey: "onboarding.page1.subtitle",
              badge: nil),
@@ -419,19 +381,22 @@ struct OnboardingCarousel: View {
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
 
-            // Controls
+            // ── Controls
             VStack(spacing: 22) {
-                // Dots
+
+                // Progress dots
                 HStack(spacing: 7) {
                     ForEach(0..<pages.count, id: \.self) { i in
                         Capsule()
-                            .fill(i == current ? Color.white : Color.white.opacity(0.26))
+                            .fill(i == current
+                                  ? (scheme == .dark ? Color.white : pages[current].gradient[0])
+                                  : (scheme == .dark ? Color.white.opacity(0.26) : pages[current].gradient[0].opacity(0.28)))
                             .frame(width: i == current ? 24 : 7, height: 7)
                             .animation(.spring(response: 0.3, dampingFraction: 0.7), value: current)
                     }
                 }
 
-                // CTA
+                // CTA button
                 Button {
                     Haptic.medium()
                     if current < pages.count - 1 {
@@ -452,23 +417,31 @@ struct OnboardingCarousel: View {
                     .frame(maxWidth: .infinity)
                     .frame(height: 56)
                     .background(
-                        RoundedRectangle(cornerRadius: 18, style: .continuous)
-                            .fill(LinearGradient(
-                                colors: pages[current].gradient,
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing))
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                                .fill(LinearGradient(
+                                    colors: pages[current].gradient,
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing))
+                            // Inner highlight
+                            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                                .fill(LinearGradient(
+                                    colors: [Color.white.opacity(0.18), .clear],
+                                    startPoint: .top, endPoint: .center))
+                        }
                     )
-                    .shadow(color: pages[current].gradient[0].opacity(0.60), radius: 20, y: 7)
+                    .shadow(color: pages[current].gradient[0].opacity(0.55), radius: 20, y: 7)
                 }
                 .padding(.horizontal, 28)
                 .buttonStyle(FABButtonStyle())
 
+                // Skip
                 if current < pages.count - 1 {
                     Button(NSLocalizedString("onboarding.skip", comment: "")) {
                         withAnimation { current = pages.count - 1 }
                     }
-                    .font(.system(size: 14))
-                    .foregroundColor(Color.white.opacity(0.38))
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(scheme == .dark ? Color.white.opacity(0.38) : Color(.secondaryLabel))
                 }
             }
             .padding(.bottom, 54)
@@ -476,48 +449,55 @@ struct OnboardingCarousel: View {
     }
 }
 
+
 // MARK: - Onboarding Page Card
 
 struct OnboardingPageCard: View {
     let page: OnboardingCarousel.Page
+    @Environment(\.colorScheme) var scheme
     @State private var appeared = false
 
     var body: some View {
         VStack(spacing: 0) {
             Spacer()
 
-            // Icon
+            // ── Icon ──────────────────────────────────────────────────
             ZStack {
                 // Glow bloom
                 Circle()
                     .fill(RadialGradient(
-                        colors: [page.gradient[0].opacity(0.50), .clear],
+                        colors: [page.gradient[0].opacity(scheme == .dark ? 0.50 : 0.30), .clear],
                         center: .center, startRadius: 0, endRadius: 100))
                     .frame(width: 200)
                     .blur(radius: 25)
 
-                // Glass card icon
+                // Glass icon card
                 ZStack {
                     RoundedRectangle(cornerRadius: 32, style: .continuous)
-                        .fill(.ultraThinMaterial)
+                        .fill(scheme == .dark
+                              ? AnyShapeStyle(.ultraThinMaterial)
+                              : AnyShapeStyle(Color.white.opacity(0.90)))
                         .frame(width: 118, height: 118)
                         .overlay(
                             RoundedRectangle(cornerRadius: 32, style: .continuous)
                                 .strokeBorder(
                                     LinearGradient(
-                                        colors: [Color.white.opacity(0.28), Color.white.opacity(0.04)],
+                                        colors: scheme == .dark
+                                            ? [Color.white.opacity(0.28), Color.white.opacity(0.04)]
+                                            : [Color.white, page.gradient[0].opacity(0.20)],
                                         startPoint: .topLeading, endPoint: .bottomTrailing),
                                     lineWidth: 0.7)
                         )
-                        .shadow(color: page.gradient[0].opacity(0.55), radius: 32, y: 14)
+                        .shadow(
+                            color: page.gradient[0].opacity(scheme == .dark ? 0.55 : 0.28),
+                            radius: 32, y: 14)
 
                     Image(systemName: page.icon)
                         .font(.system(size: 46, weight: .medium))
-                        .foregroundStyle(
-                            LinearGradient(
-                                colors: page.gradient,
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing))
+                        .foregroundStyle(LinearGradient(
+                            colors: page.gradient,
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing))
                 }
             }
             .scaleEffect(appeared ? 1 : 0.65)
@@ -525,7 +505,7 @@ struct OnboardingPageCard: View {
 
             Spacer().frame(height: 38)
 
-            // Badge
+            // ── Badge ─────────────────────────────────────────────────
             if let badge = page.badge {
                 HStack(spacing: 6) {
                     Image(systemName: "checkmark.seal.fill")
@@ -534,29 +514,29 @@ struct OnboardingPageCard: View {
                         .font(.system(size: 12, weight: .semibold))
                         .tracking(0.3)
                 }
-                .foregroundStyle(
-                    LinearGradient(
-                        colors: page.gradient,
-                        startPoint: .leading,
-                        endPoint: .trailing))
+                .foregroundStyle(LinearGradient(
+                    colors: page.gradient,
+                    startPoint: .leading,
+                    endPoint: .trailing))
                 .padding(.horizontal, 14)
                 .padding(.vertical, 7)
                 .background(
                     Capsule(style: .continuous)
-                        .fill(page.gradient[0].opacity(0.12))
+                        .fill(page.gradient[0].opacity(scheme == .dark ? 0.12 : 0.10))
                         .overlay(
                             Capsule(style: .continuous)
-                                .strokeBorder(page.gradient[0].opacity(0.30), lineWidth: 0.5))
+                                .strokeBorder(page.gradient[0].opacity(scheme == .dark ? 0.30 : 0.35),
+                                              lineWidth: 0.5))
                 )
                 .opacity(appeared ? 1 : 0)
                 .offset(y: appeared ? 0 : 8)
                 .padding(.bottom, 14)
             }
 
-            // Title
+            // ── Title ─────────────────────────────────────────────────
             Text(NSLocalizedString(page.titleKey, comment: ""))
                 .font(.system(size: 30, weight: .black, design: .rounded))
-                .foregroundColor(.white)
+                .foregroundColor(scheme == .dark ? .white : .primary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 28)
                 .opacity(appeared ? 1 : 0)
@@ -564,10 +544,10 @@ struct OnboardingPageCard: View {
 
             Spacer().frame(height: 16)
 
-            // Subtitle
+            // ── Subtitle ──────────────────────────────────────────────
             Text(NSLocalizedString(page.subtitleKey, comment: ""))
                 .font(.system(size: 16, weight: .regular))
-                .foregroundColor(Color.white.opacity(0.58))
+                .foregroundColor(scheme == .dark ? Color.white.opacity(0.58) : Color(.secondaryLabel))
                 .multilineTextAlignment(.center)
                 .lineSpacing(4)
                 .padding(.horizontal, 36)

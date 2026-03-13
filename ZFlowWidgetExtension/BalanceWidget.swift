@@ -5,6 +5,46 @@
 import WidgetKit
 import SwiftUI
 
+// MARK: - Widget Semantic Palette
+// Mirrors ZColor / AppTheme from the main app.
+// Widget target is isolated, so equivalent constants are defined here.
+
+private extension Color {
+    /// Income — matches ZColor.income (#50C878 Soft Emerald)
+    static let wIncome     = Color(hex: "#50C878")
+    /// Expense — matches ZColor.expense (#FF7F7F Soft Coral)
+    static let wExpense    = Color(hex: "#FF7F7F")
+    /// Brand accent — defaults to indigo (#5E5CE6) if not in snapshot
+    static func wAccent(hex: String?) -> Color { Color(hex: hex ?? "#5E5CE6") }
+    /// Brand accent dark — defaults to indigoDark (#7D7AFF)
+    static func wAccentDark(hex: String?) -> Color { Color(hex: hex ?? "#7D7AFF") }
+    /// Negative balance — Apple system red
+    static let wNegative   = Color(hex: "#FF453A")
+}
+
+// MARK: - Widget Typography Helpers
+// Mirrors EliteTypography from the main app.
+// Uses .rounded design and matching weights for visual consistency.
+
+private extension Font {
+    /// Hero balance: thin + rounded, size varies per widget family
+    static func wHeroBalance(_ size: CGFloat) -> Font {
+        .system(size: size, weight: .thin, design: .rounded)
+    }
+    /// Brand label: black + rounded
+    static func wBrand(_ size: CGFloat) -> Font {
+        .system(size: size, weight: .black, design: .rounded)
+    }
+    /// Uppercase caption: bold + rounded
+    static func wCaption(_ size: CGFloat = 10) -> Font {
+        .system(size: size, weight: .bold, design: .rounded)
+    }
+    /// Body bold
+    static func wBody(_ size: CGFloat = 13) -> Font {
+        .system(size: size, weight: .bold, design: .rounded)
+    }
+}
+
 // MARK: - Balance Widget
 
 struct ZFlowBalanceWidget: Widget {
@@ -13,7 +53,7 @@ struct ZFlowBalanceWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: ZFlowProvider()) { entry in
             BalanceWidgetView(entry: entry)
-                .containerBackground(.fill.tertiary, for: .widget)
+                .containerBackground(for: .widget) { WidgetGradientBackground(snapshot: entry.snapshot) }
         }
         .configurationDisplayName("ZFlow Balance")
         .description("Net balance and monthly summary.")
@@ -43,31 +83,32 @@ struct BalanceWidgetView: View {
         ZStack {
             widgetBackground
 
-            VStack(alignment: .leading, spacing: 0) {
-                // Logo
+            VStack(alignment: .leading, spacing: 4) {
+                // Logo — Color.primary (white in dark / dark in light) ensures
+                // readability on any theme background color
                 HStack(spacing: 5) {
                     Image(systemName: "chart.line.uptrend.xyaxis")
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundStyle(accentGrad)
+                        .font(.wBrand(11))
+                        .foregroundColor(.primary)
                     Text("ZFlow")
-                        .font(.system(size: 11, weight: .black, design: .rounded))
-                        .foregroundStyle(accentGrad)
+                        .font(.wBrand(11))
+                        .foregroundColor(.primary)
                     Spacer()
                 }
 
                 Spacer()
 
                 // Balance
-                Text("Net Balance")
-                    .font(.system(size: 10, weight: .medium))
-                    .foregroundColor(.secondary)
+                Text(Localizer.shared.l("widgets.netBalance"))
+                    .font(.wCaption(10))
+                    .foregroundStyle(.secondary)
                     .textCase(.uppercase)
-                    .tracking(0.3)
+                    .tracking(0.6)
 
                 Text(entry.snapshot.netBalance.formattedCurrencySimple(code: entry.snapshot.currency))
-                    .font(.system(size: 20, weight: .black, design: .rounded))
-                    .foregroundColor(entry.snapshot.netBalance >= 0 ? .primary : Color(hex: "#FF7F7F"))
-                    .minimumScaleFactor(0.6)
+                    .font(.wHeroBalance(24))
+                    .foregroundStyle(entry.snapshot.netBalance >= 0 ? Color.primary : Color.wNegative)
+                    .minimumScaleFactor(0.5)
                     .lineLimit(1)
 
                 Spacer().frame(height: 6)
@@ -75,7 +116,7 @@ struct BalanceWidgetView: View {
                 // Month change chip
                 monthChangeChip
             }
-            .padding(14)
+            .padding(18) // Optimized for 158pt square
         }
     }
 
@@ -87,53 +128,53 @@ struct BalanceWidgetView: View {
 
             HStack(spacing: 0) {
                 // Left — balance
-                VStack(alignment: .leading, spacing: 6) {
-                    HStack(spacing: 5) {
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(spacing: 4) {
                         Image(systemName: "chart.line.uptrend.xyaxis")
-                            .font(.system(size: 12, weight: .bold))
-                            .foregroundStyle(accentGrad)
+                            .font(.wBrand(12))
+                            .foregroundColor(.primary)
                         Text("ZFlow")
-                            .font(.system(size: 12, weight: .black, design: .rounded))
-                            .foregroundStyle(accentGrad)
+                            .font(.wBrand(12))
+                            .foregroundColor(.primary)
                     }
 
                     Spacer()
 
-                    Text("Net Balance")
-                        .font(.system(size: 10, weight: .medium))
-                        .foregroundColor(.secondary)
+                    Text(Localizer.shared.l("widgets.netBalance"))
+                        .font(.wCaption(10))
+                        .foregroundStyle(.secondary)
                         .textCase(.uppercase)
-                        .tracking(0.3)
+                        .tracking(0.6)
 
                     Text(entry.snapshot.netBalance.formattedCurrencySimple(code: entry.snapshot.currency))
-                        .font(.system(size: 22, weight: .black, design: .rounded))
-                        .foregroundColor(.primary)
-                        .minimumScaleFactor(0.55)
+                        .font(.wHeroBalance(28))
+                        .foregroundStyle(Color.primary)
+                        .minimumScaleFactor(0.5)
                         .lineLimit(1)
 
                     monthChangeChip
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.leading, 14)
-                .padding(.vertical, 14)
+                .padding(.leading, 20)
+                .padding(.vertical, 18) // Optimized for 338pt x 158pt
 
                 Divider().padding(.vertical, 14)
 
                 // Right — income + expense
                 VStack(spacing: 10) {
                     incomeExpenseRow(
-                        label: "Income",
+                        label: Localizer.shared.l("dashboard.income"),
                         value: entry.snapshot.thisMonthIncome,
-                        icon: "arrow.down.circle.fill",
-                        color: Color(hex: "#50C878"))
+                        icon: "arrow.up.circle.fill",
+                        color: .wIncome)
 
                     Divider()
 
                     incomeExpenseRow(
-                        label: "Expense",
+                        label: Localizer.shared.l("dashboard.expense"),
                         value: entry.snapshot.thisMonthExpense,
-                        icon: "arrow.up.circle.fill",
-                        color: Color(hex: "#FF7F7F"))
+                        icon: "arrow.down.circle.fill",
+                        color: .wExpense)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.horizontal, 12)
@@ -153,58 +194,58 @@ struct BalanceWidgetView: View {
                 HStack {
                     HStack(spacing: 6) {
                         Image(systemName: "chart.line.uptrend.xyaxis")
-                            .font(.system(size: 14, weight: .bold))
-                            .foregroundStyle(accentGrad)
+                            .font(.wBrand(14))
+                            .foregroundColor(.primary)
                         Text("ZFlow")
-                            .font(.system(size: 14, weight: .black, design: .rounded))
-                            .foregroundStyle(accentGrad)
+                            .font(.wBrand(14))
+                            .foregroundColor(.primary)
                     }
                     Spacer()
                     Text(entry.snapshot.updatedAt, style: .time)
-                        .font(.system(size: 11))
+                        .font(.system(size: 11, weight: .bold, design: .rounded))
                         .foregroundColor(.secondary)
                 }
-                .padding(.horizontal, 16)
-                .padding(.top, 14)
+                .padding(.horizontal, 22)
+                .padding(.top, 20)
 
                 // Balance hero
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Net Balance")
-                        .font(.system(size: 11, weight: .medium))
-                        .foregroundColor(.secondary)
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(Localizer.shared.l("widgets.netBalance"))
+                        .font(.wCaption(11))
+                        .foregroundStyle(.secondary)
                         .textCase(.uppercase)
-                        .tracking(0.4)
-                        .padding(.horizontal, 16)
+                        .tracking(0.6)
+                        .padding(.horizontal, 22)
 
-                    HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    HStack(alignment: .firstTextBaseline, spacing: 10) {
                         Text(entry.snapshot.netBalance.formattedCurrencySimple(code: entry.snapshot.currency))
-                            .font(.system(size: 30, weight: .black, design: .rounded))
-                            .foregroundColor(.primary)
-                            .minimumScaleFactor(0.5)
+                            .font(.wHeroBalance(34))
+                            .foregroundStyle(Color.primary)
+                            .minimumScaleFactor(0.4)
                             .lineLimit(1)
                         monthChangeChip
                     }
-                    .padding(.horizontal, 16)
+                    .padding(.horizontal, 22)
                 }
-                .padding(.vertical, 8)
+                .padding(.vertical, 12)
 
                 // Sparkline
                 WeeklySparkline(values: entry.snapshot.weeklyExpenses)
-                    .frame(height: 50)
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 10)
+                    .frame(height: 64)
+                    .padding(.horizontal, 22)
+                    .padding(.bottom, 14)
 
-                Divider().padding(.horizontal, 16)
+                Divider().opacity(0.3).padding(.horizontal, 22)
 
                 // Recent transactions
                 VStack(spacing: 0) {
-                    ForEach(Array(entry.snapshot.recentTransactions.prefix(3).enumerated()), id: \.element.id) { idx, txn in
+                    ForEach(Array(entry.snapshot.recentTransactions.prefix(4).enumerated()), id: \.element.id) { idx, txn in
                         WidgetTransactionRow(txn: txn, currency: entry.snapshot.currency)
-                        if idx < 2 { Divider().padding(.leading, 52) }
+                        if idx < 3 { Divider().opacity(0.2).padding(.leading, 52) }
                     }
                 }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
+                .padding(.horizontal, 18)
+                .padding(.vertical, 8)
 
                 Spacer()
             }
@@ -216,33 +257,32 @@ struct BalanceWidgetView: View {
     private var monthChangeChip: some View {
         let diff = entry.snapshot.thisMonthIncome - entry.snapshot.thisMonthExpense
         let positive = diff >= 0
+        let chipColor: Color = positive ? .wIncome : .wExpense
         return HStack(spacing: 3) {
             Image(systemName: positive ? "arrow.up.right" : "arrow.down.left")
-                .font(.system(size: 9, weight: .bold))
+                .font(.wCaption(9))
             Text(diff.formattedShort() + " " + entry.snapshot.currency)
-                .font(.system(size: 10, weight: .semibold))
+                .font(.wCaption(10))
         }
-        .foregroundColor(positive ? Color(hex: "#50C878") : Color(hex: "#FF7F7F"))
+        .foregroundStyle(chipColor)
         .padding(.horizontal, 7)
         .padding(.vertical, 4)
-        .background(
-            Capsule()
-                .fill((positive ? Color(hex: "#50C878") : Color(hex: "#FF7F7F")).opacity(0.12)))
+        .background(Capsule().fill(chipColor.opacity(0.12)))
     }
 
     private func incomeExpenseRow(label: String, value: Double, icon: String, color: Color) -> some View {
         HStack(spacing: 8) {
             Image(systemName: icon)
-                .font(.system(size: 13))
-                .foregroundColor(color)
+                .font(.wBody(13))
+                .foregroundStyle(color)
                 .frame(width: 18)
             VStack(alignment: .leading, spacing: 1) {
                 Text(label)
-                    .font(.system(size: 10, weight: .medium))
-                    .foregroundColor(.secondary)
+                    .font(.wCaption(10))
+                    .foregroundStyle(.secondary)
                 Text(value.formattedCurrencySimple(code: entry.snapshot.currency))
-                    .font(.system(size: 13, weight: .bold))
-                    .foregroundColor(.primary)
+                    .font(.wBody(13))
+                    .foregroundStyle(Color.primary)
                     .minimumScaleFactor(0.6)
                     .lineLimit(1)
             }
@@ -252,14 +292,10 @@ struct BalanceWidgetView: View {
     // MARK: Background
 
     private var widgetBackground: some View {
-        Color(.systemBackground)
+        WidgetGlassBackground()
+            .ignoresSafeArea()
     }
 
-    private var accentGrad: LinearGradient {
-        LinearGradient(
-            colors: [Color(hex: "#5E5CE6"), Color(hex: "#7D7AFF")],
-            startPoint: .topLeading, endPoint: .bottomTrailing)
-    }
 }
 
 // MARK: - Weekly Sparkline
@@ -281,14 +317,14 @@ struct WeeklySparkline: View {
                         RoundedRectangle(cornerRadius: 3)
                             .fill(
                                 LinearGradient(
-                                    colors: [Color(hex: "#FF7F7F").opacity(0.9), Color(hex: "#FF7F7F").opacity(0.35)],
+                                    colors: [Color.wExpense.opacity(0.9), Color.wExpense.opacity(0.35)],
                                     startPoint: .top, endPoint: .bottom))
                             .frame(
                                 width: barW,
                                 height: max > 0 ? Swift.max(4, h * CGFloat(val / max)) : 4)
                         Text(days[i % 7])
-                            .font(.system(size: 8, weight: .medium))
-                            .foregroundColor(.secondary)
+                            .font(.wCaption(8))
+                            .foregroundStyle(.secondary)
                     }
                 }
             }
@@ -314,20 +350,20 @@ struct WidgetTransactionRow: View {
                     .foregroundColor(Color(hex: txn.categoryColor))
             }
             VStack(alignment: .leading, spacing: 1) {
-                Text(txn.categoryName)
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(.primary)
+                Text(Localizer.shared.category(txn.categoryName))
+                    .font(.wBody(12))
+                    .foregroundStyle(Color.primary)
                 if let note = txn.note, !note.isEmpty {
                     Text(note)
-                        .font(.system(size: 10))
-                        .foregroundColor(.secondary)
+                        .font(.wCaption(10))
+                        .foregroundStyle(.secondary)
                         .lineLimit(1)
                 }
             }
             Spacer()
             Text("\(txn.type == "income" ? "+" : "−")\(txn.amount.formattedShort()) \(txn.currency)")
-                .font(.system(size: 12, weight: .bold))
-                .foregroundColor(txn.type == "income" ? Color(hex: "#50C878") : Color(hex: "#FF7F7F"))
+                .font(.wBody(12))
+                .foregroundStyle(txn.type == "income" ? Color.wIncome : Color.wExpense)
         }
         .padding(.vertical, 8)
     }

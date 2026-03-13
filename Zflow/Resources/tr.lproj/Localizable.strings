@@ -22,6 +22,7 @@
 "auth.email" = "E-posta";
 "auth.password" = "Şifre";
 "auth.fullName" = "Ad Soyad";
+"auth.phoneNumber" = "Telefon Numarası";
 "auth.businessName" = "Şirket / Marka Adı";
 "auth.rememberMe" = "Beni Hatırla";
 "auth.noAccount" = "Hesabın yok mu?";
@@ -31,6 +32,8 @@
 "auth.business" = "İşletme";
 "auth.createAccount" = "Hesap Oluştur";
 "auth.welcomeBack" = "Tekrar Hoş Geldiniz";
+"auth.forgotPassword" = "Şifremi Unuttum";
+"auth.resetEmailSent" = "Şifre sıfırlama bağlantısı e-posta adresinize gönderildi.";
 
 // Tabs
 "tab.home" = "Ana Sayfa";
@@ -39,6 +42,7 @@
 // Action Menu
 "action.chooseOption" = "Ne yapmak istersiniz?";
 "action.addTransaction" = "İşlem Ekle";
+"action.addFile" = "Dosya Ekle (PDF/CSV)";
 "action.scanWithAI" = "AI ile Tara";
 "tab.transactions" = "İşlemler";
 "tab.reports" = "Raporlar";
@@ -47,10 +51,12 @@
 
 // Dashboard
 "dashboard.netBalance" = "Net Bakiye";
+"dashboard.quickActions" = "Hızlı İşlemler";
 "dashboard.income" = "Gelir";
 "dashboard.expense" = "Gider";
 "dashboard.insights" = "İpuçları";
 "dashboard.budgets" = "Bütçeler";
+"dashboard.cashFlow" = "Nakit Akışı Tahmini";
 "dashboard.recent" = "Son İşlemler";
 "dashboard.showMore" = "Daha Fazla";
 "dashboard.showLess" = "Daha Az";
@@ -60,6 +66,10 @@
 "dashboard.addTransaction" = "İşlem Ekle";
 "dashboard.monthlyChange" = "Aylık Değişim";
 "dashboard.transactions" = "işlem";
+
+"widgets.budgets" = "Bütçeler";
+"widgets.noBudgets" = "Bütçe Ayarlanmadı";
+"widgets.netBalance" = "Net Bakiye";
 
 // Transactions
 "transaction.new" = "Yeni İşlem";
@@ -86,9 +96,17 @@
 "common.save" = "Kaydet";
 "common.search" = "Ara";
 "common.close" = "Kapat";
+"common.copy" = "Kopyala";
+"common.reply" = "Yanıtla";
 "common.deleteWarning" = "Bu işlem geri alınamaz.";
+"chat.you" = "Siz";
+"chat.assistant" = "ZFlow AI";
 "time.today" = "Bugün";
 "time.yesterday" = "Dün";
+"time.daily" = "Günlük";
+"time.weekly" = "Haftalık";
+"time.monthly" = "Aylık";
+"time.yearly" = "Yıllık";
 
 // Reports
 "reports.title" = "Raporlar";
@@ -167,6 +185,63 @@
 
 // Categories
 "category.other" = "Diğer";
+"category.salary" = "Maaş";
+"category.freelance" = "Serbest Meslek";
+"category.investment" = "Yatırım";
+"category.rental" = "Kira Geliri";
+"category.bonus" = "Prim";
+"category.dividend" = "Temettü";
+"category.side_hustle" = "Ek Gelir";
+"category.gift_received" = "Hediye Alınan";
+"category.groceries" = "Market";
+"category.shopping" = "Alışveriş";
+"category.dining_out" = "Dışarıda Yemek";
+"category.coffee" = "Kahve";
+"category.entertainment" = "Eğlence";
+"category.streaming" = "Yayın Platformu";
+"category.housing" = "Konut";
+"category.transport" = "Ulaşım";
+"category.health" = "Sağlık";
+"category.pharmacy" = "Eczane";
+"category.education" = "Eğitim";
+"category.clothing" = "Giyim";
+"category.travel" = "Seyahat";
+"category.subscriptions" = "Abonelikler";
+"category.pets" = "Evcil Hayvan";
+"category.personal_care" = "Kişisel Bakım";
+"category.sports_&_gym" = "Spor & Spor Salonu";
+"category.electronics" = "Elektronik";
+"category.home_&_garden" = "Ev & Bahçe";
+"category.tax" = "Vergi";
+"category.product_sales" = "Ürün Satışı";
+"category.service_fee" = "Hizmet Bedeli";
+"category.commission" = "Komisyon";
+"category.consulting" = "Danışmanlık";
+"category.licensing" = "Lisans";
+"category.grant_/_fund" = "Hibe / Fon";
+"category.partnership" = "Ortaklık";
+"category.return" = "İade";
+"category.payroll" = "Personel Maaşı";
+"category.office_rent" = "Ofis Kirası";
+"category.raw_materials" = "Ham Madde";
+"category.manufacturing" = "Üretim";
+"category.marketing" = "Pazarlama";
+"category.advertising" = "Reklam";
+"category.utilities" = "Faturalar";
+"category.insurance" = "Sigorta";
+"category.software/saas" = "Yazılım / SaaS";
+"category.logistics" = "Lojistik";
+"category.corporate_tax" = "Kurumlar Vergisi";
+"category.legal_&_admin" = "Hukuki & İdari";
+"category.r&d" = "Ar-Ge";
+"category.equipment" = "Ekipman";
+"category.office_supplies" = "Ofis Malzemeleri";
+"category.training" = "Eğitim & Kurs";
+"category.bank_charges" = "Banka Masrafları";
+"category.kdv_/_vat" = "KDV / VAT";
+"category.travel_(biz)" = "Seyahat (İş)";
+"category.subcontracting" = "Taşeronluk";
+"category.gift" = "Hediye";
 
 // Additional sort/transaction keys
 "sort.newest" = "En Yeni";
@@ -174,6 +249,7 @@
 "sort.highest" = "En Yüksek";
 "sort.lowest" = "En Düşük";
 "dashboard.budgets" = "Bütçeler";
+"dashboard.cashFlow" = "Nakit Akışı Tahmini";
 "dashboard.insights" = "İpuçları";
 "dashboard.recent" = "Son İşlemler";
 "dashboard.showMore" = "Daha Fazla";
@@ -244,6 +320,12 @@
 "ai.reply.hello" = "Merhaba! Bugün finanslarınız konusunda size nasıl yardımcı olabilirim?";
 "ai.reply.thanks" = "Rica ederim! Başka bir şeye ihtiyacınız olursa buradayım.";
 "ai.reply.default" = "Gelir, gider, bakiye ve işlemlerinizi analiz etmenize yardımcı olabilirim. Ayrıca fiş taraması için de bana sorabilirsiniz. Ne öğrenmek istersiniz?";
+"ai.reply.error" = "Üzgünüm, şu an bağlantı kurmakta zorlanıyorum. Lütfen internetinizi veya sunucu durumunu kontrol edip tekrar deneyin.";
+"ai.scan.saveSuccess" = "Tamamdır! %@ %@ tutarındaki %@ işlemini başarıyla kaydettim. ✅";
+"ai.prompt.summary" = "📊 Bu ayki özetim";
+"ai.prompt.expenses" = "💰 Son harcamalarım";
+"ai.prompt.budget" = "🎯 Bütçe tavsiyesi ver";
+"ai.prompt.mostSpent" = "🧾 En çok neye harcadım?";
 "ai.reply.scanHint" = "Fiş taramak için giriş çubuğundaki 📷 kamera simgesine dokunun. İşlem bilgilerini otomatik olarak çıkaracağım!";
 
 // Scan
@@ -272,9 +354,161 @@
 "ai.scan.failed" = "Fişi okuyamadım. %@";
 "ai.scan.unknownMerchant" = "Bilinmeyen mağaza";
 
-// Ödeme
-"payment.awaitingApproval" = "Onay Bekleyen Ödeme";
-"common.reject" = "Reddet";
-"common.approve" = "Onayla";
+// Watch
+"watch.reports" = "Raporlar";
+"watch.convert" = "Dönüştür";
+"watch.lastTransaction" = "Son İşlem";
+"watch.connection" = "Bağlantı";
+"watch.connected" = "Bağlı";
+"watch.disconnected" = "Bağlı Değil";
+"watch.upcomingPayments" = "Yaklaşan Ödemeler";
+"watch.noUpcomingPayments" = "Yaklaşan ödeme yok";
+"watch.next" = "İleri";
+"watch.confirm" = "Onayla";
+"watch.saved" = "Kaydedildi!";
+"watch.sendingToPhone" = "iPhone'a gönderiliyor...";
+"watch.from" = "Kaynak";
+"watch.to" = "Hedef";
+"watch.gotIt" = "Anladım";
+"watch.dismiss" = "Kapat";
+"watch.allOnTrack" = "Bütçeler yolunda!";
+"watch.onTrack" = "Yolunda";
+"watch.percentUsed" = "%%%d kullanıldı";
+"watch.almostAtLimit" = "Limit dolmak üzere";
+"watch.budgetExceeded" = "Bütçe Aşıldı!";
+"watch.alerts" = "Uyarılar";
+"watch.left" = "Kalan";
+"watch.noCategories" = "Kategori yok";
+"watch.addCategoriesIPhone" = "iPhone'dan kategori ekleyin";
+"watch.both" = "Tümü";
+"watch.shortInc" = "Gel";
+"watch.shortExp" = "Gid";
+"watch.shortAll" = "Hep";
+"reports.weeklyExpenses" = "Haftalık Harcamalar";
+
 "time.tomorrow" = "Yarın";
 "time.daysLeft" = "%d gün kaldı";
+
+// AI Insights (Reports panel)
+"ai.insights.title" = "AI Yorumları";
+"ai.insights.subtitle" = "Finansal verilerinizin analizi";
+"ai.chat.open" = "Sohbet Et";
+"ai.action.calendar" = "Takvime Git";
+
+// Budget Manager
+"budget.noCategories" = "Henüz Kategori Yok";
+"budget.noCategoriesHint" = "Önce Ayarlar → Kategoriler'den kategori ekleyin, sonra buraya gelin.";
+"budget.tapHint" = "Aylık bütçe belirlemek için kategoriye dokunun";
+"budget.set" = "Bütçe Belirle";
+"budget.monthlyLimit" = "Aylık limit";
+"budget.limitFor" = "%@ için aylık limit";
+"budget.notSet" = "Bütçe belirlenmemiş";
+
+// Common additional
+"common.error" = "Hata";
+"common.approve" = "Onayla";
+"common.showLess" = "Daha Az";
+"common.showMoreCount" = "+%d Daha";
+"common.reject" = "Reddet";
+
+// Payments
+"payment.awaitingApproval" = "Onay Bekleyen Ödeme";
+"widget.recentTransactions" = "Recent Transactions";
+
+// Settings (additional)
+"settings.cardTheme" = "Kart Teması";
+"settings.personalInfo" = "Kişisel Bilgiler";
+"settings.security" = "Güvenlik";
+"settings.changeEmail" = "E-posta Değiştir";
+"settings.changePassword" = "Şifre Değiştir";
+"settings.appLock" = "Uygulama Kilidi";
+"settings.updateEmail" = "E-postayı Güncelle";
+"settings.newPassword" = "Yeni Şifre";
+"settings.confirmPassword" = "Şifreyi Onayla";
+"settings.both" = "İkisi de";
+
+// Added for full localization support
+"budget.totalIncome" = "Aylık Toplam Gelir";
+"budget.categoryBudgets" = "Kategori Bütçeleri";
+"budget.enterSalary" = "Aylık toplam gelirinizi girin";
+"export.formatCSVDesc" = "Excel, Numbers veya Google Sheets için";
+"export.formatPDFDesc" = "Yazdırmak veya paylaşmak için biçimlendirilmiş rapor";
+"export.buttonCSV" = "CSV Dışa Aktar";
+"export.buttonPDF" = "PDF Dışa Aktar";
+"export.transactionsCount" = "%d işlem mevcut";
+"transaction.income" = "Gelir";
+"transaction.expense" = "Gider";
+"common.more" = "Daha";
+"settings.appVersion" = "Versiyon 1.0  •  SwiftUI + Supabase ile";
+"category.noCategories" = "Henüz Kategori Yok";
+"category.noCategoriesHint" = "+ butonuna dokunarak kategori ekleyin ya da varsayılanları geri yükleyin.";
+
+"common.none" = "Yok";
+"payment.upcoming" = "Yaklaşan Ödeme";
+"common.name" = "İsim";
+"common.color" = "Renk";
+"common.icon" = "İkon";
+"common.all" = "Tümü";
+"common.select" = "Seç";
+"bulk.deleteSelected" = "%d Seçiliyi Sil";
+"category.namePlaceholder" = "Kategori adı";
+"auth.resetLinkExpired" = "Şifre sıfırlama linkiniz geçersiz veya süresi dolmuş. Lütfen tekrar deneyin.";
+"auth.enterEmailFirst" = "Lütfen önce e-posta adresinizi girin.";
+"auth.resetPasswordDesc" = "Hesabın için yeni bir şifre belirle.";
+"auth.updatePassword" = "Şifreyi Güncelle";
+"auth.passwordTooShort" = "Şifre en az 6 karakter olmalı.";
+"auth.passwordMismatch" = "Şifreler eşleşmiyor.";
+"auth.pwWeak" = "Zayıf";
+"auth.pwFair" = "Orta";
+"auth.pwStrong" = "Güçlü";
+"auth.continueWithGoogle" = "Google ile Devam Et";
+"auth.continueWithApple" = "Apple ile Devam Et";
+"auth.continueWithEmail" = "E-posta ile Devam Et";
+"auth.orDivider" = "veya";
+"auth.googleFailed" = "Google girişi başarısız oldu.";
+"auth.comingSoon" = "Yakında";
+
+// Toplu İçe Aktarma
+"bulk.importAction" = "Döküm Yükle (PDF/CSV)";
+"bulk.importSub" = "Yapay zeka ile dökümünüzü analiz edin";
+"bulk.verifyTitle" = "İşlemleri Onayla";
+"bulk.countSub" = "%d işlem bulundu.";
+"bulk.selectCategory" = "Kategori Seç";
+"bulk.saveAllCount" = "%d İşlemi Z-Flow'a Kaydet";
+"bulk.pickCategory" = "Kategori Seç";
+"bulk.automaticNote" = "Banka Ekstresinden Aktarıldı";
+"bulk.saving" = "İşlemleriniz kaydediliyor...";
+"bulk.doneTitle" = "Başarılı!";
+"bulk.doneSub" = "%d işlem başarıyla içe aktarıldı.";
+"ai.analyzingTitle" = "Yapay Zeka dökümünüzü analiz ediyor...";
+"ai.loadingSub" = "İşlemleriniz akıllıca kategorize ediliyor.";
+"category.incoming_transfer" = "Gelen Transfer";
+"category.outgoing_transfer" = "Giden Transfer";
+"category.bank_fees" = "Banka Ücretleri";
+
+// Düzenli İşlem & Hatırlatıcı
+"recurring.alertTitle" = "Düzenli İşlem mi?";
+"recurring.alertMessage" = "Bu {type} her ay tekrarlanıyor mu? Takvime eklensin mi?";
+"recurring.addReminder" = "Hatırlatıcı Kur";
+"recurring.title" = "Düzenli İşlemler";
+"recurring.noItems" = "Henüz düzenli işlem yok";
+
+// Recurring manager (settings)
+"settings.recurring.manage" = "Düzenli Ödemeleri Yönet";
+"recurring.manageTitle" = "Düzenli Ödemeler";
+"recurring.emptyTitle" = "Düzenli ödeme bulunamadı";
+"recurring.emptySubtitle" = "Düzenli kira, maaş, fatura vb. ödemeleri buradan yönetebilirsiniz.";
+"recurring.details" = "Detaylar";
+"recurring.dayOfMonth" = "Her ayın %d. günü";
+"recurring.dayPicker" = "Ayın Günü";
+"recurring.isActive" = "Aktif";
+"recurring.editTitle" = "Düzenli Ödemeyi Düzenle";
+"recurring.variableAmount" = "Değişken";
+
+// Harcama Trend Kartı
+"tip.monthlyComparison" = "Aylık Karşılaştırma";
+"tip.lastMonth" = "Geçen Ay";
+"tip.thisMonth" = "Bu Ay";
+"tip.increased" = "arttı";
+"tip.decreased" = "azaldı";
+"tip.noLastMonth" = "Geçen aya ait veri yok";

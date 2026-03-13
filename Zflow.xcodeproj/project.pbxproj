@@ -7,11 +7,16 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		11BFECCE56DDFDB64B77D058 /* ZFlowLockScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = E48A9EC25ED0C7E5A924D639 /* ZFlowLockScreen.swift */; };
+		3019A3772F5F003C009DD6CF /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 3019A3762F5F003C009DD6CF /* GoogleSignIn */; };
 		303515232F4D8F4200419F58 /* ZFlowWatch Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 303515192F4D8F4100419F58 /* ZFlowWatch Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		3035153D2F4D8FCE00419F58 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3035153C2F4D8FCE00419F58 /* WidgetKit.framework */; };
 		3035153F2F4D8FCE00419F58 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3035153E2F4D8FCE00419F58 /* SwiftUI.framework */; };
 		3035154E2F4D8FCF00419F58 /* ZFlowWidgetExtensionExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 3035153A2F4D8FCE00419F58 /* ZFlowWidgetExtensionExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		307F427C2F4D9E3B000D3E8B /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 307F427B2F4D9E3B000D3E8B /* Supabase */; };
+		593A208C188570D4CC770ABE /* WidgetCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20B735FAE9F0DF7A7C563FFF /* WidgetCategory.swift */; };
+		C68D0CA4DE15CD70AEF042E9 /* QuickAddIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89B7837BA6AB9D40869F9DF6 /* QuickAddIntent.swift */; };
+		C773C4BC7B9CAA26E3903A16 /* SecurityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFFF02CF8B106826E91DFFA5 /* SecurityManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -71,6 +76,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		20B735FAE9F0DF7A7C563FFF /* WidgetCategory.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = WidgetCategory.swift; path = Zflow/Ecosystem/Shared/WidgetCategory.swift; sourceTree = "<group>"; };
 		303515192F4D8F4100419F58 /* ZFlowWatch Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ZFlowWatch Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3035153A2F4D8FCE00419F58 /* ZFlowWidgetExtensionExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ZFlowWidgetExtensionExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		3035153C2F4D8FCE00419F58 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
@@ -78,6 +84,9 @@
 		30916A852F48969F001E2B8C /* Zflow.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Zflow.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		30916A922F48969F001E2B8C /* ZflowTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ZflowTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		30916A9C2F48969F001E2B8C /* ZflowUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ZflowUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		89B7837BA6AB9D40869F9DF6 /* QuickAddIntent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = QuickAddIntent.swift; path = Zflow/Ecosystem/Shared/QuickAddIntent.swift; sourceTree = "<group>"; };
+		BFFF02CF8B106826E91DFFA5 /* SecurityManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SecurityManager.swift; path = Zflow/Ecosystem/Shared/SecurityManager.swift; sourceTree = "<group>"; };
+		E48A9EC25ED0C7E5A924D639 /* ZFlowLockScreen.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ZFlowLockScreen.swift; path = Views/Security/ZFlowLockScreen.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -91,6 +100,7 @@
 		303515602F4D913B00419F58 /* Exceptions for "Zflow" folder in "ZFlowWatch Watch App" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				"/Localized: Resources/Localizable.strings",
 				Ecosystem/Shared/AppGroupModels.swift,
 				Ecosystem/Shared/BudgetAlertEngine.swift,
 				Ecosystem/Shared/WatchConnector.swift,
@@ -100,6 +110,7 @@
 		303515612F4D913B00419F58 /* Exceptions for "Zflow" folder in "ZFlowWidgetExtensionExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				"/Localized: Resources/Localizable.strings",
 				Ecosystem/Shared/AppGroupModels.swift,
 				Ecosystem/Shared/ZFlowLiveActivityManager.swift,
 			);
@@ -172,6 +183,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				307F427C2F4D9E3B000D3E8B /* Supabase in Frameworks */,
+				3019A3772F5F003C009DD6CF /* GoogleSignIn in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -211,6 +223,10 @@
 				303515402F4D8FCE00419F58 /* ZFlowWidgetExtension */,
 				3035153B2F4D8FCE00419F58 /* Frameworks */,
 				30916A862F48969F001E2B8C /* Products */,
+				BFFF02CF8B106826E91DFFA5 /* SecurityManager.swift */,
+				89B7837BA6AB9D40869F9DF6 /* QuickAddIntent.swift */,
+				20B735FAE9F0DF7A7C563FFF /* WidgetCategory.swift */,
+				E48A9EC25ED0C7E5A924D639 /* ZFlowLockScreen.swift */,
 			);
 			sourceTree = "<group>";
 		};
@@ -245,8 +261,6 @@
 				3035151A2F4D8F4100419F58 /* ZFlowWatch Watch App */,
 			);
 			name = "ZFlowWatch Watch App";
-			packageProductDependencies = (
-			);
 			productName = "ZFlowWatch Watch App";
 			productReference = 303515192F4D8F4100419F58 /* ZFlowWatch Watch App.app */;
 			productType = "com.apple.product-type.application";
@@ -267,8 +281,6 @@
 				303515402F4D8FCE00419F58 /* ZFlowWidgetExtension */,
 			);
 			name = ZFlowWidgetExtensionExtension;
-			packageProductDependencies = (
-			);
 			productName = ZFlowWidgetExtensionExtension;
 			productReference = 3035153A2F4D8FCE00419F58 /* ZFlowWidgetExtensionExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
@@ -295,6 +307,7 @@
 			name = Zflow;
 			packageProductDependencies = (
 				307F427B2F4D9E3B000D3E8B /* Supabase */,
+				3019A3762F5F003C009DD6CF /* GoogleSignIn */,
 			);
 			productName = Zflow;
 			productReference = 30916A852F48969F001E2B8C /* Zflow.app */;
@@ -317,8 +330,6 @@
 				30916A952F48969F001E2B8C /* ZflowTests */,
 			);
 			name = ZflowTests;
-			packageProductDependencies = (
-			);
 			productName = ZflowTests;
 			productReference = 30916A922F48969F001E2B8C /* ZflowTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -340,8 +351,6 @@
 				30916A9F2F48969F001E2B8C /* ZflowUITests */,
 			);
 			name = ZflowUITests;
-			packageProductDependencies = (
-			);
 			productName = ZflowUITests;
 			productReference = 30916A9C2F48969F001E2B8C /* ZflowUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
@@ -354,23 +363,23 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 2620;
-				LastUpgradeCheck = 2620;
+				LastUpgradeCheck = 2630;
 				TargetAttributes = {
 					303515182F4D8F4100419F58 = {
-						CreatedOnToolsVersion = 26.2;
+						CreatedOnToolsVersion = 16.0;
 					};
 					303515392F4D8FCE00419F58 = {
-						CreatedOnToolsVersion = 26.2;
+						CreatedOnToolsVersion = 16.0;
 					};
 					30916A842F48969F001E2B8C = {
-						CreatedOnToolsVersion = 26.2;
+						CreatedOnToolsVersion = 16.0;
 					};
 					30916A912F48969F001E2B8C = {
-						CreatedOnToolsVersion = 26.2;
+						CreatedOnToolsVersion = 16.0;
 						TestTargetID = 30916A842F48969F001E2B8C;
 					};
 					30916A9B2F48969F001E2B8C = {
-						CreatedOnToolsVersion = 26.2;
+						CreatedOnToolsVersion = 16.0;
 						TestTargetID = 30916A842F48969F001E2B8C;
 					};
 				};
@@ -404,6 +413,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				307F427A2F4D9E3B000D3E8B /* XCRemoteSwiftPackageReference "supabase-swift" */,
+				3019A3752F5F003C009DD6CF /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 30916A862F48969F001E2B8C /* Products */;
@@ -462,6 +472,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C68D0CA4DE15CD70AEF042E9 /* QuickAddIntent.swift in Sources */,
+				C773C4BC7B9CAA26E3903A16 /* SecurityManager.swift in Sources */,
+				593A208C188570D4CC770ABE /* WidgetCategory.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -476,6 +489,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				11BFECCE56DDFDB64B77D058 /* ZFlowLockScreen.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -524,6 +538,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = H6FNM9B2WV;
@@ -531,14 +546,15 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = ZFlowWatch;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.sinangokcul.zflowapp;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.sinangokcul.zflowapp2;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sinangokcul.zflowapp.watchkitapp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sinangokcul.zflowapp2.watchkitapp2;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -548,7 +564,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
-				WATCHOS_DEPLOYMENT_TARGET = 26.0;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
 			};
 			name = Debug;
 		};
@@ -557,6 +573,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = H6FNM9B2WV;
@@ -564,14 +581,15 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = ZFlowWatch;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.sinangokcul.zflowapp;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.sinangokcul.zflowapp2;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sinangokcul.zflowapp.watchkitapp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sinangokcul.zflowapp2.watchkitapp2;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -581,7 +599,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
-				WATCHOS_DEPLOYMENT_TARGET = 26.0;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
 			};
 			name = Release;
 		};
@@ -589,6 +607,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APP_ICON_ASSETS = NO;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = ZFlowWidgetExtension/ZFlowWidgetExtension.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
@@ -605,7 +624,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sinangokcul.zflowapp.ZFlowWidgetExtension;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sinangokcul.zflowapp2.ZFlowWidgetExtension2;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
@@ -622,6 +641,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APP_ICON_ASSETS = NO;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = ZFlowWidgetExtension/ZFlowWidgetExtension.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
@@ -638,7 +658,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sinangokcul.zflowapp.ZFlowWidgetExtension;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sinangokcul.zflowapp2.ZFlowWidgetExtension2;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
@@ -656,6 +676,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -704,12 +725,13 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -720,6 +742,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -762,11 +785,12 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -777,7 +801,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APP_ICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = Zflow/Zflow.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = H6FNM9B2WV;
@@ -787,6 +813,9 @@
 				INFOPLIST_KEY_CFBundleDisplayName = "Z Flow";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "ZFlow needs access to your calendar to add and view financial events.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "ZFlow needs camera access to scan receipts and invoices";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "ZFlow needs photo library access to select receipt images for scanning";
+				INFOPLIST_KEY_NSUserTrackingUsageDescription = "ZFlow uses anonymous analytics to improve personalized financial insights and app performance.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -797,8 +826,9 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sinangokcul.zflowapp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sinangokcul.zflowapp2;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
@@ -814,7 +844,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APP_ICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = Zflow/Zflow.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = H6FNM9B2WV;
@@ -824,6 +856,9 @@
 				INFOPLIST_KEY_CFBundleDisplayName = "Z Flow";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "ZFlow needs access to your calendar to add and view financial events.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "ZFlow needs camera access to scan receipts and invoices";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "ZFlow needs photo library access to select receipt images for scanning";
+				INFOPLIST_KEY_NSUserTrackingUsageDescription = "ZFlow uses anonymous analytics to improve personalized financial insights and app performance.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -834,8 +869,9 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sinangokcul.zflowapp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sinangokcul.zflowapp2;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
@@ -854,7 +890,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = H6FNM9B2WV;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.sinangokcul.ZflowTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -876,7 +912,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = H6FNM9B2WV;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.sinangokcul.ZflowTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -990,6 +1026,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		3019A3752F5F003C009DD6CF /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 9.1.0;
+			};
+		};
 		307F427A2F4D9E3B000D3E8B /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/supabase/supabase-swift";
@@ -1001,6 +1045,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		3019A3762F5F003C009DD6CF /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3019A3752F5F003C009DD6CF /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
 		307F427B2F4D9E3B000D3E8B /* Supabase */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 307F427A2F4D9E3B000D3E8B /* XCRemoteSwiftPackageReference "supabase-swift" */;

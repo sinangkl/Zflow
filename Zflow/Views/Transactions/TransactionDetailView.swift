@@ -3,13 +3,24 @@ import SwiftUI
 // MARK: - Transaction Detail Sheet
 
 struct TransactionDetailView: View {
-    let transaction: Transaction
-    let category: Category?
-
+    private let initialTransaction: Transaction
     @EnvironmentObject var transactionVM: TransactionViewModel
     @EnvironmentObject var authVM: AuthViewModel
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var scheme
+
+    // Computed property to ensure UI always shows the "current" state in the VM
+    private var transaction: Transaction {
+        transactionVM.transactions.first(where: { $0.id == initialTransaction.id }) ?? initialTransaction
+    }
+
+    private var category: Category? {
+        transactionVM.category(for: transaction.categoryId)
+    }
+
+    init(transaction: Transaction, category: Category?) {
+        self.initialTransaction = transaction
+    }
 
     @State private var showEdit   = false
     @State private var showDelete = false
@@ -44,7 +55,7 @@ struct TransactionDetailView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(NSLocalizedString("common.close", comment: "")) { dismiss() }
-                        .foregroundColor(ZColor.indigo)
+                        .foregroundColor(AppTheme.baseColor)
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Menu {
@@ -63,7 +74,7 @@ struct TransactionDetailView: View {
                     } label: {
                         Image(systemName: "ellipsis.circle.fill")
                             .font(.system(size: 20))
-                            .foregroundColor(ZColor.indigo)
+                            .foregroundColor(AppTheme.baseColor)
                     }
                 }
             }
@@ -72,10 +83,9 @@ struct TransactionDetailView: View {
                     .environmentObject(transactionVM)
                     .environmentObject(authVM)
             }
-            .confirmationDialog(
+            .alert(
                 NSLocalizedString("common.delete", comment: ""),
-                isPresented: $showDelete,
-                titleVisibility: .visible
+                isPresented: $showDelete
             ) {
                 Button(NSLocalizedString("common.delete", comment: ""), role: .destructive) {
                     if let uid = authVM.currentUserId {
@@ -112,7 +122,7 @@ struct TransactionDetailView: View {
                 }
 
                 // Category name
-                Text(category?.name ?? NSLocalizedString("category.other", comment: ""))
+                Text(category?.localizedName ?? NSLocalizedString("category.other", comment: ""))
                     .font(.system(size: 14, weight: .medium))
                     .foregroundColor(.white.opacity(0.82))
                     .textCase(.uppercase)
@@ -143,7 +153,7 @@ struct TransactionDetailView: View {
             if let note = transaction.note, !note.isEmpty {
                 detailRow(
                     icon: "note.text",
-                    iconColor: ZColor.indigo,
+                    iconColor: AppTheme.baseColor,
                     label: NSLocalizedString("transaction.note", comment: ""),
                     value: note
                 )
@@ -151,7 +161,7 @@ struct TransactionDetailView: View {
             }
 
             detailRow(
-                icon: isIncome ? "arrow.down.circle.fill" : "arrow.up.circle.fill",
+                icon: isIncome ? "arrow.up.circle.fill" : "arrow.down.circle.fill",
                 iconColor: isIncome ? ZColor.income : ZColor.expense,
                 label: NSLocalizedString("transaction.type", comment: ""),
                 value: isIncome

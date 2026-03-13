@@ -63,6 +63,7 @@ struct AllTransactionsView: View {
         NavigationStack {
             ZStack {
                 MeshGradientBackground()
+                    .ignoresSafeArea()
 
                 VStack(spacing: 0) {
                     // Filter chips
@@ -97,7 +98,7 @@ struct AllTransactionsView: View {
                                             Button {
                                                 transactionToEdit = txn; Haptic.light()
                                             } label: { Label("Edit", systemImage: "pencil") }
-                                            .tint(ZColor.indigo)
+                                            .tint(AppTheme.baseColor)
                                         }
                                     }
                                 } header: {
@@ -134,7 +135,7 @@ struct AllTransactionsView: View {
                     } label: {
                         Image(systemName: "arrow.up.arrow.down.circle.fill")
                             .font(.system(size: 20))
-                            .foregroundColor(ZColor.indigo)
+                            .foregroundColor(AppTheme.baseColor)
                     }
                     .accessibilityLabel("Sort transactions")
                 }
@@ -165,7 +166,7 @@ struct AllTransactionsView: View {
     private var filterBar: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
-                PillTag(label: "All", color: ZColor.indigo, isSelected: filterType == nil) {
+                PillTag(label: NSLocalizedString("common.all", comment: ""), color: AppTheme.baseColor, isSelected: filterType == nil) {
                     withAnimation { filterType = nil; filterCategoryId = nil }
                     Haptic.selection()
                 }
@@ -205,9 +206,9 @@ struct AllTransactionsView: View {
 
         return HStack(spacing: 12) {
             summaryChip("+\(income.formattedCurrency(code: transactionVM.primaryCurrency))",
-                        color: ZColor.income, icon: "arrow.down.circle.fill")
+                        color: ZColor.income, icon: "arrow.up.circle.fill")
             summaryChip("-\(expense.formattedCurrency(code: transactionVM.primaryCurrency))",
-                        color: ZColor.expense, icon: "arrow.up.circle.fill")
+                        color: ZColor.expense, icon: "arrow.down.circle.fill")
             Spacer()
             Text("\(filtered.count) items")
                 .font(.system(size: 12))

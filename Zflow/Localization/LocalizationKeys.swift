@@ -1,16 +1,9 @@
 import SwiftUI
+import Combine
 
 // MARK: - Localization Helper
-// Telefon dilini otomatik algılar — NSLocalizedString tüm Apple dilleri için
-
-extension String {
-    var localized: String {
-        NSLocalizedString(self, comment: "")
-    }
-    func localized(_ args: CVarArg...) -> String {
-        String(format: NSLocalizedString(self, comment: ""), args)
-    }
-}
+// Using shared Localizer to support AppGroup language sync.
+// String.localized is now defined in Localizer.swift
 
 // MARK: - String Keys (type-safe enum)
 
@@ -27,6 +20,7 @@ enum L {
     static let email                = "auth.email"
     static let password             = "auth.password"
     static let fullName             = "auth.fullName"
+    static let phoneNumber          = "auth.phoneNumber"
     static let businessName         = "auth.businessName"
     static let rememberMe           = "auth.rememberMe"
     static let noAccount            = "auth.noAccount"
@@ -36,6 +30,8 @@ enum L {
     static let business             = "auth.business"
     static let createAccount        = "auth.createAccount"
     static let welcomeBack          = "auth.welcomeBack"
+    static let forgotPassword       = "auth.forgotPassword"
+    static let resetEmailSent       = "auth.resetEmailSent"
 
     // MARK: Tabs
     static let tabHome              = "tab.home"

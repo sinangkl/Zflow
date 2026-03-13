@@ -3,6 +3,7 @@ import SwiftUI
 import Combine
 import Supabase
 import PostgREST
+import Realtime
 
 @MainActor
 final class TransactionViewModel: ObservableObject {
@@ -13,14 +14,45 @@ final class TransactionViewModel: ObservableObject {
     @Published var categories:   [Category]    = []
     @Published var isLoading     = false
     @Published var errorMessage: String?
+    @Published var categorySpendingThisMonth: [UUID: Double] = [:]
 
     @AppStorage("defaultCurrency") var primaryCurrency: String = "TRY"
 
     private let supabase = SupabaseManager.shared.client
 
-    // Ecosystem: authVM ve budgetManager inject edilir
-    weak var authVM:        AuthViewModel?
-    weak var budgetManager: BudgetManager?
+    // Ecosystem: authVM, budgetManager ve scheduledPaymentVM inject edilir
+    weak var authVM:              AuthViewModel?
+    weak var budgetManager:       BudgetManager?
+    weak var scheduledPaymentVM:  ScheduledPaymentViewModel?
+    weak var recurringVM:         RecurringTransactionViewModel?
+    weak var calMgr:              CalendarManager?
+
+    private var cancellables: Set<AnyCancellable> = []
+    private var realtimeChannel: RealtimeChannelV2?
+
+    init() {
+        // Refresh widget snapshot whenever budgets change
+        NotificationCenter.default
+            .publisher(for: BudgetManager.budgetsDidChange)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.updateEcosystem() }
+            .store(in: &cancellables)
+            
+        NotificationCenter.default
+            .publisher(for: Notification.Name("ZFlowDidLogout"))
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.clearData() }
+            .store(in: &cancellables)
+    }
+    
+    func clearData() {
+        stopRealtime()
+        transactions.removeAll()
+        categories.removeAll()
+        categorySpendingThisMonth.removeAll()
+        errorMessage = nil
+        updateEcosystem()
+    }
 
     // MARK: - Computed: Totals
 
@@ -43,9 +75,29 @@ final class TransactionViewModel: ObservableObject {
     // MARK: - Computed: Category Spending (this month)
 
     func categorySpending(categoryId: UUID) -> Double {
-        transactions.filter {
+        return categorySpendingThisMonth[categoryId] ?? 0.0
+    }
+
+    /// Belirli bir kategorinin bu ayki gider toplamı
+    func categoryExpenseThisMonth(for categoryId: UUID) -> Double {
+        let cal = Calendar.current
+        let now = Date()
+        return transactions.filter {
             guard let d = $0.date else { return false }
-            return Calendar.current.isDate(d, equalTo: Date(), toGranularity: .month)
+            return cal.isDate(d, equalTo: now, toGranularity: .month)
+                && $0.type == "expense"
+                && $0.categoryId == categoryId
+        }.reduce(0) { $0 + convert($1) }
+    }
+
+    /// Belirli bir kategorinin geçen ayki gider toplamı
+    func categoryExpenseLastMonth(for categoryId: UUID) -> Double {
+        let cal = Calendar.current
+        let now = Date()
+        guard let lastMonth = cal.date(byAdding: .month, value: -1, to: now) else { return 0 }
+        return transactions.filter {
+            guard let d = $0.date else { return false }
+            return cal.isDate(d, equalTo: lastMonth, toGranularity: .month)
                 && $0.type == "expense"
                 && $0.categoryId == categoryId
         }.reduce(0) { $0 + convert($1) }
@@ -98,6 +150,80 @@ final class TransactionViewModel: ObservableObject {
         }
         isLoading = false
         updateEcosystem()
+        subscribeToRealtime(userId: userId)
+    }
+
+    func stopRealtime() {
+        let channel = realtimeChannel
+        realtimeChannel = nil
+        Task {
+            await channel?.unsubscribe()
+        }
+    }
+
+    func subscribeToRealtime(userId: UUID) {
+        guard realtimeChannel == nil else { return }
+        
+        let channel = supabase.realtimeV2
+            .channel("public:transactions:user=\(userId.uuidString)")
+        
+        realtimeChannel = channel
+        
+        _ = channel.onPostgresChange(
+            AnyAction.self,
+            table: "transactions",
+            filter: "user_id=eq.\(userId.uuidString)"
+        ) { action in
+            Task { @MainActor [weak self] in
+                self?.handleRealtimeChange(action)
+            }
+        }
+        
+        Task {
+            do {
+                try await channel.subscribeWithError()
+            } catch {
+                print("❌ [Realtime] Subscribe error: \(error)")
+            }
+        }
+    }
+
+    private func handleRealtimeChange(_ action: AnyAction) {
+        print("🔔 [Realtime] Transaction change detected")
+        
+        let decoder = PostgrestClient.Configuration.jsonDecoder
+        switch action {
+        case .insert(let a):
+            do {
+                let newTxn: Transaction = try a.decodeRecord(decoder: decoder)
+                if !transactions.contains(where: { $0.id == newTxn.id }) {
+                    transactions.insert(newTxn, at: 0)
+                    updateEcosystem()
+                }
+            } catch {
+                print("❌ [Realtime] Error decoding inserted transaction: \(error)")
+            }
+        case .update(let a):
+            do {
+                let updated: Transaction = try a.decodeRecord(decoder: decoder)
+                if let idx = transactions.firstIndex(where: { $0.id == updated.id }) {
+                    transactions[idx] = updated
+                    updateEcosystem()
+                }
+            } catch {
+                print("❌ [Realtime] Error decoding updated transaction: \(error)")
+            }
+        case .delete(let a):
+            do {
+                let old: Transaction = try a.decodeOldRecord(decoder: decoder)
+                if let idx = transactions.firstIndex(where: { $0.id == old.id }) {
+                    transactions.remove(at: idx)
+                    updateEcosystem()
+                }
+            } catch {
+                print("❌ [Realtime] Error decoding deleted transaction: \(error)")
+            }
+        }
     }
 
     func fetchTransactions(userId: UUID) async {
@@ -106,6 +232,7 @@ final class TransactionViewModel: ObservableObject {
                 .select()
                 .eq("user_id", value: userId.uuidString)
                 .order("date", ascending: false)
+                .order("created_at", ascending: false)
                 .execute().value
         } catch { errorMessage = error.localizedDescription }
     }
@@ -124,7 +251,12 @@ final class TransactionViewModel: ObservableObject {
                 print("📂 [Categories] Empty — seeding defaults for userType: \(userType)")
                 await seedDefaultCategories(userId: userId, userType: userType)
             } else {
-                categories = fetched
+                var seenNames = Set<String>()
+                categories = fetched.filter { cat in
+                    guard !seenNames.contains(cat.name) else { return false }
+                    seenNames.insert(cat.name)
+                    return true
+                }
             }
         } catch {
             print("❌ [Categories] FETCH ERROR: \(error)")
@@ -137,20 +269,35 @@ final class TransactionViewModel: ObservableObject {
     @discardableResult
     func addTransaction(userId: UUID, amount: Double, currency: Currency,
                         type: TransactionType, categoryId: UUID?,
-                        note: String?, date: Date) async -> Bool {
+                        note: String?, date: Date, status: String?, attachmentURL: String?) async -> Bool {
         let insert = TransactionInsert(
             userId: userId, amount: amount, currency: currency.rawValue,
             type: type.rawValue,
             categoryId: categoryId,
             note: note?.isEmpty == true ? nil : note,
-            date: date)
+            date: date,
+            status: status,
+            attachmentURL: attachmentURL)
         do {
-            try await supabase.from("transactions").insert(insert).execute()
-            await fetchTransactions(userId: userId)
+            let result: [Transaction] = try await supabase.from("transactions")
+                .insert(insert)
+                .select()
+                .execute()
+                .value
+            
+            if let newTxn = result.first {
+                self.transactions.insert(newTxn, at: 0)
+                print("✅ [Transactions] Added and updated local state: \(newTxn.id)")
+            } else {
+                // Fallback if select() returns empty
+                await fetchTransactions(userId: userId)
+            }
+            
             Haptic.success()
             updateEcosystem()
             return true
         } catch {
+            print("❌ [Transactions] ADD ERROR: \(error)")
             errorMessage = error.localizedDescription
             Haptic.error()
             return false
@@ -159,20 +306,38 @@ final class TransactionViewModel: ObservableObject {
 
     func updateTransaction(id: UUID, userId: UUID, amount: Double, currency: Currency,
                            type: TransactionType, categoryId: UUID?,
-                           note: String?, date: Date) async {
+                           note: String?, date: Date, status: String?, attachmentURL: String?) async {
         let insert = TransactionInsert(
             userId: userId, amount: amount, currency: currency.rawValue,
             type: type.rawValue,
             categoryId: categoryId,
             note: note?.isEmpty == true ? nil : note,
-            date: date)
+            date: date,
+            status: status,
+            attachmentURL: attachmentURL)
         do {
-            try await supabase.from("transactions").update(insert)
-                .eq("id", value: id.uuidString).execute()
-            await fetchTransactions(userId: userId)
+            let result: [Transaction] = try await supabase.from("transactions")
+                .update(insert)
+                .eq("id", value: id.uuidString)
+                .select()
+                .execute()
+                .value
+            
+            if let updatedTxn = result.first {
+                if let idx = transactions.firstIndex(where: { $0.id == id }) {
+                    transactions[idx] = updatedTxn
+                    print("✅ [Transactions] Updated local state for: \(id)")
+                } else {
+                    await fetchTransactions(userId: userId)
+                }
+            } else {
+                await fetchTransactions(userId: userId)
+            }
+            
             Haptic.success()
             updateEcosystem()
         } catch {
+            print("❌ [Transactions] UPDATE ERROR: \(error)")
             errorMessage = error.localizedDescription
             Haptic.error()
         }
@@ -182,16 +347,26 @@ final class TransactionViewModel: ObservableObject {
         do {
             try await supabase.from("transactions").delete()
                 .eq("id", value: id.uuidString).execute()
-            await fetchTransactions(userId: userId)
+            
+            // Local update: remove from array
+            if let idx = transactions.firstIndex(where: { $0.id == id }) {
+                transactions.remove(at: idx)
+                print("✅ [Transactions] Deleted and removed from local state: \(id)")
+            } else {
+                await fetchTransactions(userId: userId)
+            }
+            
             Haptic.medium()
             updateEcosystem()
-        } catch { print("Delete error: \(error)") }
+        } catch { 
+            print("❌ [Transactions] DELETE ERROR: \(error)")
+        }
     }
 
     // MARK: - CRUD: Categories
 
     func addCategory(userId: UUID, name: String, color: String, icon: String, type: String) async -> Bool {
-        let insert = CategoryInsert(userId: userId, name: name, color: color, icon: icon, type: type)
+        let insert = CategoryInsert(userId: userId, familyId: nil, name: name, color: color, icon: icon, type: type)
         print("➕ [Categories] Adding: name=\(name), color=\(color), icon=\(icon), type=\(type), userId=\(userId.uuidString)")
         do {
             try await supabase.from("categories").insert(insert).execute()
@@ -222,13 +397,18 @@ final class TransactionViewModel: ObservableObject {
     // Widget + Watch + LiveActivity + BudgetAlert güncellenir.
 
     func updateEcosystem() {
-        let budgets = budgetManager?.budgets ?? [:]
+        calculateCategorySpending()
+        let budgets   = budgetManager?.budgets ?? [:]
+        let scheduled = scheduledPaymentVM?.scheduledPayments ?? []
+        let recurring = recurringVM?.recurringTransactions ?? []
         SnapshotWriter.write(
-            transactions:    transactions,
-            categories:      categories,
-            budgets:         budgets,
-            profile:         authVM?.userProfile,
-            primaryCurrency: primaryCurrency)
+            transactions:          transactions,
+            categories:            categories,
+            budgets:               budgets,
+            profile:               authVM?.userProfile,
+            primaryCurrency:       primaryCurrency,
+            scheduledPayments:     scheduled,
+            recurringTransactions: recurring)
 
         let snap = SnapshotStore.shared.load()
         BudgetAlertEngine.shared.evaluate(budgets: snap.budgetStatuses)
@@ -260,6 +440,21 @@ final class TransactionViewModel: ObservableObject {
 
     // MARK: - Private
 
+    private func calculateCategorySpending() {
+        let cal = Calendar.current
+        let now = Date()
+        var newSpending: [UUID: Double] = [:]
+        
+        // Single O(N) pass to pre-calculate spending for all categories
+        for txn in transactions {
+            guard let d = txn.date, txn.type == "expense", let catId = txn.categoryId else { continue }
+            if cal.isDate(d, equalTo: now, toGranularity: .month) {
+                newSpending[catId, default: 0] += convert(txn)
+            }
+        }
+        self.categorySpendingThisMonth = newSpending
+    }
+
     private enum Period { case month, lastMonth, all }
 
     private func sumConverted(type: String, period: Period = .all) -> Double {
@@ -282,7 +477,7 @@ final class TransactionViewModel: ObservableObject {
 
     private func seedDefaultCategories(userId: UUID, userType: String) async {
         let inserts = filteredDefaultCategories(for: userType).map {
-            CategoryInsert(userId: userId, name: $0.name, color: $0.color, icon: $0.icon, type: $0.type)
+            CategoryInsert(userId: userId, familyId: nil, name: $0.name, color: $0.color, icon: $0.icon, type: $0.type)
         }
         print("🌱 [Categories] Seeding \(inserts.count) defaults for userType: \(userType)")
         do {

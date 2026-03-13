@@ -104,5 +104,6 @@ struct WatchQuickAdd: Codable {
 }
 
 extension Notification.Name {
-    static let zflowWatchQuickAdd = Notification.Name("com.zflow.watchQuickAdd")
+    static let zflowWatchQuickAdd  = Notification.Name("com.zflow.watchQuickAdd")
+    static let zflowOpenAddSheet   = Notification.Name("com.zflow.openAddSheet")
 }

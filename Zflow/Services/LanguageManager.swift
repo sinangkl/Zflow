@@ -13,6 +13,11 @@ final class LanguageManager: ObservableObject {
             UserDefaults.standard.set([currentLanguage], forKey: "AppleLanguages")
             UserDefaults.standard.set(currentLanguage, forKey: "appLanguage")
             UserDefaults.standard.synchronize()
+            
+            // Sync to AppGroup for Extensions
+            AppGroup.defaults.set(currentLanguage, forKey: AppGroup.Key.language)
+            AppGroup.defaults.synchronize()
+            
             Bundle.setLanguage(currentLanguage)
         }
     }

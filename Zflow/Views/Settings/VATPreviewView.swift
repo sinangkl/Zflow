@@ -45,7 +45,7 @@ struct VATPreviewCard: View {
                                 .foregroundColor(ZColor.labelSec)
                             Image(systemName: "sparkles")
                                 .font(.system(size: 9, weight: .bold))
-                                .foregroundColor(ZColor.indigo)
+                                .foregroundColor(AppTheme.baseColor)
                         }
                     }
 
@@ -54,12 +54,12 @@ struct VATPreviewCard: View {
                     // Coming soon badge
                     Text(NSLocalizedString("vat.comingSoon", comment: ""))
                         .font(.system(size: 10, weight: .bold))
-                        .foregroundColor(ZColor.indigo)
+                        .foregroundColor(AppTheme.baseColor)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
                         .background(
                             Capsule(style: .continuous)
-                                .fill(ZColor.indigo.opacity(0.10))
+                                .fill(AppTheme.baseColor.opacity(0.10))
                         )
 
                     Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
@@ -144,7 +144,7 @@ struct VATPreviewCard: View {
                     .padding(12)
                     .background(
                         RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .fill(ZColor.indigo.opacity(0.07))
+                            .fill(AppTheme.baseColor.opacity(0.07))
                     )
                     .padding(.horizontal, 14)
                     .padding(.bottom, 12)
@@ -154,7 +154,7 @@ struct VATPreviewCard: View {
                     removal: .opacity))
             }
         }
-        .background(Color(.secondarySystemGroupedBackground))
+        .background(Color.white.opacity(scheme == .dark ? 0.08 : 0.06))
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
@@ -203,7 +203,7 @@ struct VATPreviewCard: View {
             resultItem(
                 label: NSLocalizedString("vat.total", comment: ""),
                 value: calc.totalAmount,
-                color: ZColor.indigo,
+                color: AppTheme.baseColor,
                 isBold: true)
         }
         .padding(12)

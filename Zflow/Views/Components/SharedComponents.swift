@@ -7,6 +7,7 @@ import SwiftUI
 struct PremiumBackground: View {
     var body: some View {
         MeshGradientBackground()
+            .ignoresSafeArea()
     }
 }
 
@@ -50,6 +51,19 @@ struct GradientCard<Content: View>: View {
     }
 }
 
+// MARK: - Category Localization Helper
+
+extension Category {
+    var localizedName: String {
+        let key = "category.\(self.name.lowercased().replacingOccurrences(of: " ", with: "_"))"
+        let localized = NSLocalizedString(key, comment: "")
+        if localized == key {
+            return self.name.isEmpty ? NSLocalizedString("category.other", comment: "") : self.name
+        }
+        return localized
+    }
+}
+
 // MARK: - TransactionRow
 
 struct TransactionRow: View {
@@ -73,7 +87,7 @@ struct TransactionRow: View {
             }
             // Text
             VStack(alignment: .leading, spacing: 2) {
-                Text(category?.name ?? "Uncategorized")
+                Text(category?.localizedName ?? "Diğer Ödeme")
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundColor(ZColor.label)
                 if let note = transaction.note, !note.isEmpty {
@@ -87,7 +101,7 @@ struct TransactionRow: View {
             // Amount
             VStack(alignment: .trailing, spacing: 2) {
                 Text("\(isIncome ? "+" : "−")\(transaction.amount.formattedCurrency(code: transaction.currency))")
-                    .font(.system(size: 15, weight: .bold))
+                    .eliteBody().fontWeight(.bold)
                     .foregroundColor(isIncome ? ZColor.income : ZColor.expense)
                 if let date = transaction.date {
                     Text(date.formatted(.dateTime.day().month(.abbreviated)))
@@ -97,7 +111,7 @@ struct TransactionRow: View {
         }
         .padding(.horizontal, 14).padding(.vertical, 11)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(category?.name ?? "Uncategorized") - \(isIncome ? "Income" : "Expense") \(transaction.amount.formattedCurrency(code: transaction.currency))")
+        .accessibilityLabel("\(category?.localizedName ?? "Uncategorized") - \(isIncome ? "Income" : "Expense") \(transaction.amount.formattedCurrency(code: transaction.currency))")
         
         Group {
             if isStandalone {
@@ -117,12 +131,11 @@ struct ScrollTransformModifier: ViewModifier {
     func body(content: Content) -> some View {
         if #available(iOS 17.0, *) {
             content.visualEffect { view, proxy in
-                let frame = proxy.frame(in: .global)
-                let estimatedScreenHeight: CGFloat = 850.0
+                let frame = proxy.frame(in: .scrollView)
                 let position = frame.midY
-                let distanceFromCenter = abs(estimatedScreenHeight / 2 - position)
-                let scale = max(0.9, 1 - (distanceFromCenter / (estimatedScreenHeight * 1.5)))
-                
+                let containerHeight = proxy.size.height
+                let distanceFromCenter = abs(containerHeight / 2 - position)
+                let scale = max(0.92, 1 - (distanceFromCenter / (containerHeight * 1.8)))
                 return view.scaleEffect(scale)
             }
         } else {
@@ -135,6 +148,34 @@ extension View {
     func liquidScrollTransform() -> some View {
         modifier(ScrollTransformModifier())
     }
+    
+    @ViewBuilder
+    func versionedSymbolEffect(_ effect: VersionedEffectType) -> some View {
+        if #available(iOS 17.0, *) {
+            switch effect {
+            case .pulse:
+                self.symbolEffect(.pulse)
+            case .bounce:
+                #if swift(>=6.0)
+                if #available(iOS 18.0, *) {
+                    self.symbolEffect(.bounce)
+                } else {
+                    // Bounce is discrete-only in iOS 17, fallback to pulse
+                    self.symbolEffect(.pulse)
+                }
+                #else
+                self.symbolEffect(.pulse)
+                #endif
+            }
+        } else {
+            self
+        }
+    }
+}
+
+enum VersionedEffectType {
+    case pulse
+    case bounce
 }
 
 // MARK: - InsightCard
@@ -231,13 +272,25 @@ struct EmptyStateView: View {
 
 struct SectionHeader: View {
     var title: String; var trailing: String? = nil; var trailingAction: (() -> Void)? = nil
+    @Environment(\.colorScheme) private var scheme
     var body: some View {
         HStack(alignment: .firstTextBaseline) {
-            Text(title).font(.system(size: 20, weight: .bold)).foregroundColor(ZColor.label)
+            Text(title)
+                .eliteTitle()
+                .foregroundColor(ZColor.label)
             Spacer()
             if let label = trailing {
-                Button(label) { trailingAction?() }
-                    .font(.system(size: 14, weight: .medium)).foregroundColor(ZColor.indigo)
+                Button {
+                    trailingAction?()
+                    Haptic.light()
+                } label: {
+                    Text(label)
+                        .eliteBody()
+                        .foregroundColor(AppTheme.baseColor)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8) // HIG touch target
+                        .contentShape(Rectangle())
+                }
             }
         }
     }
@@ -247,18 +300,20 @@ struct SectionHeader: View {
 
 struct BudgetProgressBar: View {
     var spent: Double; var limit: Double
-    var color: Color = ZColor.indigo; var height: CGFloat = 6
+    var color: Color = AppTheme.baseColor; var height: CGFloat = 6
     private var ratio: Double { limit > 0 ? min(spent/limit, 1.0) : 0 }
     private var barColor: Color {
         if ratio >= 1.0 { return ZColor.expense }
         if ratio >= 0.8 { return ZColor.warning }
         return ZColor.income
     }
+    @Environment(\.colorScheme) private var scheme
     var body: some View {
         GeometryReader { geo in
             ZStack(alignment: .leading) {
                 RoundedRectangle(cornerRadius: height/2, style: .continuous)
-                    .fill(Color(.tertiarySystemFill)).frame(height: height)
+                    .fill(Color.white.opacity(scheme == .dark ? 0.1 : 0.08))
+                    .frame(height: height)
                 RoundedRectangle(cornerRadius: height/2, style: .continuous)
                     .fill(barColor)
                     .frame(width: max(0, geo.size.width * ratio), height: height)
@@ -273,16 +328,24 @@ struct BudgetProgressBar: View {
 
 struct StatCard: View {
     var title: String; var value: String; var icon: String
-    var iconColor: Color = ZColor.indigo; var valueColor: Color = ZColor.label
+    var iconColor: Color = AppTheme.baseColor; var valueColor: Color = ZColor.label
     var trend: Double? = nil
+    @Environment(\.colorScheme) private var scheme
+
+    /// True when no real data is available
+    private var noData: Bool { value == "—" || value.isEmpty }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 ZStack {
                     Circle()
-                        .fill(iconColor.opacity(0.12)).frame(width: 36, height: 36)
-                    Image(systemName: icon).font(.system(size: 15, weight: .semibold)).foregroundColor(iconColor)
+                        .fill(iconColor.opacity(0.14)).frame(width: 38, height: 38)
+                    
+                    Image(systemName: icon)
+                        .font(.system(size: 16, weight: .semibold))
+                        .versionedSymbolEffect(.pulse)
+                        .foregroundColor(iconColor)
                 }
                 Spacer()
                 if let t = trend {
@@ -294,12 +357,24 @@ struct StatCard: View {
                     .foregroundColor(t >= 0 ? ZColor.expense : ZColor.income)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
-                    .background(Capsule().fill((t >= 0 ? ZColor.expense : ZColor.income).opacity(0.1)))
+                    .background(Capsule().fill((t >= 0 ? ZColor.expense : ZColor.income).opacity(0.12)))
                 }
             }
-            Text(value).font(.system(size: 22, weight: .bold, design: .rounded)).foregroundColor(valueColor)
-                .lineLimit(1).minimumScaleFactor(0.65)
-            Text(title).font(.system(size: 12, weight: .medium)).foregroundColor(ZColor.labelSec)
+
+            if noData {
+                Text("—")
+                    .font(.system(size: 22, weight: .bold, design: .rounded))
+                    .foregroundColor(ZColor.labelTert)
+            } else {
+                Text(value)
+                    .font(.system(size: 24, weight: .bold, design: .rounded))
+                    .foregroundColor(valueColor)
+                    .lineLimit(1).minimumScaleFactor(0.65)
+            }
+
+            Text(title)
+                .font(.system(size: 13, weight: .medium))
+                .foregroundColor(ZColor.label.opacity(scheme == .dark ? 0.65 : 0.55))
         }
         .padding(16).liquidGlass(cornerRadius: 24)
     }
@@ -361,7 +436,7 @@ struct ErrorBanner: View {
                 .background(Circle().fill(Color.red.opacity(0.8)))
             
             VStack(alignment: .leading, spacing: 2) {
-                Text("Error").font(.system(size: 13, weight: .semibold)).foregroundColor(.white)
+                Text(NSLocalizedString("common.error", comment: "Error")).eliteBody().foregroundColor(.white)
                 Text(message).font(.system(size: 12)).foregroundColor(.white.opacity(0.9))
                     .lineLimit(2).fixedSize(horizontal: false, vertical: true)
             }
@@ -388,6 +463,7 @@ struct ErrorBanner: View {
 struct IconGridPicker: View {
     @Binding var selectedIcon: String
     var columns: [GridItem] = Array(repeating: GridItem(.flexible(), spacing: 10), count: 5)
+    @AppStorage("profileCardColor") private var appThemeColorHex: String = "#5E5CE6"
     
     let categoryIcons = [
         ("Income", ["banknote.fill", "dollarsign.circle.fill", "chart.line.uptrend.xyaxis", "percent", "arrow.triangle.2.circlepath"]),
@@ -419,10 +495,10 @@ struct IconGridPicker: View {
                                     .frame(height: 44)
                                     .frame(maxWidth: .infinity)
                                     .background(RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                        .fill(isSelected ? ZColor.indigo.opacity(0.15) : Color(.tertiarySystemFill)))
-                                    .foregroundColor(isSelected ? ZColor.indigo : ZColor.label)
+                                        .fill(isSelected ? Color(hex: appThemeColorHex).opacity(0.15) : Color(.tertiarySystemFill)))
+                                    .foregroundColor(isSelected ? Color(hex: appThemeColorHex) : ZColor.label)
                                     .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                        .strokeBorder(isSelected ? ZColor.indigo.opacity(0.5) : .clear, lineWidth: 1.5))
+                                        .strokeBorder(isSelected ? Color(hex: appThemeColorHex).opacity(0.5) : .clear, lineWidth: 1.5))
                             }.accessibilityLabel("Select \(icon) icon")
                         }
                     }
@@ -454,7 +530,7 @@ struct ReadyPaymentCard: View {
         VStack(spacing: 10) {
             HStack(spacing: 12) {
                 VStack(alignment: .leading, spacing: 3) {
-                    Text("Payment Awaiting Approval")
+                    Text(NSLocalizedString("payment.awaitingApproval", comment: "Payment Awaiting Approval"))
                         .font(.system(size: 12, weight: .semibold))
                         .foregroundColor(Color(UIColor.systemOrange))
                         .textCase(.uppercase)
@@ -494,7 +570,12 @@ struct ReadyPaymentCard: View {
 
                 Button(action: onApprove) {
                     HStack(spacing: 6) {
-                        Image(systemName: "checkmark.circle.fill")
+                        if #available(iOS 18.0, watchOS 11.0, *) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .symbolEffect(.bounce, options: .nonRepeating)
+                        } else {
+                            Image(systemName: "checkmark.circle.fill")
+                        }
                         Text(NSLocalizedString("common.approve", comment: ""))
                     }
                     .font(.system(size: 13, weight: .semibold))

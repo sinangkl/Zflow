@@ -5,7 +5,12 @@ import Combine
 
 enum TransactionType: String, Codable, CaseIterable {
     case income, expense
-    var displayName: String { rawValue.capitalized }
+    var displayName: String {
+        switch self {
+        case .income: return NSLocalizedString("dashboard.income", comment: "")
+        case .expense: return NSLocalizedString("dashboard.expense", comment: "")
+        }
+    }
 }
 
 enum Currency: String, Codable, CaseIterable, Identifiable {
@@ -46,12 +51,15 @@ struct Transaction: Codable, Identifiable, Equatable {
     var categoryId: UUID?
     var note: String?
     var date: Date?
+    var status: String?          // "approved", "pending", "rejected"
+    var attachmentURL: String?
     let createdAt: Date?
 
     enum CodingKeys: String, CodingKey {
-        case id, amount, currency, type, note, date
+        case id, amount, currency, type, note, date, status
         case userId = "user_id"
         case categoryId = "category_id"
+        case attachmentURL = "attachment_url"
         case createdAt = "created_at"
     }
 }
@@ -64,11 +72,14 @@ struct TransactionInsert: Codable {
     let categoryId: UUID?
     let note: String?
     let date: Date
+    let status: String?
+    let attachmentURL: String?
 
     enum CodingKeys: String, CodingKey {
-        case amount, currency, type, note, date
+        case amount, currency, type, note, date, status
         case userId = "user_id"
         case categoryId = "category_id"
+        case attachmentURL = "attachment_url"
     }
 }
 
@@ -77,6 +88,7 @@ struct TransactionInsert: Codable {
 struct Category: Codable, Identifiable, Hashable, Equatable {
     let id: UUID
     let userId: UUID?
+    let familyId: UUID?
     let name: String
     let color: String
     let icon: String?
@@ -86,18 +98,20 @@ struct Category: Codable, Identifiable, Hashable, Equatable {
     enum CodingKeys: String, CodingKey {
         case id, name, color, icon, type
         case userId = "user_id"
+        case familyId = "family_id"
         case createdAt = "created_at"
     }
 }
 
 struct CategoryInsert: Codable {
-    let userId: UUID
+    let userId: UUID?
+    let familyId: UUID?
     let name: String
     let color: String
     let icon: String?
     let type: String?
     enum CodingKeys: String, CodingKey {
-        case name, color, icon, type; case userId = "user_id"
+        case name, color, icon, type; case userId = "user_id"; case familyId = "family_id"
     }
 }
 
@@ -105,7 +119,12 @@ struct CategoryInsert: Codable {
 
 enum UserType: String, Codable, CaseIterable {
     case personal, business
-    var displayName: String { rawValue.capitalized }
+    var displayName: String {
+        switch self {
+        case .personal: return NSLocalizedString("auth.personal", comment: "")
+        case .business: return NSLocalizedString("auth.business", comment: "")
+        }
+    }
     var icon: String { self == .personal ? "person.fill" : "building.2.fill" }
 }
 
@@ -114,7 +133,17 @@ struct Profile: Codable, Identifiable, Equatable {
     var fullName: String?
     var userType: String?
     var businessName: String?
-    var avatarURL: String? // EKLEDİĞİMİZ KISIM
+    var phoneNumber: String?
+    var avatarURL: String?
+    var familyId: UUID?
+    var familyRole: String?          // "admin", "member"
+    var familyStatus: String?        // "active", "pending"
+    var familyRelationship: String?  // "Eşim", "Oğlum", "Kızım" vb.
+    var themeApp: String?            // "system", "light", "dark"
+    var themeFamilyCardHex: String?
+    var themeWalletCardHex: String?
+    var subscriptionTier: String?    // "free", "premium", "family_pro"
+    var subscriptionExpiresAt: Date?
     let createdAt: Date?
 
     enum CodingKeys: String, CodingKey {
@@ -122,7 +151,17 @@ struct Profile: Codable, Identifiable, Equatable {
         case fullName = "full_name"
         case userType = "user_type"
         case businessName = "business_name"
-        case avatarURL = "avatar_url" // EKLEDİĞİMİZ KISIM
+        case phoneNumber = "phone_number"
+        case avatarURL = "avatar_url"
+        case familyId = "family_id"
+        case familyRole = "family_role"
+        case familyStatus = "family_status"
+        case familyRelationship = "family_relationship"
+        case themeApp = "theme_app"
+        case themeFamilyCardHex = "theme_family_card"
+        case themeWalletCardHex = "theme_wallet_card"
+        case subscriptionTier = "subscription_tier"
+        case subscriptionExpiresAt = "subscription_expires_at"
         case createdAt = "created_at"
     }
 
@@ -143,14 +182,85 @@ struct ProfileInsert: Codable {
     let fullName: String
     let userType: String
     let businessName: String?
-    var avatarURL: String? // EKLEDİĞİMİZ KISIM
+    let phoneNumber: String?
+    var avatarURL: String?
+    var familyId: UUID?
+    var familyRole: String?
+    var familyStatus: String?
+    var familyRelationship: String?
+    var themeApp: String?
+    var themeFamilyCardHex: String?
+    var themeWalletCardHex: String?
+    var subscriptionTier: String?
+    var subscriptionExpiresAt: Date?
 
     enum CodingKeys: String, CodingKey {
         case id
         case fullName = "full_name"
         case userType = "user_type"
         case businessName = "business_name"
-        case avatarURL = "avatar_url" // EKLEDİĞİMİZ KISIM
+        case phoneNumber = "phone_number"
+        case avatarURL = "avatar_url"
+        case familyId = "family_id"
+        case familyRole = "family_role"
+        case familyStatus = "family_status"
+        case familyRelationship = "family_relationship"
+        case themeApp = "theme_app"
+        case themeFamilyCardHex = "theme_family_card"
+        case themeWalletCardHex = "theme_wallet_card"
+        case subscriptionTier = "subscription_tier"
+        case subscriptionExpiresAt = "subscription_expires_at"
+    }
+}
+
+// MARK: - Family Models
+
+struct Family: Codable, Identifiable {
+    let id: UUID
+    var name: String
+    var adminId: UUID
+    var cardColor: String? // New family card color
+
+    enum CodingKeys: String, CodingKey {
+        case id, name
+        case adminId = "admin_id"
+        case cardColor = "card_color"
+    }
+}
+
+struct FamilyMember: Identifiable, Codable {
+    var id: UUID
+    var userId: UUID
+    var displayName: String?
+    var avatarURL: String?
+    var role: String // "admin" | "member"
+    var status: String? // "active" | "pending"
+    var relationship: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id, role
+        case userId = "user_id"
+        case displayName = "display_name"
+        case avatarURL = "avatar_url"
+        case status = "status"
+        case relationship = "relationship"
+    }
+}
+
+struct FamilyActivity: Codable, Identifiable {
+    let id: UUID
+    let familyId: UUID
+    let userId: UUID
+    let actionType: String // 'expense_added', 'goal_completed', 'member_joined'
+    let details: [String: String]?
+    let createdAt: Date
+
+    enum CodingKeys: String, CodingKey {
+        case id, details
+        case familyId = "family_id"
+        case userId = "user_id"
+        case actionType = "action_type"
+        case createdAt = "created_at"
     }
 }
 
@@ -159,8 +269,10 @@ struct ProfileInsert: Codable {
 struct Budget: Codable, Identifiable, Equatable {
     let id: UUID
     let userId: UUID?
+    let familyId: UUID? // Shared family budget support
     let categoryId: UUID?
     var limitAmount: Double
+    var monthlySalary: Double?
     var budgetType: String?
     var currency: String?
     let createdAt: Date?
@@ -168,10 +280,32 @@ struct Budget: Codable, Identifiable, Equatable {
     enum CodingKeys: String, CodingKey {
         case id, currency
         case userId = "user_id"
+        case familyId = "family_id"
         case categoryId = "category_id"
         case limitAmount = "limit_amount"
+        case monthlySalary = "monthly_salary"
         case budgetType = "budget_type"
         case createdAt = "created_at"
+    }
+}
+
+struct BudgetInsert: Codable {
+    let userId: UUID?
+    let familyId: UUID?
+    let categoryId: UUID?
+    let limitAmount: Double
+    let monthlySalary: Double?
+    let budgetType: String?
+    let currency: String?
+
+    enum CodingKeys: String, CodingKey {
+        case userId = "user_id"
+        case familyId = "family_id"
+        case categoryId = "category_id"
+        case limitAmount = "limit_amount"
+        case monthlySalary = "monthly_salary"
+        case budgetType = "budget_type"
+        case currency
     }
 }
 
@@ -179,7 +313,14 @@ struct Budget: Codable, Identifiable, Equatable {
 
 enum RecurringInterval: String, Codable, CaseIterable {
     case daily, weekly, monthly, yearly
-    var displayName: String { rawValue.capitalized }
+    var displayName: String {
+        switch self {
+        case .daily: return NSLocalizedString("time.daily", comment: "")
+        case .weekly: return NSLocalizedString("time.weekly", comment: "")
+        case .monthly: return NSLocalizedString("time.monthly", comment: "")
+        case .yearly: return NSLocalizedString("time.yearly", comment: "")
+        }
+    }
     var icon: String {
         switch self {
         case .daily: "sun.max"; case .weekly: "calendar.badge.clock"
@@ -273,6 +414,92 @@ enum TurkishVATRate: Double, CaseIterable {
 extension Profile {
     var avatarStoragePath: String { "avatars/\(id.uuidString).jpg" }
 }
+// MARK: - Recurring Transaction Model (Düzenli İşlem Şablonu)
+
+struct RecurringTransaction: Codable, Identifiable, Equatable {
+    let id: UUID
+    let userId: UUID?
+    var title: String
+    var categoryId: UUID?
+    var transactionType: String  // "income" | "expense"
+    var expectedAmount: Double?
+    var currency: String
+    var dayOfMonth: Int          // 1-31
+    var isActive: Bool
+    let createdAt: Date?
+
+    enum CodingKeys: String, CodingKey {
+        case id, title, currency
+        case userId = "user_id"
+        case categoryId = "category_id"
+        case transactionType = "transaction_type"
+        case expectedAmount = "expected_amount"
+        case dayOfMonth = "day_of_month"
+        case isActive = "is_active"
+        case createdAt = "created_at"
+    }
+
+    /// Bu ayın (veya gelecek ayın) beklenen tarihini hesaplar
+    var nextOccurrence: Date {
+        let cal = Calendar.current
+        let now = Date()
+        let currentDay = cal.component(.day, from: now)
+        var comps = cal.dateComponents([.year, .month], from: now)
+        comps.day = min(dayOfMonth, 28)
+
+        if currentDay > dayOfMonth {
+            comps.month = (comps.month ?? 1) + 1
+        }
+        return cal.date(from: comps) ?? now
+    }
+
+    var daysUntilNext: Int {
+        let cal = Calendar.current
+        return cal.dateComponents([.day], from: cal.startOfDay(for: Date()), to: cal.startOfDay(for: nextOccurrence)).day ?? 0
+    }
+}
+
+struct RecurringTransactionInsert: Codable {
+    let userId: UUID
+    let title: String
+    let categoryId: UUID?
+    let transactionType: String
+    let expectedAmount: Double?
+    let currency: String
+    let dayOfMonth: Int
+    let isActive: Bool
+
+    enum CodingKeys: String, CodingKey {
+        case title, currency
+        case userId = "user_id"
+        case categoryId = "category_id"
+        case transactionType = "transaction_type"
+        case expectedAmount = "expected_amount"
+        case dayOfMonth = "day_of_month"
+        case isActive = "is_active"
+    }
+}
+
+/// Update payload for existing recurring transaction
+struct RecurringTransactionUpdate: Codable {
+    let title: String
+    let categoryId: UUID?
+    let transactionType: String
+    let expectedAmount: Double?
+    let currency: String
+    let dayOfMonth: Int
+    let isActive: Bool
+
+    enum CodingKeys: String, CodingKey {
+        case title, currency
+        case categoryId = "category_id"
+        case transactionType = "transaction_type"
+        case expectedAmount = "expected_amount"
+        case dayOfMonth = "day_of_month"
+        case isActive = "is_active"
+    }
+}
+
 // MARK: - Scheduled Payment Models
 
 enum ScheduledPaymentStatus: String, Codable {
@@ -329,5 +556,4 @@ struct ScheduledPaymentInsert: Codable {
         case calendarEventId = "calendar_event_id"
     }
 }
-
 

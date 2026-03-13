@@ -17,8 +17,8 @@ struct ZFlowExportView: View {
         var color: Color { self == .csv ? ZColor.income : ZColor.expense }
         var desc: String {
             self == .csv
-            ? "For Excel, Numbers or Google Sheets"
-            : "Formatted report for printing or sharing"
+            ? Localizer.shared.l("export.formatCSVDesc")
+            : Localizer.shared.l("export.formatPDFDesc")
         }
     }
 
@@ -30,7 +30,9 @@ struct ZFlowExportView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color(.systemGroupedBackground).ignoresSafeArea()
+                MeshGradientBackground()
+                    .ignoresSafeArea()
+
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 24) {
                         headerSection
@@ -41,12 +43,12 @@ struct ZFlowExportView: View {
                     .padding(.bottom, 40)
                 }
             }
-            .navigationTitle("Export")
+            .navigationTitle(Localizer.shared.l("export.title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button(L.done.localized) { dismiss() }
-                        .foregroundColor(ZColor.indigo)
+                        .foregroundColor(AppTheme.baseColor)
                 }
             }
             .sheet(item: $shareItem) { item in
@@ -64,7 +66,7 @@ struct ZFlowExportView: View {
                 .foregroundStyle(AppTheme.accentGradient)
             Text(L.exportTitle.localized)
                 .font(.system(size: 24, weight: .bold))
-            Text("\(transactionVM.transactions.count) transactions available")
+            Text(String(format: Localizer.shared.l("export.transactionsCount"), transactionVM.transactions.count))
                 .font(.system(size: 14))
                 .foregroundColor(ZColor.labelSec)
         }
@@ -75,7 +77,7 @@ struct ZFlowExportView: View {
 
     private var formatPickerSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Export Format")
+            Text(Localizer.shared.l("export.format"))
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundColor(ZColor.labelSec)
                 .textCase(.uppercase)
@@ -113,15 +115,15 @@ struct ZFlowExportView: View {
                 }
                 Spacer()
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                    .foregroundColor(isSelected ? ZColor.indigo : ZColor.labelTert)
+                    .foregroundColor(isSelected ? AppTheme.baseColor : ZColor.labelTert)
                     .font(.system(size: 20))
             }
             .padding(14)
-            .background(Color(.secondarySystemGroupedBackground))
+            .background(Color.white.opacity(scheme == .dark ? 0.08 : 0.06))
             .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .strokeBorder(isSelected ? ZColor.indigo.opacity(0.5) : Color.clear, lineWidth: 1.5)
+                    .strokeBorder(isSelected ? AppTheme.baseColor.opacity(0.5) : Color.clear, lineWidth: 1.5)
             )
         }
         .buttonStyle(.plain)
@@ -130,7 +132,7 @@ struct ZFlowExportView: View {
     // MARK: - Export Button
 
     private var exportButton: some View {
-        let label = selectedFormat == .csv ? "Export CSV" : "Export PDF"
+        let label = selectedFormat == .csv ? Localizer.shared.l("export.buttonCSV") : Localizer.shared.l("export.buttonPDF")
         return Button { generate() } label: {
             Group {
                 if isGenerating {
@@ -206,7 +208,7 @@ struct ZFlowExportView: View {
 
         // Header
         let headerRect = CGRect(x: 0, y: 0, width: 595, height: 80)
-        ctx.setFillColor(UIColor(ZColor.indigo).cgColor)
+        ctx.setFillColor(UIColor(AppTheme.baseColor).cgColor)
         ctx.fill(headerRect)
 
         let titleAttr: [NSAttributedString.Key: Any] = [
@@ -241,7 +243,7 @@ struct ZFlowExportView: View {
         // Table header
         let colAttrs: [NSAttributedString.Key: Any] = [
             .font: UIFont.systemFont(ofSize: 9, weight: .bold),
-            .foregroundColor: UIColor(ZColor.indigo)
+            .foregroundColor: UIColor(AppTheme.baseColor)
         ]
         ["Date", "Type", "Category", "Amount", "Note"].enumerated().forEach { i, title in
             let x: CGFloat = [24, 104, 174, 334, 424][i]

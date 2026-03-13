@@ -37,7 +37,7 @@ struct ZFlowLiveActivityWidget: Widget {
                 Image(systemName: "chart.line.uptrend.xyaxis")
                     .font(.system(size: 12, weight: .bold))
                     .foregroundStyle(LinearGradient(
-                        colors: [Color(hex: "#5E5CE6"), Color(hex: "#7D7AFF")],
+                        colors: [Color(hex: context.state.accentPrimaryHex ?? "#5E5CE6"), Color(hex: context.state.accentSecondaryHex ?? "#7D7AFF")],
                         startPoint: .topLeading, endPoint: .bottomTrailing))
             } compactTrailing: {
                 // Sağ kompakt — bakiye veya bütçe uyarısı
@@ -46,7 +46,7 @@ struct ZFlowLiveActivityWidget: Widget {
                 // Minimal — sadece ikon
                 MinimalView(context: context)
             }
-            .keylineTint(Color(hex: "#5E5CE6"))
+            .keylineTint(Color(hex: context.state.accentPrimaryHex ?? "#5E5CE6"))
             .contentMargins(.horizontal, 10, for: .expanded)
             .contentMargins(.top, 6, for: .expanded)
         }
@@ -59,11 +59,20 @@ struct LockScreenLiveActivity: View {
     let context: ActivityViewContext<ZFlowActivityAttributes>
 
     var state: ZFlowActivityAttributes.ContentState { context.state }
-
+    
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(Color(hex: "#07071C"))
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Color(hex: state.accentPrimaryHex ?? "#07071C").opacity(0.12),
+                            Color(hex: "#07071C")
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
 
             HStack(spacing: 16) {
                 // Left — ZFlow logo + balance
@@ -72,7 +81,7 @@ struct LockScreenLiveActivity: View {
                         Image(systemName: "chart.line.uptrend.xyaxis")
                             .font(.system(size: 12, weight: .bold))
                             .foregroundStyle(LinearGradient(
-                                colors: [Color(hex: "#5E5CE6"), Color(hex: "#7D7AFF")],
+                                colors: [Color(hex: state.accentPrimaryHex ?? "#5E5CE6"), Color(hex: state.accentSecondaryHex ?? "#7D7AFF")],
                                 startPoint: .topLeading, endPoint: .bottomTrailing))
                         Text("ZFlow")
                             .font(.system(size: 12, weight: .black, design: .rounded))
@@ -90,12 +99,12 @@ struct LockScreenLiveActivity: View {
                 // Right — Income | Expense
                 VStack(alignment: .trailing, spacing: 6) {
                     statRow(
-                        icon: "arrow.down.circle.fill",
+                        icon: "arrow.up.circle.fill",
                         value: state.thisMonthIncome,
                         color: Color(hex: "#50C878"),
                         currency: context.attributes.currency)
                     statRow(
-                        icon: "arrow.up.circle.fill",
+                        icon: "arrow.down.circle.fill",
                         value: state.thisMonthExpense,
                         color: Color(hex: "#FF7F7F"),
                         currency: context.attributes.currency)
@@ -150,7 +159,7 @@ struct ExpandedLeading: View {
                 Image(systemName: "chart.line.uptrend.xyaxis")
                     .font(.system(size: 11, weight: .bold))
                     .foregroundStyle(LinearGradient(
-                        colors: [Color(hex: "#5E5CE6"), Color(hex: "#7D7AFF")],
+                        colors: [Color(hex: context.state.accentPrimaryHex ?? "#5E5CE6"), Color(hex: context.state.accentSecondaryHex ?? "#7D7AFF")],
                         startPoint: .topLeading, endPoint: .bottomTrailing))
                 Text("ZFlow")
                     .font(.system(size: 11, weight: .black, design: .rounded))
@@ -171,12 +180,12 @@ struct ExpandedTrailing: View {
     var body: some View {
         VStack(alignment: .trailing, spacing: 4) {
             Label(context.state.thisMonthIncome.formattedShort(),
-                  systemImage: "arrow.down.circle.fill")
+                  systemImage: "arrow.up.circle.fill")
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundColor(Color(hex: "#50C878"))
 
             Label(context.state.thisMonthExpense.formattedShort(),
-                  systemImage: "arrow.up.circle.fill")
+                  systemImage: "arrow.down.circle.fill")
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundColor(Color(hex: "#FF7F7F"))
         }
@@ -275,7 +284,7 @@ struct MinimalView: View {
             Image(systemName: "chart.line.uptrend.xyaxis")
                 .font(.system(size: 12, weight: .bold))
                 .foregroundStyle(LinearGradient(
-                    colors: [Color(hex: "#5E5CE6"), Color(hex: "#7D7AFF")],
+                    colors: [Color(hex: context.state.accentPrimaryHex ?? "#5E5CE6"), Color(hex: context.state.accentSecondaryHex ?? "#7D7AFF")],
                     startPoint: .topLeading, endPoint: .bottomTrailing))
         }
     }

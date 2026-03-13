@@ -6,6 +6,7 @@
 // ============================================================
 import ActivityKit
 import Foundation
+import Combine
 
 // MARK: - Live Activity Attributes
 // Widget Extension views bu struct'ı referans alır.
@@ -25,6 +26,8 @@ struct ZFlowActivityAttributes: ActivityAttributes {
         var alertBudgetName:       String?
         var alertBudgetPercent:    Int?
         var alertBudgetColor:      String?    // hex
+        var accentPrimaryHex:      String?    // hex
+        var accentSecondaryHex:    String?    // hex
         var updatedAt: Date
     }
 }
@@ -109,6 +112,8 @@ final class ZFlowLiveActivityManager {
                 rawValue: $0.alertType == .exceeded ? "exceeded"
                         : $0.alertType == .critical ? "critical" : "warning"
             )?.hex ?? "#FF9F0A" },
+            accentPrimaryHex:        snapshot.accentPrimaryHex,
+            accentSecondaryHex:      snapshot.accentSecondaryHex,
             updatedAt: .now)
     }
 }

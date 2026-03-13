@@ -32,10 +32,12 @@
 "tab.calendar" = "Календарь";
 "tab.settings" = "Настройки";
 "dashboard.netBalance" = "Чистый Баланс";
+"dashboard.quickActions" = "Быстрые действия";
 "dashboard.income" = "Доходы";
 "dashboard.expense" = "Расходы";
 "dashboard.insights" = "Аналитика";
 "dashboard.budgets" = "Бюджеты";
+"dashboard.cashFlow" = "Прогноз денежных потоков";
 "dashboard.recent" = "Недавние";
 "dashboard.showMore" = "Показать Больше";
 "dashboard.showLess" = "Показать Меньше";
@@ -119,7 +121,66 @@
 "vat.total" = "Итого (с НДС)";
 "vat.comingSoon" = "Скоро";
 "vat.aiIntegration" = "ИИ-Интеграция НДС — Скоро";
+// Categories
 "category.other" = "Другое";
+"category.salary" = "Зарплата";
+"category.freelance" = "Фриланс";
+"category.investment" = "Инвестиции";
+"category.rental" = "Аренда";
+"category.bonus" = "Бонус";
+"category.dividend" = "Дивиденды";
+"category.side_hustle" = "Подработка";
+"category.gift_received" = "Подарок";
+"category.groceries" = "Продукты";
+"category.shopping" = "Покупки";
+"category.dining_out" = "Рестораны";
+"category.coffee" = "Кофе";
+"category.entertainment" = "Развлечения";
+"category.streaming" = "Стриминг";
+"category.housing" = "Жильё";
+"category.transport" = "Транспорт";
+"category.health" = "Здоровье";
+"category.pharmacy" = "Аптека";
+"category.education" = "Образование";
+"category.clothing" = "Одежда";
+"category.travel" = "Путешествия";
+"category.subscriptions" = "Подписки";
+"category.pets" = "Питомцы";
+"category.personal_care" = "Уход за собой";
+"category.sports_&_gym" = "Спорт и фитнес";
+"category.electronics" = "Электроника";
+"category.home_&_garden" = "Дом и сад";
+"category.tax" = "Налоги";
+"category.product_sales" = "Продажи";
+"category.service_fee" = "Услуги";
+"category.commission" = "Комиссия";
+"category.consulting" = "Консалтинг";
+"category.licensing" = "Лицензирование";
+"category.grant_/_fund" = "Грант / Фонд";
+"category.partnership" = "Партнёрство";
+"category.return" = "Возврат";
+"category.payroll" = "Зарплатный фонд";
+"category.office_rent" = "Аренда офиса";
+"category.raw_materials" = "Сырьё";
+"category.manufacturing" = "Производство";
+"category.marketing" = "Маркетинг";
+"category.advertising" = "Реклама";
+"category.utilities" = "Коммунальные услуги";
+"category.insurance" = "Страхование";
+"category.software/saas" = "ПО / SaaS";
+"category.logistics" = "Логистика";
+"category.corporate_tax" = "Налог на прибыль";
+"category.legal_&_admin" = "Юридические услуги";
+"category.r&d" = "НИОКР";
+"category.equipment" = "Оборудование";
+"category.office_supplies" = "Канцелярия";
+"category.training" = "Обучение";
+"category.bank_charges" = "Банковские расходы";
+"category.kdv_/_vat" = "НДС";
+"category.travel_(biz)" = "Командировки";
+"category.subcontracting" = "Субподряд";
+"category.gift" = "Подарок";
+
 "time.goodMorning" = "Доброе Утро";
 "time.goodAfternoon" = "Добрый День";
 "time.goodEvening" = "Добрый Вечер";
@@ -161,3 +222,82 @@
 "calendar.optionalNote" = "Заметка (необязательно)...";
 "calendar.newEvent" = "Новое событие";
 "calendar.add" = "Добавить";
+
+// AI Insights
+"ai.insights.title" = "AI Insights";
+"ai.insights.subtitle" = "Analysis of your financial data";
+"ai.chat.open" = "Chat";
+"ai.action.calendar" = "Go to Calendar";
+
+// Budget Manager
+"budget.noCategories" = "No Categories Yet";
+"budget.noCategoriesHint" = "Add categories in Settings → Categories first.";
+"budget.tapHint" = "Tap a category to set its monthly budget";
+"budget.set" = "Set Budget";
+"budget.monthlyLimit" = "Monthly limit";
+"budget.limitFor" = "Monthly limit for %@";
+"budget.notSet" = "No budget set";
+
+// Common additional
+"common.error" = "Error";
+
+// Payments
+"payment.awaitingApproval" = "Payment Awaiting Approval";
+"widget.recentTransactions" = "Recent Transactions";
+
+// Settings (additional)
+"settings.cardTheme" = "Тема карточки";
+"settings.personalInfo" = "Личные данные";
+"settings.security" = "Безопасность";
+"settings.changeEmail" = "Изменить email";
+"settings.changePassword" = "Изменить пароль";
+"settings.appLock" = "Блокировка приложения";
+"settings.updateEmail" = "Обновить email";
+"settings.newPassword" = "Новый пароль";
+"settings.confirmPassword" = "Подтвердить пароль";
+"settings.both" = "Оба";
+
+// Added for full localization support
+"budget.totalIncome" = "Общий ежемесячный доход";
+"budget.categoryBudgets" = "Бюджеты по категориям";
+"budget.enterSalary" = "Введите ваш общий ежемесячный доход";
+"export.formatCSVDesc" = "Для Excel, Numbers или Google Sheets";
+"export.formatPDFDesc" = "Отчёт для печати или отправки";
+"export.buttonCSV" = "Экспорт CSV";
+"export.buttonPDF" = "Экспорт PDF";
+"export.transactionsCount" = "%d транзакций доступно";
+"transaction.income" = "Доход";
+"transaction.expense" = "Расход";
+"common.more" = "Ещё";
+"settings.appVersion" = "Версия 1.0  •  Создано с SwiftUI + Supabase";
+"category.noCategories" = "Нет категорий";
+"category.noCategoriesHint" = "Нажмите +, чтобы добавить категории или восстановить стандартные.";
+
+"common.none" = "Нет";
+"payment.upcoming" = "Предстоящий Платёж";
+"transaction.type" = "Тип";
+"common.name" = "Название";
+"common.color" = "Цвет";
+"common.icon" = "Иконка";
+"common.all" = "Все";
+"common.select" = "Выбрать";
+"bulk.deleteSelected" = "Удалить %d выбранных";
+"category.namePlaceholder" = "Название категории";
+"auth.resetLinkExpired" = "Ссылка для сброса пароля недействительна или устарела. Попробуйте снова.";
+"auth.enterEmailFirst" = "Сначала введите адрес электронной почты.";
+"auth.resetPasswordDesc" = "Задайте новый пароль для вашего аккаунта.";
+"auth.updatePassword" = "Обновить пароль";
+"auth.passwordTooShort" = "Пароль должен содержать не менее 6 символов.";
+"auth.passwordMismatch" = "Пароли не совпадают.";
+"auth.pwWeak" = "Слабый";
+"auth.pwFair" = "Средний";
+"auth.pwStrong" = "Надёжный";
+"auth.continueWithGoogle" = "Продолжить через Google";
+"auth.continueWithApple" = "Продолжить через Apple";
+"auth.continueWithEmail" = "Продолжить через E-mail";
+"auth.orDivider" = "или";
+"auth.googleFailed" = "Ошибка входа через Google.";
+"auth.comingSoon" = "Скоро";
+"category.incoming_transfer" = "Входящий перевод";
+"category.outgoing_transfer" = "Исходящий перевод";
+"category.bank_fees" = "Банковские комиссии";

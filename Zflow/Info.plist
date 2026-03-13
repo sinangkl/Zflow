@@ -2,10 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>NSCameraUsageDescription</key>
-	<string>ZFlow needs camera access to scan receipts and invoices</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>ZFlow needs photo library access to select receipt images for scanning</string>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>com.zflow.bgrefresh</string>
+	</array>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -16,6 +16,32 @@
 				<string>zflow</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.541490785310-loi70nv5nkhfgqkq3dfqie9jt8qma3ii</string>
+			</array>
+		</dict>
 	</array>
+	<key>GIDClientID</key>
+	<string>541490785310-loi70nv5nkhfgqkq3dfqie9jt8qma3ii.apps.googleusercontent.com</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>processing</string>
+	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>Aileye katılmak için QR kodu okutmak veya makbuz eklemek adına kameranıza erişmemiz gerekiyor.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Giderlerinizi eklerken PDF veya makbuz yükleyebilmek için fotoğraf kitaplığınıza erişmemiz gerekiyor.</string>
 </dict>
 </plist>

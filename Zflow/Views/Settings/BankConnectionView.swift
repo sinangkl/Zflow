@@ -11,6 +11,7 @@ struct BankConnectionView: View {
     @State private var connectedBanks: [ConnectedBank] = []
     @State private var isLoading = false
     @State private var showAddBank = false
+    @State private var showComingSoonAlert = false
 
     var body: some View {
         NavigationStack {
@@ -50,6 +51,11 @@ struct BankConnectionView: View {
                             .foregroundStyle(.secondary)
                     }
                 }
+            }
+            .alert(NSLocalizedString("bank.comingSoon", comment: ""), isPresented: $showComingSoonAlert) {
+                Button("Tamam", role: .cancel) {}
+            } message: {
+                Text("Banka bağlantısı özelliği yakında aktif olacak. Yapı Kredi Açık Bankacılık entegrasyonu test aşamasındadır.")
             }
         }
     }
@@ -93,7 +99,7 @@ struct BankConnectionView: View {
         VStack(spacing: 16) {
             Image(systemName: "link.badge.plus")
                 .font(.system(size: 40))
-                .foregroundColor(ZColor.indigo.opacity(0.4))
+                .foregroundColor(AppTheme.baseColor.opacity(0.4))
 
             Text(NSLocalizedString("bank.noAccounts", comment: ""))
                 .font(.system(size: 15, weight: .medium))
@@ -101,7 +107,7 @@ struct BankConnectionView: View {
                 .multilineTextAlignment(.center)
 
             Button {
-                showAddBank = true
+                showComingSoonAlert = true
                 Haptic.medium()
             } label: {
                 HStack(spacing: 8) {
@@ -163,7 +169,7 @@ struct BankConnectionView: View {
                     Text(NSLocalizedString("bank.addAnother", comment: ""))
                         .font(.system(size: 14, weight: .medium))
                 }
-                .foregroundColor(ZColor.indigo)
+                .foregroundColor(AppTheme.baseColor)
                 .padding(.leading, 6)
                 .padding(.top, 4)
             }
@@ -277,7 +283,7 @@ struct BankConnectionView: View {
         HStack(spacing: 12) {
             Image(systemName: "lock.shield.fill")
                 .font(.system(size: 24))
-                .foregroundColor(ZColor.indigo.opacity(0.6))
+                .foregroundColor(AppTheme.baseColor.opacity(0.6))
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(NSLocalizedString("bank.securityTitle", comment: ""))
@@ -292,10 +298,10 @@ struct BankConnectionView: View {
         .padding(16)
         .background(
             RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(ZColor.indigo.opacity(0.06))
+                .fill(AppTheme.baseColor.opacity(0.06))
                 .overlay(
                     RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .strokeBorder(ZColor.indigo.opacity(0.12), lineWidth: 0.5)
+                        .strokeBorder(AppTheme.baseColor.opacity(0.12), lineWidth: 0.5)
                 )
         )
     }

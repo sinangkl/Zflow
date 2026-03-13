@@ -2,20 +2,21 @@ import Foundation
 
 // MARK: - App Group Constants
 
-enum AppGroup {
-    static let id              = "group.com.zflow.app"
-    static let defaults        = UserDefaults(suiteName: id)!
+public enum AppGroup {
+    public static let id              = "group.com.zflow.app"
+    public static let defaults        = UserDefaults(suiteName: id)!
 
-    enum Key {
-        static let snapshot    = "zflow.snapshot.v2"
-        static let budgetAlert = "zflow.budgetAlerts.v2"
-        static let liveState   = "zflow.liveState.v1"
+    public enum Key {
+        public static let snapshot    = "zflow.snapshot.v2"
+        public static let budgetAlert = "zflow.budgetAlerts.v2"
+        public static let liveState   = "zflow.liveState.v1"
+        public static let language    = "zflow.language.v2"
     }
 }
 
 // MARK: - Shared Snapshot
 
-struct ZFlowSnapshot: Codable {
+public struct ZFlowSnapshot: Codable {
     var netBalance: Double
     var thisMonthIncome: Double
     var thisMonthExpense: Double
@@ -26,38 +27,135 @@ struct ZFlowSnapshot: Codable {
     var updatedAt: Date
     var userDisplayName: String
     var userType: String
+    var categories: [SnapshotCategory]
+    var categoryBreakdown: [SnapshotCategoryBreakdown]
+    var scheduledPayments: [SnapshotScheduledPayment]
+    var recurringTransactions: [SnapshotRecurringTransaction]
+    var accentPrimaryHex: String?
+    var accentSecondaryHex: String?
 
-    static var empty: ZFlowSnapshot {
+    public static var empty: ZFlowSnapshot {
         ZFlowSnapshot(
             netBalance: 0, thisMonthIncome: 0, thisMonthExpense: 0,
             currency: "TRY", recentTransactions: [], budgetStatuses: [],
             weeklyExpenses: Array(repeating: 0, count: 7),
-            updatedAt: Date(), userDisplayName: "ZFlow", userType: "personal")
+            updatedAt: Date(), userDisplayName: "ZFlow", userType: "personal",
+            categories: [], categoryBreakdown: [], scheduledPayments: [],
+            recurringTransactions: [],
+            accentPrimaryHex: "#5E5CE6", accentSecondaryHex: "#7C3AED")
     }
 
+    // Backwards-compatible decoding for snapshots without the new fields
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        netBalance = try c.decode(Double.self, forKey: .netBalance)
+        thisMonthIncome = try c.decode(Double.self, forKey: .thisMonthIncome)
+        thisMonthExpense = try c.decode(Double.self, forKey: .thisMonthExpense)
+        currency = try c.decode(String.self, forKey: .currency)
+        recentTransactions = try c.decode([SnapshotTransaction].self, forKey: .recentTransactions)
+        budgetStatuses = try c.decode([SnapshotBudget].self, forKey: .budgetStatuses)
+        weeklyExpenses = try c.decode([Double].self, forKey: .weeklyExpenses)
+        updatedAt = try c.decode(Date.self, forKey: .updatedAt)
+        userDisplayName = try c.decode(String.self, forKey: .userDisplayName)
+        userType = try c.decode(String.self, forKey: .userType)
+        categories = (try? c.decode([SnapshotCategory].self, forKey: .categories)) ?? []
+        categoryBreakdown = (try? c.decode([SnapshotCategoryBreakdown].self, forKey: .categoryBreakdown)) ?? []
+        scheduledPayments = (try? c.decode([SnapshotScheduledPayment].self, forKey: .scheduledPayments)) ?? []
+        recurringTransactions = (try? c.decode([SnapshotRecurringTransaction].self, forKey: .recurringTransactions)) ?? []
+        accentPrimaryHex = try? c.decode(String.self, forKey: .accentPrimaryHex)
+        accentSecondaryHex = try? c.decode(String.self, forKey: .accentSecondaryHex)
+    }
 
+    public init(netBalance: Double, thisMonthIncome: Double, thisMonthExpense: Double,
+         currency: String, recentTransactions: [SnapshotTransaction],
+         budgetStatuses: [SnapshotBudget], weeklyExpenses: [Double],
+         updatedAt: Date, userDisplayName: String, userType: String,
+         categories: [SnapshotCategory] = [], categoryBreakdown: [SnapshotCategoryBreakdown] = [], scheduledPayments: [SnapshotScheduledPayment] = [],
+         recurringTransactions: [SnapshotRecurringTransaction] = [],
+         accentPrimaryHex: String? = nil, accentSecondaryHex: String? = nil) {
+        self.netBalance = netBalance
+        self.thisMonthIncome = thisMonthIncome
+        self.thisMonthExpense = thisMonthExpense
+        self.currency = currency
+        self.recentTransactions = recentTransactions
+        self.budgetStatuses = budgetStatuses
+        self.weeklyExpenses = weeklyExpenses
+        self.updatedAt = updatedAt
+        self.userDisplayName = userDisplayName
+        self.userType = userType
+        self.categories = categories
+        self.categoryBreakdown = categoryBreakdown
+        self.scheduledPayments = scheduledPayments
+        self.recurringTransactions = recurringTransactions
+        self.accentPrimaryHex = accentPrimaryHex
+        self.accentSecondaryHex = accentSecondaryHex
+    }
 }
 
-struct SnapshotTransaction: Codable, Identifiable {
-    var id: UUID
-    var amount: Double
-    var currency: String
-    var type: String
-    var categoryName: String
-    var categoryIcon: String
-    var categoryColor: String
-    var note: String?
-    var date: Date
+// MARK: - Snapshot Category (for Watch category picker)
+
+public struct SnapshotCategory: Codable, Identifiable {
+    public var id: UUID
+    public var name: String
+    public var icon: String
+    public var color: String
+    public var type: String  // "income" | "expense" | "both"
 }
 
-struct SnapshotBudget: Codable, Identifiable {
-    var id: UUID
-    var categoryName: String
-    var categoryIcon: String
-    var categoryColor: String
-    var limit: Double
-    var spent: Double
-    var currency: String
+// MARK: - Category Breakdown (for Watch reports)
+
+public struct SnapshotCategoryBreakdown: Codable, Identifiable {
+    public var id: UUID       // category id
+    public var name: String
+    public var icon: String
+    public var color: String
+    public var total: Double
+    public var percent: Double
+}
+
+public struct SnapshotTransaction: Codable, Identifiable {
+    public var id: UUID
+    public var amount: Double
+    public var currency: String
+    public var type: String
+    public var categoryName: String
+    public var categoryIcon: String
+    public var categoryColor: String
+    public var note: String?
+    public var date: Date
+}
+
+public struct SnapshotScheduledPayment: Codable, Identifiable {
+    public var id: UUID
+    public var title: String
+    public var amount: Double
+    public var currency: String
+    public var type: String
+    public var scheduledDate: Date
+    public var status: String
+}
+
+public struct SnapshotRecurringTransaction: Codable, Identifiable {
+    public var id: UUID
+    public var title: String
+    public var expectedAmount: Double?
+    public var currency: String
+    public var transactionType: String  // "income" | "expense"
+    public var dayOfMonth: Int
+    public var categoryName: String
+    public var categoryIcon: String
+    public var categoryColor: String
+    public var isActive: Bool
+}
+
+public struct SnapshotBudget: Codable, Identifiable {
+    public var id: UUID
+    public var categoryName: String
+    public var categoryIcon: String
+    public var categoryColor: String
+    public var limit: Double
+    public var spent: Double
+    public var currency: String
 
     var ratio: Double      { limit > 0 ? spent / limit : 0 }
     var percentage: Int    { Int(min(ratio * 100, 100)) }
@@ -160,14 +258,14 @@ extension Double {
     /// Short numeric format, optional currency code appended.
     /// e.g. 12500.formattedShort() → "12.5K"
     ///      12500.formattedShort(code: "TRY") → "12.5K TRY"
-    func formattedShort(code: String = "") -> String {
+    public func formattedShort(code: String = "") -> String {
         let suffix = code.isEmpty ? "" : " \(code)"
         if abs(self) >= 1_000_000 { return String(format: "%.1fM\(suffix)", self / 1_000_000) }
         if abs(self) >= 1_000     { return String(format: "%.1fK\(suffix)", self / 1_000) }
         return String(format: "%.0f\(suffix)", self)
     }
 
-    func formattedCurrencySimple(code: String) -> String {
+    public func formattedCurrencySimple(code: String) -> String {
         let f = NumberFormatter()
         f.numberStyle = .currency
         f.currencyCode = code
@@ -176,5 +274,4 @@ extension Double {
         return f.string(from: NSNumber(value: self)) ?? "\(code) \(self)"
     }
 }
-
 

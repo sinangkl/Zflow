@@ -1,158 +1,221 @@
 import SwiftUI
 
-// MARK: - Login View
-// Elite auth screen — Liquid Glass on night backdrop
+// MARK: - LoginView
+// Premium redesign — glass pill inputs, floating options row, refined social buttons
 
 struct LoginView: View {
     @EnvironmentObject var authVM: AuthViewModel
     @Environment(\.colorScheme) var scheme
 
-    @State private var email        = ""
-    @State private var password     = ""
-    @State private var fullName     = ""
-    @State private var businessName = ""
-    @State private var isSignUp     = false
+    @State private var email          = ""
+    @State private var password       = ""
+    @State private var fullName       = ""
+    @State private var phoneNumber    = ""
+    @State private var businessName   = ""
+    @State private var isSignUp       = false
+    @State private var showPassword   = false
+    @State private var showResetAlert = false
+    @State private var appeared       = false
     @State private var selectedUserType: UserType = .personal
-    @State private var showPassword = false
-    @State private var appeared     = false
-    @FocusState private var focusedField: Field?
 
-    enum Field { case email, password, fullName, businessName }
+    @FocusState private var focusedField: Field?
+    enum Field { case email, password, fullName, phoneNumber, businessName }
+
+    private var accent: Color { AppTheme.baseColor }
+
+    // MARK: - Body
 
     var body: some View {
         ZStack {
-            // Reuse LiquidNightBackground but lighter in light mode
-            AuthBackground(scheme: scheme)
+            // ── Deep atmospheric background
+            MeshGradientBackground().ignoresSafeArea()
+
+            // ── Atmospheric center glow
+            RadialGradient(
+                colors: [accent.opacity(scheme == .dark ? 0.20 : 0.10), .clear],
+                center: .init(x: 0.5, y: 0.25),
+                startRadius: 0, endRadius: 340)
+            .ignoresSafeArea()
 
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 0) {
                     Spacer().frame(height: 64)
 
-                    // Logo
+                    // ── Logo
                     logoSection
                         .opacity(appeared ? 1 : 0)
-                        .scaleEffect(appeared ? 1 : 0.85)
-                        .offset(y: appeared ? 0 : 20)
+                        .scaleEffect(appeared ? 1 : 0.88)
+                        .offset(y: appeared ? 0 : 14)
 
-                    Spacer().frame(height: 36)
+                    Spacer().frame(height: 32)
 
-                    // Form glass card
-                    formCard
-                        .padding(.horizontal, 20)
-                        .opacity(appeared ? 1 : 0)
-                        .offset(y: appeared ? 0 : 30)
-
-                    // Error
+                    // ── Error banner (global — Google + email errors)
                     if let err = authVM.errorMessage {
                         errorBanner(err)
                             .padding(.horizontal, 20)
-                            .padding(.top, 12)
+                            .padding(.bottom, 14)
                             .transition(.move(edge: .top).combined(with: .opacity))
                     }
 
-                    // Primary CTA
+                    // ── Sign-up extra fields (name, phone)
+                    if isSignUp {
+                        signUpExtraFields
+                            .padding(.horizontal, 20)
+                            .padding(.bottom, 10)
+                            .transition(.asymmetric(
+                                insertion: .move(edge: .top).combined(with: .opacity),
+                                removal: .opacity.combined(with: .scale(scale: 0.96))))
+                    }
+
+                    // ── Core fields: email + password
+                    coreFields
+                        .padding(.horizontal, 20)
+                        .opacity(appeared ? 1 : 0)
+                        .offset(y: appeared ? 0 : 22)
+
+                    // ── Options row: Remember Me + Forgot Password (sign-in only)
+                    if !isSignUp {
+                        optionsRow
+                            .padding(.horizontal, 24)
+                            .padding(.top, 12)
+                            .opacity(appeared ? 1 : 0)
+                            .transition(.opacity.combined(with: .move(edge: .top)))
+                    }
+
+                    // ── Account type + business name (sign-up only)
+                    if isSignUp {
+                        accountTypeSection
+                            .padding(.horizontal, 20)
+                            .padding(.top, 12)
+                            .transition(.asymmetric(
+                                insertion: .move(edge: .top).combined(with: .opacity),
+                                removal: .opacity))
+                    }
+
+                    // ── Primary action button
                     primaryButton
                         .padding(.horizontal, 20)
-                        .padding(.top, 18)
+                        .padding(.top, 20)
                         .opacity(appeared ? 1 : 0)
-                        .offset(y: appeared ? 0 : 20)
 
-                    // Toggle row
+                    // ── Switch mode row
                     toggleRow
-                        .padding(.top, 18)
-                        .padding(.bottom, 50)
+                        .padding(.top, 16)
                         .opacity(appeared ? 1 : 0)
+
+                    // ── Divider
+                    orDivider
+                        .padding(.horizontal, 28)
+                        .padding(.vertical, 22)
+                        .opacity(appeared ? 1 : 0)
+
+                    // ── Social buttons
+                    VStack(spacing: 12) {
+                        googleButton
+                        appleButton
+                    }
+                    .padding(.horizontal, 20)
+                    .opacity(appeared ? 1 : 0)
+                    .offset(y: appeared ? 0 : 16)
+
+                    Spacer().frame(height: 60)
                 }
             }
+            .scrollDismissesKeyboard(.interactively)
         }
         .ignoresSafeArea()
         .animation(.spring(response: 0.40, dampingFraction: 0.80), value: isSignUp)
         .animation(.easeInOut(duration: 0.22), value: authVM.errorMessage)
         .onAppear {
-            withAnimation(.spring(response: 0.60, dampingFraction: 0.72).delay(0.12)) {
+            withAnimation(.spring(response: 0.60, dampingFraction: 0.72).delay(0.10)) {
                 appeared = true
             }
         }
+        .alert(NSLocalizedString("auth.forgotPassword", comment: ""), isPresented: $showResetAlert) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(NSLocalizedString("auth.resetEmailSent", comment: ""))
+        }
     }
 
-    // MARK: - Logo
+    // MARK: - Logo ─────────────────────────────────────────────────────
 
     private var logoSection: some View {
-        VStack(spacing: 14) {
+        VStack(spacing: 16) {
             ZStack {
-                // Glow
+                // Outer diffused ambient glow
                 Circle()
-                    .fill(
-                        RadialGradient(
-                            colors: [Color(hex: "#5E5CE6").opacity(scheme == .dark ? 0.50 : 0.25), .clear],
-                            center: .center, startRadius: 0, endRadius: 80))
-                    .frame(width: 160)
-                    .blur(radius: 20)
+                    .fill(RadialGradient(
+                        colors: [accent.opacity(scheme == .dark ? 0.60 : 0.28), .clear],
+                        center: .center, startRadius: 0, endRadius: 100))
+                    .frame(width: 200)
+                    .blur(radius: 32)
 
-                // Glass circle
-                ZStack {
-                    Circle()
-                        .fill(scheme == .dark ? AnyShapeStyle(.ultraThinMaterial) : AnyShapeStyle(Color.white.opacity(0.92)))
-                        .frame(width: 80, height: 80)
-                        .overlay(
-                            Circle()
-                                .strokeBorder(
-                                    LinearGradient(
-                                        colors: [Color.white.opacity(0.4), Color(hex: "#5E5CE6").opacity(0.2)],
-                                        startPoint: .topLeading, endPoint: .bottomTrailing),
-                                    lineWidth: 0.8)
-                        )
-                        .shadow(color: Color(hex: "#5E5CE6").opacity(0.55), radius: 24, y: 8)
+                // Soft halo ring
+                Circle()
+                    .stroke(
+                        LinearGradient(
+                            colors: [accent.opacity(0.25), accent.opacity(0.05)],
+                            startPoint: .topLeading, endPoint: .bottomTrailing),
+                        lineWidth: 1)
+                    .frame(width: 104)
+                    .blur(radius: 1.5)
 
-                    Image(systemName: "chart.line.uptrend.xyaxis")
-                        .font(.system(size: 30, weight: .bold))
-                        .foregroundStyle(
+                // Glass disk
+                Circle()
+                    .fill(scheme == .dark
+                          ? AnyShapeStyle(.ultraThinMaterial)
+                          : AnyShapeStyle(Color.white.opacity(0.96)))
+                    .frame(width: 86, height: 86)
+                    .overlay(
+                        Circle().strokeBorder(
                             LinearGradient(
-                                colors: [Color(hex: "#5E5CE6"), Color(hex: "#7D7AFF")],
-                                startPoint: .topLeading, endPoint: .bottomTrailing))
-                }
+                                colors: [
+                                    Color.white.opacity(scheme == .dark ? 0.55 : 0.95),
+                                    accent.opacity(0.28)
+                                ],
+                                startPoint: .topLeading, endPoint: .bottomTrailing),
+                            lineWidth: 1.0)
+                    )
+                    .shadow(color: accent.opacity(scheme == .dark ? 0.65 : 0.32), radius: 32, y: 12)
+                    .shadow(color: accent.opacity(0.22), radius: 7, y: 3)
+
+                // Icon
+                Image(systemName: "chart.line.uptrend.xyaxis")
+                    .font(.system(size: 33, weight: .bold))
+                    .foregroundStyle(LinearGradient(
+                        colors: [accent, AppTheme.accentSecondary],
+                        startPoint: .topLeading, endPoint: .bottomTrailing))
             }
 
-            VStack(spacing: 6) {
+            VStack(spacing: 7) {
                 Text("ZFlow")
-                    .font(.system(size: 38, weight: .black, design: .rounded))
+                    .font(.system(size: 42, weight: .black, design: .rounded))
                     .foregroundStyle(
                         scheme == .dark
                         ? AnyShapeStyle(LinearGradient(
-                            colors: [Color.white, Color(hex: "#C4B5FD"), Color(hex: "#818CF8")],
+                            colors: [.white, Color(hex: "#EDE8FF"), accent.opacity(0.80)],
                             startPoint: .topLeading, endPoint: .bottomTrailing))
                         : AnyShapeStyle(LinearGradient(
-                            colors: [Color(hex: "#5E5CE6"), Color(hex: "#7D7AFF")],
+                            colors: [accent, AppTheme.accentSecondary],
                             startPoint: .topLeading, endPoint: .bottomTrailing))
                     )
-                    .tracking(-0.8)
+                    .tracking(-1.2)
+                    .shadow(color: accent.opacity(scheme == .dark ? 0.50 : 0.22), radius: 14, y: 5)
 
                 Text(NSLocalizedString(isSignUp ? "auth.createAccount" : "auth.welcomeBack", comment: ""))
-                    .font(.system(size: 15, weight: .regular))
-                    .foregroundColor(scheme == .dark ? Color.white.opacity(0.50) : Color(.secondaryLabel))
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundColor(scheme == .dark ? Color.white.opacity(0.46) : Color(.secondaryLabel))
             }
         }
     }
 
-    // MARK: - Form Card (Liquid Glass)
+    // MARK: - Core Fields (Email + Password) ───────────────────────────
 
-    private var formCard: some View {
-        VStack(spacing: 0) {
-            // Full name
-            if isSignUp {
-                formRow(icon: "person.fill", content: {
-                    TextField(NSLocalizedString("auth.fullName", comment: ""), text: $fullName)
-                        .focused($focusedField, equals: .fullName)
-                        .textInputAutocapitalization(.words)
-                        .autocorrectionDisabled()
-                        .submitLabel(.next)
-                        .onSubmit { focusedField = .email }
-                })
-                formDivider()
-            }
-
-            // Email
-            formRow(icon: "envelope.fill", content: {
+    private var coreFields: some View {
+        VStack(spacing: 10) {
+            // E-posta
+            glassPillField(icon: "envelope.fill", isFocused: focusedField == .email) {
                 TextField(NSLocalizedString("auth.email", comment: ""), text: $email)
                     .focused($focusedField, equals: .email)
                     .keyboardType(.emailAddress)
@@ -160,11 +223,12 @@ struct LoginView: View {
                     .autocorrectionDisabled()
                     .submitLabel(.next)
                     .onSubmit { focusedField = .password }
-            })
-            formDivider()
+                    .font(.system(size: 16))
+                    .foregroundColor(scheme == .dark ? .white : .primary)
+            }
 
-            // Password
-            formRow(icon: "lock.fill", content: {
+            // Şifre
+            glassPillField(icon: "lock.fill", isFocused: focusedField == .password) {
                 Group {
                     if showPassword {
                         TextField(NSLocalizedString("auth.password", comment: ""), text: $password)
@@ -177,142 +241,191 @@ struct LoginView: View {
                 .textInputAutocapitalization(.never)
                 .submitLabel(isSignUp ? .next : .go)
                 .onSubmit { if !isSignUp { performAuth() } }
+                .font(.system(size: 16))
+                .foregroundColor(scheme == .dark ? .white : .primary)
 
-                Spacer()
-
-                Button {
-                    showPassword.toggle()
-                    Haptic.selection()
-                } label: {
+                // Eye toggle
+                Button { showPassword.toggle(); Haptic.selection() } label: {
                     Image(systemName: showPassword ? "eye.slash" : "eye")
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(scheme == .dark ? Color.white.opacity(0.45) : Color(.tertiaryLabel))
-                        .frame(width: 40, height: 40)
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(scheme == .dark ? Color.white.opacity(0.38) : Color(.tertiaryLabel))
+                        .frame(width: 44, height: 44)
                 }
-            })
+            }
+        }
+    }
 
-            // Remember me (sign in)
-            if !isSignUp {
-                formDivider()
-                rememberMeRow
+    // MARK: - Sign-Up Extra Fields ─────────────────────────────────────
+
+    private var signUpExtraFields: some View {
+        VStack(spacing: 10) {
+            glassPillField(icon: "person.fill", isFocused: focusedField == .fullName) {
+                TextField(NSLocalizedString("auth.fullName", comment: ""), text: $fullName)
+                    .focused($focusedField, equals: .fullName)
+                    .textInputAutocapitalization(.words)
+                    .autocorrectionDisabled()
+                    .submitLabel(.next)
+                    .onSubmit { focusedField = .phoneNumber }
+                    .font(.system(size: 16))
+                    .foregroundColor(scheme == .dark ? .white : .primary)
             }
 
-            // Account type (sign up)
-            if isSignUp {
-                formDivider()
-                accountTypeRow
+            glassPillField(icon: "phone.fill", isFocused: focusedField == .phoneNumber) {
+                TextField(NSLocalizedString("auth.phoneNumber", comment: ""), text: $phoneNumber)
+                    .focused($focusedField, equals: .phoneNumber)
+                    .keyboardType(.phonePad)
+                    .submitLabel(.next)
+                    .onSubmit { focusedField = .email }
+                    .font(.system(size: 16))
+                    .foregroundColor(scheme == .dark ? .white : .primary)
+            }
+        }
+    }
+
+    // MARK: - Glass Pill Field ─────────────────────────────────────────
+
+    private func glassPillField<C: View>(
+        icon: String,
+        isFocused: Bool,
+        @ViewBuilder content: () -> C
+    ) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(
+                    isFocused
+                    ? AnyShapeStyle(LinearGradient(
+                        colors: [accent, AppTheme.accentSecondary],
+                        startPoint: .topLeading, endPoint: .bottomTrailing))
+                    : AnyShapeStyle(scheme == .dark
+                        ? Color.white.opacity(0.32)
+                        : Color(.secondaryLabel).opacity(0.65))
+                )
+                .frame(width: 18)
+                .padding(.leading, 18)
+                .animation(.easeInOut(duration: 0.20), value: isFocused)
+
+            content()
+        }
+        .frame(minHeight: 58)
+        .padding(.trailing, 4)
+        .background(
+            RoundedRectangle(cornerRadius: 17, style: .continuous)
+                .fill(scheme == .dark
+                      ? AnyShapeStyle(.ultraThinMaterial)
+                      : AnyShapeStyle(Color.white.opacity(0.93)))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 17, style: .continuous)
+                .strokeBorder(
+                    isFocused
+                    ? LinearGradient(
+                        colors: [accent.opacity(0.75), AppTheme.accentSecondary.opacity(0.45)],
+                        startPoint: .topLeading, endPoint: .bottomTrailing)
+                    : LinearGradient(
+                        colors: [
+                            Color.white.opacity(scheme == .dark ? 0.16 : 0.75),
+                            Color.white.opacity(scheme == .dark ? 0.04 : 0.28)
+                        ],
+                        startPoint: .topLeading, endPoint: .bottomTrailing),
+                    lineWidth: isFocused ? 1.2 : 0.5)
+        )
+        .shadow(
+            color: isFocused
+                ? accent.opacity(0.22)
+                : Color.black.opacity(scheme == .dark ? 0.22 : 0.06),
+            radius: isFocused ? 14 : 6,
+            y: isFocused ? 5 : 2)
+        .animation(.easeInOut(duration: 0.22), value: isFocused)
+    }
+
+    // MARK: - Options Row (Remember Me + Forgot Password) ──────────────
+
+    private var optionsRow: some View {
+        HStack(alignment: .center) {
+            // ── Remember Me checkbox
+            Button { authVM.rememberMe.toggle(); Haptic.selection() } label: {
+                HStack(spacing: 9) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 5, style: .continuous)
+                            .fill(authVM.rememberMe
+                                  ? accent
+                                  : (scheme == .dark
+                                      ? Color.white.opacity(0.10)
+                                      : Color(.tertiarySystemFill)))
+                            .frame(width: 19, height: 19)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 5, style: .continuous)
+                                    .strokeBorder(
+                                        authVM.rememberMe
+                                            ? accent
+                                            : Color.white.opacity(scheme == .dark ? 0.20 : 0.50),
+                                        lineWidth: authVM.rememberMe ? 0 : 0.6)
+                            )
+                        if authVM.rememberMe {
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 10, weight: .bold))
+                                .foregroundColor(.white)
+                        }
+                    }
+                    .animation(.spring(response: 0.22, dampingFraction: 0.70), value: authVM.rememberMe)
+
+                    Text(NSLocalizedString("auth.rememberMe", comment: ""))
+                        .font(.system(size: 13.5, weight: .medium))
+                        .foregroundColor(scheme == .dark ? Color.white.opacity(0.62) : Color(.secondaryLabel))
+                }
+            }
+            .buttonStyle(.plain)
+
+            Spacer()
+
+            // ── Forgot Password
+            Button { handleForgotPassword() } label: {
+                Text(NSLocalizedString("auth.forgotPassword", comment: ""))
+                    .font(.system(size: 13.5, weight: .semibold))
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [accent, AppTheme.accentSecondary],
+                            startPoint: .leading, endPoint: .trailing)
+                    )
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    // MARK: - Account Type Section ─────────────────────────────────────
+
+    private var accountTypeSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(NSLocalizedString("auth.accountType", comment: ""))
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundColor(scheme == .dark ? Color.white.opacity(0.36) : Color(.tertiaryLabel))
+                .textCase(.uppercase)
+                .tracking(0.7)
+                .padding(.leading, 4)
+
+            HStack(spacing: 10) {
+                ForEach(UserType.allCases, id: \.self) { accountTypeChip($0) }
             }
 
-            // Business name
-            if isSignUp && selectedUserType == .business {
-                formDivider()
-                formRow(icon: "building.2.fill", content: {
+            if selectedUserType == .business {
+                glassPillField(icon: "building.2.fill", isFocused: focusedField == .businessName) {
                     TextField(NSLocalizedString("auth.businessName", comment: ""), text: $businessName)
                         .focused($focusedField, equals: .businessName)
                         .textInputAutocapitalization(.words)
                         .autocorrectionDisabled()
-                })
-            }
-        }
-        .background(
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .fill(scheme == .dark ? AnyShapeStyle(.ultraThinMaterial) : AnyShapeStyle(Color.white.opacity(0.94)))
-                .shadow(
-                    color: scheme == .dark
-                        ? Color(hex: "#5E5CE6").opacity(0.15)
-                        : Color.black.opacity(0.07),
-                    radius: 24, x: 0, y: 8)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .strokeBorder(
-                    scheme == .dark
-                        ? LinearGradient(
-                            colors: [Color.white.opacity(0.14), Color.white.opacity(0.03)],
-                            startPoint: .topLeading, endPoint: .bottomTrailing)
-                        : LinearGradient(
-                            colors: [Color.white.opacity(0.8), Color(.systemGray5).opacity(0.5)],
-                            startPoint: .topLeading, endPoint: .bottomTrailing),
-                    lineWidth: 0.8)
-        )
-    }
-
-    private func formRow<C: View>(icon: String, @ViewBuilder content: () -> C) -> some View {
-        HStack(spacing: 12) {
-            Image(systemName: icon)
-                .font(.system(size: 13, weight: .medium))
-                .foregroundColor(scheme == .dark ? Color.white.opacity(0.40) : Color(.secondaryLabel))
-                .frame(width: 18)
-                .padding(.leading, 16)
-
-            content()
-                .font(.system(size: 16))
-                .foregroundColor(scheme == .dark ? .white : .primary)
-        }
-        .frame(minHeight: 52)
-    }
-
-    private func formDivider() -> some View {
-        Rectangle()
-            .fill(scheme == .dark ? Color.white.opacity(0.07) : Color(.separator).opacity(0.4))
-            .frame(height: 0.5)
-            .padding(.leading, 46)
-    }
-
-    // MARK: - Remember Me
-
-    private var rememberMeRow: some View {
-        Button {
-            authVM.rememberMe.toggle()
-            Haptic.selection()
-        } label: {
-            HStack(spacing: 12) {
-                Image(systemName: authVM.rememberMe ? "checkmark.square.fill" : "square")
-                    .font(.system(size: 18))
-                    .foregroundColor(authVM.rememberMe ? ZColor.indigo : (scheme == .dark ? Color.white.opacity(0.35) : Color(.tertiaryLabel)))
-                    .padding(.leading, 16)
-
-                Text(NSLocalizedString("auth.rememberMe", comment: ""))
-                    .font(.system(size: 15))
-                    .foregroundColor(scheme == .dark ? Color.white.opacity(0.75) : .primary)
-
-                Spacer()
-            }
-            .frame(minHeight: 52)
-        }
-        .buttonStyle(.plain)
-        .animation(.spring(response: 0.2, dampingFraction: 0.7), value: authVM.rememberMe)
-    }
-
-    // MARK: - Account Type
-
-    private var accountTypeRow: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text(NSLocalizedString("auth.accountType", comment: ""))
-                .font(.system(size: 11, weight: .semibold))
-                .foregroundColor(scheme == .dark ? Color.white.opacity(0.40) : Color(.tertiaryLabel))
-                .textCase(.uppercase)
-                .tracking(0.5)
-                .padding(.horizontal, 16)
-                .padding(.top, 14)
-
-            HStack(spacing: 10) {
-                ForEach(UserType.allCases, id: \.self) { type in
-                    accountTypeChip(type)
+                        .font(.system(size: 16))
+                        .foregroundColor(scheme == .dark ? .white : .primary)
                 }
+                .transition(.move(edge: .top).combined(with: .opacity))
             }
-            .padding(.horizontal, 12)
-            .padding(.bottom, 12)
         }
-        .transition(.asymmetric(
-            insertion: .move(edge: .top).combined(with: .opacity),
-            removal: .opacity))
     }
 
     private func accountTypeChip(_ type: UserType) -> some View {
         let sel = selectedUserType == type
         return Button {
-            withAnimation(.spring(response: 0.25, dampingFraction: 0.7)) { selectedUserType = type }
+            withAnimation(.spring(response: 0.25, dampingFraction: 0.70)) { selectedUserType = type }
             Haptic.selection()
         } label: {
             HStack(spacing: 8) {
@@ -322,23 +435,29 @@ struct LoginView: View {
                     .font(.system(size: 14, weight: sel ? .semibold : .regular))
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 12)
+            .padding(.vertical, 13)
             .background(
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
                     .fill(sel
-                          ? ZColor.indigo.opacity(0.15)
-                          : (scheme == .dark ? Color.white.opacity(0.07) : Color(.tertiarySystemFill)))
+                          ? AnyShapeStyle(LinearGradient(
+                              colors: [accent.opacity(0.20), AppTheme.accentSecondary.opacity(0.12)],
+                              startPoint: .topLeading, endPoint: .bottomTrailing))
+                          : AnyShapeStyle(scheme == .dark
+                              ? Color.white.opacity(0.06)
+                              : Color(.tertiarySystemFill)))
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .strokeBorder(sel ? ZColor.indigo.opacity(0.55) : .clear, lineWidth: 1.5)
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .strokeBorder(
+                        sel ? accent.opacity(0.55) : Color.white.opacity(scheme == .dark ? 0.10 : 0.40),
+                        lineWidth: sel ? 1.2 : 0.5)
             )
-            .foregroundColor(sel ? ZColor.indigo : (scheme == .dark ? Color.white.opacity(0.65) : Color(.secondaryLabel)))
+            .foregroundColor(sel ? accent : (scheme == .dark ? Color.white.opacity(0.58) : Color(.secondaryLabel)))
         }
         .buttonStyle(.plain)
     }
 
-    // MARK: - Error Banner
+    // MARK: - Error Banner ─────────────────────────────────────────────
 
     private func errorBanner(_ message: String) -> some View {
         HStack(spacing: 10) {
@@ -347,67 +466,87 @@ struct LoginView: View {
             Text(message)
                 .font(.system(size: 13, weight: .medium))
                 .foregroundColor(ZColor.expense)
+                .fixedSize(horizontal: false, vertical: true)
             Spacer()
+            Button { authVM.errorMessage = nil } label: {
+                Image(systemName: "xmark")
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundColor(ZColor.expense.opacity(0.70))
+                    .frame(width: 32, height: 32)
+            }
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 12)
+        .padding(.horizontal, 14).padding(.vertical, 12)
         .background(
             RoundedRectangle(cornerRadius: 12, style: .continuous)
                 .fill(ZColor.expense.opacity(0.10))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .strokeBorder(ZColor.expense.opacity(0.22), lineWidth: 0.5))
+                .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .strokeBorder(ZColor.expense.opacity(0.22), lineWidth: 0.5))
         )
     }
 
-    // MARK: - Primary Button
+    // MARK: - Primary Button ───────────────────────────────────────────
 
     private var primaryButton: some View {
-        Button { performAuth() } label: {
+        let active = !isFormInvalid && !authVM.isLoading
+
+        return Button { performAuth() } label: {
             ZStack {
                 if authVM.isLoading {
                     ProgressView().tint(.white)
                 } else {
                     HStack(spacing: 10) {
                         Image(systemName: isSignUp ? "person.badge.plus" : "arrow.right.circle.fill")
-                            .font(.system(size: 16, weight: .semibold))
+                            .font(.system(size: 17, weight: .bold))
                         Text(NSLocalizedString(isSignUp ? "auth.createAccount" : "auth.signIn", comment: ""))
                             .font(.system(size: 17, weight: .bold))
+                            .tracking(0.2)
                     }
                     .foregroundColor(.white)
                 }
             }
             .frame(maxWidth: .infinity)
-            .frame(height: 54)
+            .frame(height: 58)
             .background(
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(
-                        isFormInvalid || authVM.isLoading
-                        ? AnyShapeStyle(LinearGradient(
-                            colors: [Color(hex: "#5E5CE6").opacity(0.40), Color(hex: "#7D7AFF").opacity(0.40)],
-                            startPoint: .topLeading, endPoint: .bottomTrailing))
-                        : AnyShapeStyle(LinearGradient(
-                            colors: [Color(hex: "#5E5CE6"), Color(hex: "#7D7AFF")],
-                            startPoint: .topLeading, endPoint: .bottomTrailing))
-                    )
+                ZStack {
+                    // Base gradient
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .fill(active
+                              ? AnyShapeStyle(LinearGradient(
+                                  colors: [accent, AppTheme.accentSecondary],
+                                  startPoint: .topLeading, endPoint: .bottomTrailing))
+                              : AnyShapeStyle(LinearGradient(
+                                  colors: [accent.opacity(0.35), AppTheme.accentSecondary.opacity(0.28)],
+                                  startPoint: .topLeading, endPoint: .bottomTrailing)))
+
+                    // Inner top highlight shimmer (active only)
+                    if active {
+                        RoundedRectangle(cornerRadius: 18, style: .continuous)
+                            .fill(LinearGradient(
+                                colors: [Color.white.opacity(0.20), .clear],
+                                startPoint: .top, endPoint: .center))
+                    }
+                }
             )
-            .shadow(
-                color: isFormInvalid ? .clear : Color(hex: "#5E5CE6").opacity(0.45),
-                radius: 16, y: 6)
+            .overlay(
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .strokeBorder(Color.white.opacity(active ? 0.18 : 0), lineWidth: 0.7)
+            )
+            // Double-layer shadow for depth
+            .shadow(color: active ? accent.opacity(0.58) : .clear, radius: 22, y: 9)
+            .shadow(color: active ? accent.opacity(0.28) : .clear, radius: 6, y: 3)
         }
         .disabled(isFormInvalid || authVM.isLoading)
         .buttonStyle(FABButtonStyle())
         .animation(.easeInOut(duration: 0.18), value: isFormInvalid)
-        .accessibilityLabel(NSLocalizedString(isSignUp ? "auth.createAccount" : "auth.signIn", comment: ""))
     }
 
-    // MARK: - Toggle
+    // MARK: - Toggle Row ───────────────────────────────────────────────
 
     private var toggleRow: some View {
         HStack(spacing: 4) {
             Text(NSLocalizedString(isSignUp ? "auth.haveAccount" : "auth.noAccount", comment: ""))
                 .font(.system(size: 14))
-                .foregroundColor(scheme == .dark ? Color.white.opacity(0.45) : Color(.secondaryLabel))
+                .foregroundColor(scheme == .dark ? Color.white.opacity(0.44) : Color(.secondaryLabel))
             Button(NSLocalizedString(isSignUp ? "auth.signIn" : "auth.signUp", comment: "")) {
                 withAnimation(.spring(response: 0.38, dampingFraction: 0.80)) {
                     isSignUp.toggle()
@@ -418,32 +557,174 @@ struct LoginView: View {
                 Haptic.selection()
             }
             .font(.system(size: 14, weight: .bold))
-            .foregroundColor(ZColor.indigo)
-            .accessibilityLabel(NSLocalizedString(isSignUp ? "auth.signIn" : "auth.signUp", comment: ""))
+            .foregroundColor(accent)
         }
     }
 
-    // MARK: - Helpers
+    // MARK: - OR Divider ───────────────────────────────────────────────
+
+    private var orDivider: some View {
+        HStack(spacing: 14) {
+            Rectangle()
+                .fill(scheme == .dark ? Color.white.opacity(0.08) : Color(.separator).opacity(0.30))
+                .frame(height: 0.5)
+            Text(NSLocalizedString("auth.orDivider", comment: ""))
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundColor(scheme == .dark ? Color.white.opacity(0.26) : Color(.tertiaryLabel))
+                .fixedSize()
+                .padding(.horizontal, 4)
+            Rectangle()
+                .fill(scheme == .dark ? Color.white.opacity(0.08) : Color(.separator).opacity(0.30))
+                .frame(height: 0.5)
+        }
+    }
+
+    // MARK: - Google Button ────────────────────────────────────────────
+
+    private var googleButton: some View {
+        Button {
+            Haptic.medium()
+            Task { await authVM.signInWithGoogle() }
+        } label: {
+            HStack(spacing: 0) {
+                // ── G icon
+                ZStack {
+                    Circle()
+                        .fill(Color.white)
+                        .frame(width: 30, height: 30)
+                        .shadow(color: Color.black.opacity(0.14), radius: 4, y: 2)
+                    Text("G")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(Color(hex: "#4285F4"))
+                }
+                .padding(.leading, 18)
+
+                // ── Label (centred)
+                Text(NSLocalizedString("auth.continueWithGoogle", comment: ""))
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(scheme == .dark ? .white : Color(.label))
+                    .frame(maxWidth: .infinity)
+
+                // ── Loading / spacer
+                Group {
+                    if authVM.isLoading {
+                        ProgressView()
+                            .scaleEffect(0.78)
+                            .tint(scheme == .dark ? .white : Color(.secondaryLabel))
+                    } else {
+                        Color.clear
+                    }
+                }
+                .frame(width: 46)
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 58)
+            .background(
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .fill(scheme == .dark
+                          ? AnyShapeStyle(.ultraThinMaterial)
+                          : AnyShapeStyle(Color.white))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .strokeBorder(
+                        LinearGradient(
+                            colors: [
+                                Color.white.opacity(scheme == .dark ? 0.24 : 0.85),
+                                Color.white.opacity(scheme == .dark ? 0.05 : 0.30)
+                            ],
+                            startPoint: .topLeading, endPoint: .bottomTrailing),
+                        lineWidth: 0.6)
+            )
+            .shadow(color: Color.black.opacity(scheme == .dark ? 0.26 : 0.08), radius: 18, y: 7)
+        }
+        .buttonStyle(FABButtonStyle())
+        .disabled(authVM.isLoading)
+    }
+
+    // MARK: - Apple Button ─────────────────────────────────────────────
+
+    private var appleButton: some View {
+        Button {
+            Haptic.medium()
+            Task { await authVM.signInWithApple() }
+        } label: {
+            HStack(spacing: 0) {
+                // ── Apple icon
+                Image(systemName: "apple.logo")
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(width: 46)
+                    .padding(.leading, 4)
+
+                // ── Label (centred)
+                Text(NSLocalizedString("auth.continueWithApple", comment: ""))
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+
+                // ── Loading indicator or spacer
+                Group {
+                    if authVM.isLoading {
+                        ProgressView()
+                            .scaleEffect(0.78)
+                            .tint(.white)
+                    } else {
+                        Color.clear
+                    }
+                }
+                .frame(width: 46)
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 58)
+            .background(
+                ZStack {
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .fill(scheme == .dark
+                              ? AnyShapeStyle(Color(hex: "0C0C0C").opacity(0.85))
+                              : AnyShapeStyle(Color.black))
+                    // Subtle top highlight
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .fill(LinearGradient(
+                            colors: [Color.white.opacity(0.07), .clear],
+                            startPoint: .top, endPoint: .center))
+                }
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .strokeBorder(
+                        LinearGradient(
+                            colors: [Color.white.opacity(0.22), Color.white.opacity(0.06)],
+                            startPoint: .topLeading, endPoint: .bottomTrailing),
+                        lineWidth: 0.6)
+            )
+            .shadow(color: Color.black.opacity(0.38), radius: 18, y: 7)
+        }
+        .buttonStyle(FABButtonStyle())
+        .disabled(authVM.isLoading)
+    }
+
+    // MARK: - Helpers ──────────────────────────────────────────────────
+
 
     private var isFormInvalid: Bool {
         if isSignUp {
             let base = email.isEmpty || password.isEmpty || fullName.isEmpty || password.count < 6
-            if selectedUserType == .business {
-                return base || businessName.trimmingCharacters(in: .whitespaces).isEmpty
-            }
-            return base
+            return selectedUserType == .business
+                ? base || businessName.trimmingCharacters(in: .whitespaces).isEmpty
+                : base
         }
         return email.isEmpty || password.isEmpty
     }
 
     private func performAuth() {
         guard !isFormInvalid else { return }
-        Haptic.medium()
-        focusedField = nil
+        Haptic.medium(); focusedField = nil
         Task {
             if isSignUp {
                 await authVM.signUp(
                     email: email, password: password, fullName: fullName,
+                    phoneNumber: phoneNumber.isEmpty ? nil : phoneNumber,
                     userType: selectedUserType,
                     businessName: selectedUserType == .business ? businessName : nil)
             } else {
@@ -451,68 +732,20 @@ struct LoginView: View {
             }
         }
     }
+
+    private func handleForgotPassword() {
+        guard !email.isEmpty else {
+            authVM.errorMessage = NSLocalizedString("auth.enterEmailFirst", comment: "")
+            return
+        }
+        Haptic.medium()
+        Task {
+            let success = await authVM.sendPasswordResetEmail(email: email)
+            if success { showResetAlert = true }
+        }
+    }
 }
 
-// MARK: - Auth Background
-
-struct AuthBackground: View {
-    let scheme: ColorScheme
-    @State private var a = false
-
-    var body: some View {
-        ZStack {
-            if scheme == .dark {
-                // Night mode — match onboarding
-                LinearGradient(
-                    stops: [
-                        .init(color: Color(hex: "#000000"), location: 0),
-                        .init(color: Color(hex: "#060614"), location: 0.55),
-                        .init(color: Color(hex: "#020208"), location: 1),
-                    ],
-                    startPoint: .top, endPoint: .bottom)
-                .ignoresSafeArea()
-
-                Circle()
-                    .fill(RadialGradient(
-                        colors: [Color(hex: "#5E5CE6").opacity(0.55), .clear],
-                        center: .center, startRadius: 0, endRadius: 200))
-                    .frame(width: 400).blur(radius: 70)
-                    .offset(x: a ? -60 : -110, y: a ? -240 : -300)
-                    .animation(.easeInOut(duration: 10).repeatForever(autoreverses: true), value: a)
-
-                Circle()
-                    .fill(RadialGradient(
-                        colors: [Color(hex: "#7C3AED").opacity(0.38), .clear],
-                        center: .center, startRadius: 0, endRadius: 160))
-                    .frame(width: 320).blur(radius: 65)
-                    .offset(x: a ? 100 : 60, y: a ? -90 : -140)
-                    .animation(.easeInOut(duration: 13).repeatForever(autoreverses: true), value: a)
-
-                Circle()
-                    .fill(RadialGradient(
-                        colors: [Color(hex: "#059669").opacity(0.16), .clear],
-                        center: .center, startRadius: 0, endRadius: 150))
-                    .frame(width: 300).blur(radius: 90)
-                    .offset(x: a ? -70 : -30, y: a ? 450 : 380)
-                    .animation(.easeInOut(duration: 15).repeatForever(autoreverses: true), value: a)
-
-            } else {
-                // Light mode — clean, airy
-                Color(.systemGroupedBackground).ignoresSafeArea()
-
-                Circle()
-                    .fill(Color(hex: "#5E5CE6").opacity(0.06))
-                    .frame(width: 360).blur(radius: 90)
-                    .offset(x: a ? -40 : -80, y: a ? -160 : -220)
-                    .animation(.easeInOut(duration: 10).repeatForever(autoreverses: true), value: a)
-
-                Circle()
-                    .fill(Color(hex: "#7C3AED").opacity(0.04))
-                    .frame(width: 280).blur(radius: 80)
-                    .offset(x: a ? 80 : 40, y: a ? 300 : 380)
-                    .animation(.easeInOut(duration: 12).repeatForever(autoreverses: true), value: a)
-            }
-        }
-        .onAppear { a = true }
-    }
+#Preview {
+    LoginView().environmentObject(AuthViewModel())
 }

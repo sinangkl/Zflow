@@ -2,55 +2,14 @@ import SwiftUI
 import EventKit
 import Combine
 
-// MARK: - Calendar Manager (Apple Calendar permission + sync)
-
-@MainActor
-final class CalendarManager: ObservableObject {
-    @Published var authStatus: EKAuthorizationStatus = .notDetermined
-    @Published var appleEvents: [EKEvent] = []
-    private let store = EKEventStore()
-
-    func requestAccess() async {
-        do {
-            let granted = try await store.requestFullAccessToEvents()
-            authStatus = granted ? .fullAccess : .denied
-            if granted { fetchAppleEvents() }
-        } catch {
-            authStatus = .denied
-        }
-    }
-
-    func fetchAppleEvents() {
-        let cal = Calendar.current
-        guard let start = cal.date(byAdding: .month, value: -1, to: Date()),
-              let end   = cal.date(byAdding: .month, value: 3, to: Date()) else { return }
-        let pred = store.predicateForEvents(withStart: start, end: end, calendars: nil)
-        appleEvents = store.events(matching: pred)
-    }
-
-    func addEvent(title: String, amount: Double, currency: String,
-                  date: Date, notes: String?) -> String? {
-        guard authStatus == .fullAccess else { return nil }
-        let event       = EKEvent(eventStore: store)
-        event.title     = "💰 \(title) — \(amount.formattedCurrency(code: currency))"
-        event.startDate = date
-        event.endDate   = Calendar.current.date(byAdding: .hour, value: 1, to: date) ?? date
-        event.notes     = notes
-        event.calendar  = store.defaultCalendarForNewEvents
-        try? store.save(event, span: .thisEvent)
-        return event.eventIdentifier
-    }
-
-    var isAuthorized: Bool { authStatus == .fullAccess }
-}
-
 // MARK: - Calendar View
 
 struct CalendarView: View {
     @EnvironmentObject var transactionVM: TransactionViewModel
     @EnvironmentObject var authVM: AuthViewModel
     @EnvironmentObject var scheduledPaymentVM: ScheduledPaymentViewModel
-    @StateObject private var calMgr = CalendarManager()
+    @EnvironmentObject var recurringVM: RecurringTransactionViewModel
+    @EnvironmentObject var calMgr: CalendarManager
     @Environment(\.colorScheme) var scheme
 
     @State private var selectedDate   = Date()
@@ -59,15 +18,18 @@ struct CalendarView: View {
     @State private var showPermSheet  = false
     @State private var transactionToDelete: Transaction? = nil
     @State private var transactionToEdit: Transaction? = nil
+    @AppStorage("profileCardColor") private var appThemeColorHex: String = "#5E5CE6"
 
     private var cal: Calendar { Calendar.current }
 
+    /* 
     private var txnForDate: [Transaction] {
         transactionVM.transactions.filter {
             guard let d = $0.date else { return false }
             return cal.isDate(d, inSameDayAs: selectedDate)
         }
     }
+    */
 
     private var readyPaymentsForDate: [ScheduledPayment] {
         scheduledPaymentVM.readyPayments.filter {
@@ -95,25 +57,37 @@ struct CalendarView: View {
     }
 
     private var monthIncome: Double {
-        transactionVM.transactions
-            .filter { guard let d = $0.date else { return false }
-                return cal.isDate(d, equalTo: displayedMonth, toGranularity: .month)
-                    && $0.type == "income" }
-            .reduce(0) { $0 + transactionVM.convert($1) }
+        let scheduled = scheduledPaymentVM.scheduledPayments
+            .filter {
+                cal.isDate($0.scheduledDate, equalTo: displayedMonth, toGranularity: .month)
+                    && $0.type == "income"
+            }
+            .reduce(0) { $0 + $1.amount }
+
+        // Recurring incomes: expected to repeat every month
+        let recurring = recurringVM.totalMonthlyIncome
+        return scheduled + recurring
     }
 
     private var monthExpense: Double {
-        transactionVM.transactions
-            .filter { guard let d = $0.date else { return false }
-                return cal.isDate(d, equalTo: displayedMonth, toGranularity: .month)
-                    && $0.type == "expense" }
-            .reduce(0) { $0 + transactionVM.convert($1) }
+        let scheduled = scheduledPaymentVM.scheduledPayments
+            .filter {
+                cal.isDate($0.scheduledDate, equalTo: displayedMonth, toGranularity: .month)
+                    && $0.type == "expense"
+            }
+            .reduce(0) { $0 + $1.amount }
+
+        // Recurring expenses: expected to repeat every month
+        let recurring = recurringVM.totalMonthlyExpense
+        return scheduled + recurring
     }
 
     var body: some View {
         NavigationStack {
             ZStack {
-                PremiumBackground()
+                MeshGradientBackground()
+                    .ignoresSafeArea()
+
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 16) {
                         monthSummaryCard
@@ -123,11 +97,12 @@ struct CalendarView: View {
                     }
                     .padding(.horizontal, 16)
                     .padding(.top, 4)
-                    .padding(.bottom, 120)
+                    .padding(.bottom, 85)
                 }
             }
             .navigationTitle(L.calendarTitle.localized)
             .navigationBarTitleDisplayMode(.large)
+            .toolbarBackground(.hidden, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
@@ -136,18 +111,20 @@ struct CalendarView: View {
                     } label: {
                         Image(systemName: "calendar.badge.plus")
                             .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(ZColor.indigo)
+                            .foregroundColor(Color(hex: appThemeColorHex))
                             .frame(width: 34, height: 34)
-                            .background(Circle().fill(ZColor.indigo.opacity(0.10)))
+                            .background(Circle().fill(Color(hex: appThemeColorHex).opacity(0.10)))
                     }
                     .padding(.trailing, 4)
                 }
             }
             .sheet(isPresented: $showAddEvent) {
-                AddCalendarEventView(defaultDate: selectedDate, calMgr: calMgr)
+                AddCalendarEventView(defaultDate: selectedDate)
                     .environmentObject(transactionVM)
                     .environmentObject(authVM)
                     .environmentObject(scheduledPaymentVM)
+                    .environmentObject(recurringVM)
+                    .environmentObject(calMgr)
             }
             .sheet(isPresented: $showPermSheet) {
                 CalendarPermissionView {
@@ -160,13 +137,12 @@ struct CalendarView: View {
                     .environmentObject(transactionVM)
                     .environmentObject(authVM)
             }
-            .confirmationDialog(
+            .alert(
                 NSLocalizedString("common.delete", comment: "Delete"),
                 isPresented: Binding(
                     get: { transactionToDelete != nil },
                     set: { if !$0 { transactionToDelete = nil } }
-                ),
-                titleVisibility: .visible
+                )
             ) {
                 Button(NSLocalizedString("common.delete", comment: "Delete"), role: .destructive) {
                     if let txn = transactionToDelete, let uid = authVM.currentUserId {
@@ -181,7 +157,9 @@ struct CalendarView: View {
                     transactionToDelete = nil
                 }
             } message: {
-                Text(NSLocalizedString("common.deleteWarning", comment: "This action cannot be undone."))
+                if let t = transactionToDelete {
+                    Text("\(t.amount.formattedCurrency(code: t.currency)) - \(NSLocalizedString("common.deleteWarning", comment: "This action cannot be undone."))")
+                }
             }
             .task { await calMgr.requestAccess() }
         }
@@ -289,16 +267,15 @@ struct CalendarView: View {
     private func dayCell(_ date: Date) -> some View {
         let isToday    = cal.isDateInToday(date)
         let isSelected = cal.isDate(date, inSameDayAs: selectedDate)
-        let txns       = transactionVM.transactions.filter {
-            guard let d = $0.date else { return false }
-            return cal.isDate(d, inSameDayAs: date)
-        }
-        let hasIncome   = txns.contains { $0.type == "income" }
-        let hasExpense  = txns.contains { $0.type == "expense" }
         let appleCount  = calMgr.appleEvents.filter { cal.isDate($0.startDate, inSameDayAs: date) }.count
         let hasPending  = scheduledPaymentVM.scheduledPayments.contains {
             ($0.status == "pending" || $0.status == "ready")
             && cal.isDate($0.scheduledDate, inSameDayAs: date)
+        }
+
+        // Active recurring transactions that fall on this calendar day (by day_of_month)
+        let recurringForDay = recurringVM.activeTransactions.filter {
+            $0.dayOfMonth == cal.component(.day, from: date)
         }
 
         return Button {
@@ -310,7 +287,7 @@ struct CalendarView: View {
                     .font(.system(size: 14, weight: isToday || isSelected ? .bold : .regular))
                     .foregroundColor(
                         isSelected ? .white
-                        : isToday ? ZColor.indigo
+                        : isToday ? Color(hex: appThemeColorHex)
                         : ZColor.label)
                     .frame(width: 34, height: 34)
                     .background(
@@ -318,7 +295,7 @@ struct CalendarView: View {
                             if isSelected {
                                 Circle().fill(AppTheme.accentGradient)
                             } else if isToday {
-                                Circle().strokeBorder(ZColor.indigo, lineWidth: 1.5)
+                                Circle().strokeBorder(Color(hex: appThemeColorHex), lineWidth: 1.5)
                             } else {
                                 Circle().fill(Color.clear)
                             }
@@ -327,10 +304,13 @@ struct CalendarView: View {
 
                 // Dot indicators
                 HStack(spacing: 4) {
-                    if hasIncome  { Circle().fill(ZColor.income).frame(width: 5, height: 5) }
-                    if hasExpense { Circle().fill(ZColor.expense).frame(width: 5, height: 5) }
                     if appleCount > 0 { Circle().fill(ZColor.info).frame(width: 5, height: 5) }
                     if hasPending { Circle().fill(Color.orange).frame(width: 5, height: 5) }
+                    if !recurringForDay.isEmpty {
+                        Circle()
+                            .fill(Color.purple)
+                            .frame(width: 5, height: 5)
+                    }
                 }
                 .frame(height: 5)
             }
@@ -359,7 +339,7 @@ struct CalendarView: View {
                                     .foregroundColor(.orange)
                             }
                             VStack(alignment: .leading, spacing: 2) {
-                                Text("Yaklaşan Ödeme")
+                                Text(Localizer.shared.l("payment.upcoming"))
                                     .font(.system(size: 12, weight: .semibold))
                                     .foregroundColor(.orange)
                                 Text(payment.title)
@@ -418,8 +398,58 @@ struct CalendarView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
             }
 
-            // Transactions for Date
-            if txnForDate.isEmpty && readyPaymentsForDate.isEmpty && pendingPaymentsForDate.isEmpty {
+            // Recurring transactions for the selected day (virtual monthly items)
+            let recurringForSelectedDay = recurringVM.activeTransactions.filter {
+                $0.dayOfMonth == cal.component(.day, from: selectedDate)
+            }
+
+            if !recurringForSelectedDay.isEmpty {
+                VStack(spacing: 8) {
+                    ForEach(recurringForSelectedDay, id: \.id) { rt in
+                        HStack(spacing: 12) {
+                            ZStack {
+                                Circle()
+                                    .fill(Color.purple.opacity(0.18))
+                                    .frame(width: 38, height: 38)
+                                Image(systemName: rt.transactionType == "income" ? "arrow.down.circle.fill" : "arrow.up.circle.fill")
+                                    .font(.system(size: 16, weight: .medium))
+                                    .foregroundColor(rt.transactionType == "income" ? ZColor.income : ZColor.expense)
+                            }
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(rt.title)
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundColor(ZColor.label)
+                                if let amt = rt.expectedAmount {
+                                    Text(amt.formattedCurrency(code: rt.currency))
+                                        .font(.system(size: 13))
+                                        .foregroundColor(ZColor.labelSec)
+                                } else {
+                                    Text(Localizer.shared.l("recurring.variableAmount"))
+                                        .font(.system(size: 13))
+                                        .foregroundColor(ZColor.labelSec)
+                                }
+                                Text(Localizer.shared.l("recurring.everyMonth"))
+                                    .font(.system(size: 11))
+                                    .foregroundColor(ZColor.labelTert)
+                            }
+                            Spacer()
+                        }
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 10)
+                    }
+                }
+                .background(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .fill(Color.purple.opacity(0.08))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .strokeBorder(Color.purple.opacity(0.25), lineWidth: 1)
+                )
+            }
+
+            // Empty State
+            if readyPaymentsForDate.isEmpty && pendingPaymentsForDate.isEmpty && recurringForSelectedDay.isEmpty {
                 HStack {
                     Image(systemName: "calendar.badge.exclamationmark")
                         .foregroundColor(ZColor.labelTert)
@@ -429,38 +459,6 @@ struct CalendarView: View {
                 }
                 .padding(16)
                 .zFlowCard()
-            } else if !txnForDate.isEmpty {
-                VStack(spacing: 0) {
-                    ForEach(Array(txnForDate.enumerated()), id: \.element.id) { idx, txn in
-                        TransactionRow(
-                            transaction: txn,
-                            category: transactionVM.category(for: txn.categoryId))
-                        // Swipe only, no context menu
-                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                            Button(role: .destructive) {
-                                transactionToDelete = txn
-                                Haptic.medium()
-                            } label: {
-                                Label(NSLocalizedString("common.delete", comment: "Delete"),
-                                      systemImage: "trash.fill")
-                            }
-                            
-                            Button {
-                                transactionToEdit = txn
-                                Haptic.light()
-                            } label: {
-                                Label(NSLocalizedString("common.edit", comment: "Edit"),
-                                      systemImage: "pencil")
-                            }
-                            .tint(ZColor.indigo)
-                        }
-                        
-                        if idx < txnForDate.count - 1 { Divider().padding(.leading, 70) }
-                    }
-                }
-                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .strokeBorder(AppTheme.cardBorder(for: scheme), lineWidth: 0.5))
             }
         }
     }    // MARK: - Apple Calendar Section
@@ -471,7 +469,7 @@ struct CalendarView: View {
 
             if !calMgr.isAuthorized {
                 HStack(spacing: 12) {
-                    Image(systemName: "calendar").font(.system(size: 20)).foregroundColor(ZColor.indigo)
+                    Image(systemName: "calendar").font(.system(size: 20)).foregroundColor(Color(hex: appThemeColorHex))
                     VStack(alignment: .leading, spacing: 3) {
                         Text(NSLocalizedString("calendar.syncTitle", comment: ""))
                             .font(.system(size: 14, weight: .semibold))
@@ -483,7 +481,7 @@ struct CalendarView: View {
                         Task { await calMgr.requestAccess() }
                     }
                     .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(ZColor.indigo)
+                    .foregroundColor(Color(hex: appThemeColorHex))
                 }
                 .padding(14).zFlowCard()
             } else {
@@ -509,7 +507,8 @@ struct CalendarView: View {
                                 Spacer()
                             }
                             .padding(.horizontal, 14).padding(.vertical, 11)
-                            .background(Color(.secondarySystemGroupedBackground))
+                            .background(Color.white.opacity(scheme == .dark ? 0.08 : 0.05))
+                            .cornerRadius(8)
                             if idx < dayEvents.count - 1 { Divider().padding(.leading, 34) }
                         }
                     }
@@ -559,10 +558,12 @@ struct AddCalendarEventView: View {
     @EnvironmentObject var transactionVM: TransactionViewModel
     @EnvironmentObject var authVM: AuthViewModel
     @EnvironmentObject var scheduledPaymentVM: ScheduledPaymentViewModel
-    @ObservedObject var calMgr: CalendarManager
+    @EnvironmentObject var recurringVM: RecurringTransactionViewModel
+    @EnvironmentObject var calMgr: CalendarManager
     @Environment(\.dismiss) var dismiss
 
     let defaultDate: Date
+    @AppStorage("profileCardColor") private var appThemeColorHex: String = "#5E5CE6"
     @State private var title    = ""
     @State private var amount   = ""
     @State private var currency: Currency = .try_
@@ -571,11 +572,11 @@ struct AddCalendarEventView: View {
     @State private var selectedType = "expense"
     @State private var selectedCategory: UUID? = nil
     @State private var isSaving = false
+    @State private var repeatsMonthly = false
 
-    init(defaultDate: Date, calMgr: CalendarManager) {
+    init(defaultDate: Date) {
         self.defaultDate = defaultDate
         self._eventDate  = State(initialValue: defaultDate)
-        self.calMgr      = calMgr
     }
 
     var body: some View {
@@ -592,20 +593,20 @@ struct AddCalendarEventView: View {
                     DatePicker(NSLocalizedString("calendar.dateTime", comment: ""), selection: $eventDate)
                 }
                 
-                Section("Type") {
+                Section(Localizer.shared.l("transaction.type")) {
                     Picker("", selection: $selectedType) {
-                        Text("Expense").tag("expense")
-                        Text("Income").tag("income")
+                        Text(Localizer.shared.l("transaction.expense")).tag("expense")
+                        Text(Localizer.shared.l("transaction.income")).tag("income")
                     }
                     .pickerStyle(.segmented)
                 }
-                
-                Section("Category") {
-                    Picker("Select Category", selection: $selectedCategory) {
-                        Text("None").tag(UUID?(nil))
+
+                Section(Localizer.shared.l("transaction.category")) {
+                    Picker(Localizer.shared.l("transaction.category"), selection: $selectedCategory) {
+                        Text(Localizer.shared.l("common.none")).tag(UUID?(nil))
                         ForEach(transactionVM.categories) { cat in
                             Label {
-                                Text(cat.name)
+                                Text(cat.localizedName)
                             } icon: {
                                 Image(systemName: cat.icon!)
                                     .foregroundColor(Color(hex: cat.color))
@@ -618,19 +619,23 @@ struct AddCalendarEventView: View {
                 Section(NSLocalizedString("transaction.note", comment: "")) {
                     TextField(NSLocalizedString("calendar.optionalNote", comment: ""), text: $note, axis: .vertical).lineLimit(2...4)
                 }
+
+                Section(Localizer.shared.l("recurring.title")) {
+                    Toggle(Localizer.shared.l("recurring.addReminder"), isOn: $repeatsMonthly)
+                }
             }
             .navigationTitle(NSLocalizedString("calendar.newEvent", comment: ""))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button(L.cancel.localized) { dismiss() }.foregroundColor(ZColor.indigo)
+                    Button(L.cancel.localized) { dismiss() }.foregroundColor(Color(hex: appThemeColorHex))
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(NSLocalizedString("calendar.add", comment: "")) {
                         saveScheduledPayment()
                     }
                     .disabled(title.isEmpty || isSaving)
-                    .foregroundColor(ZColor.indigo)
+                    .foregroundColor(Color(hex: appThemeColorHex))
                 }
             }
         }
@@ -639,12 +644,24 @@ struct AddCalendarEventView: View {
     private func saveScheduledPayment() {
         guard let userId = authVM.currentUserId else { return }
         isSaving = true
-        
+
         let amt = Double(amount.replacingOccurrences(of: ",", with: ".")) ?? 0
         let transactionType = TransactionType(rawValue: selectedType) ?? .expense
-        
+
         Task {
-            // Create scheduled payment in database
+            // 1. Create Apple Calendar event first (if authorized) to get eventId
+            var eventId: String? = nil
+            if calMgr.isAuthorized {
+                eventId = calMgr.addEvent(
+                    title: title,
+                    amount: amt,
+                    currency: currency.rawValue,
+                    date: eventDate,
+                    notes: note.isEmpty ? nil : note
+                )
+            }
+
+            // 2. Save scheduled payment with the calendar event ID
             let success = await scheduledPaymentVM.addScheduledPayment(
                 userId: userId,
                 title: title,
@@ -654,24 +671,30 @@ struct AddCalendarEventView: View {
                 categoryId: selectedCategory,
                 note: note.isEmpty ? nil : note,
                 scheduledDate: eventDate,
-                calendarEventId: nil
+                calendarEventId: eventId
             )
-            
+
             if success {
-                // Also add to Apple Calendar if authorized
-                if calMgr.isAuthorized {
-                    _ = calMgr.addEvent(
+                // Eğer kullanıcı bu ödemeyi aylık düzenli yapmak istiyorsa, recurring_transactions'a da şablon ekle
+                if repeatsMonthly {
+                    let dayOfMonth = Calendar.current.component(.day, from: eventDate)
+                    let cat = selectedCategory
+
+                    _ = await recurringVM.add(
+                        userId: userId,
                         title: title,
-                        amount: amt,
-                        currency: currency.rawValue,
-                        date: eventDate,
-                        notes: note.isEmpty ? nil : note
+                        categoryId: cat,
+                        transactionType: transactionType,
+                        expectedAmount: amt,
+                        currency: currency,
+                        dayOfMonth: dayOfMonth
                     )
                 }
+
                 Haptic.success()
                 dismiss()
             }
-            
+
             isSaving = false
         }
     }

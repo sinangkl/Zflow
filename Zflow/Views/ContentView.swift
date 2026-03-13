@@ -10,7 +10,14 @@ struct ContentView: View {
 
     var body: some View {
         ZStack {
-            if !hasSeenOnboarding {
+            // ── Splash: oturum kontrol edilirken ──────────────
+            if authVM.isCheckingAuth {
+                SplashView()
+                    .transition(.opacity)
+                    .zIndex(10)
+
+            // ── Onboarding: ilk açılış ────────────────────────
+            } else if !hasSeenOnboarding {
                 OnboardingView {
                     withAnimation(.spring(response: 0.68, dampingFraction: 0.82)) {
                         hasSeenOnboarding = true
@@ -19,6 +26,7 @@ struct ContentView: View {
                 .transition(.opacity)
                 .zIndex(2)
 
+            // ── Ana ekran: giriş yapılmış ─────────────────────
             } else if authVM.isLoggedIn {
                 RootView()
                     .transition(.asymmetric(
@@ -28,6 +36,7 @@ struct ContentView: View {
                         removal: .scale(scale: 0.96).combined(with: .opacity)))
                     .zIndex(1)
 
+            // ── Giriş ekranı ──────────────────────────────────
             } else {
                 LoginView()
                     .transition(.asymmetric(
@@ -36,8 +45,14 @@ struct ContentView: View {
                     .zIndex(0)
             }
         }
+        .animation(.easeInOut(duration: 0.38), value: authVM.isCheckingAuth)
         .animation(.spring(response: 0.60, dampingFraction: 0.82), value: authVM.isLoggedIn)
         .animation(.spring(response: 0.60, dampingFraction: 0.82), value: hasSeenOnboarding)
         .task { await authVM.checkSession() }
     }
+}
+
+#Preview {
+    ContentView()
+        .environmentObject(AuthViewModel())
 }

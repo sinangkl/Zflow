@@ -10,3 +10,18 @@ func wColor(_ hex: String) -> Color {
         blue:  Double( rgb        & 0xFF) / 255
     )
 }
+
+// MARK: - Watch Semantic Palette
+// Named tokens mirror ZColor from the main app.
+// Use these instead of inline wColor("#hex") calls for consistency.
+
+/// Soft Emerald — income (matches ZColor.income)
+let wIncome  = wColor("#50C878")
+/// Soft Coral — expense (matches ZColor.expense)
+let wExpense = wColor("#FF7F7F")
+/// Brand Indigo — accent (matches AppTheme.baseColor)
+var wAccent: Color { WatchStore.shared.accentPrimary }
+/// Brand Accent Secondary
+var wAccentSec: Color { WatchStore.shared.accentSecondary }
+/// Orange — warning / upcoming payments (matches ZColor.warning)
+let wWarning = wColor("#FF9F0A")
